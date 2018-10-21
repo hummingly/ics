@@ -1,4 +1,32 @@
 /// Macros to create data types and implement traits.
+#[macro_export]
+macro_rules! parameters {
+    ($($key:expr, $value:expr);*) => {
+        {
+            let mut parameters: Parameters = BTreeMap::new();
+            $(
+                parameters.insert($key.into(), $value.into());
+            )*
+            parameters
+        }
+    };
+}
+
+#[cfg(test)]
+mod test {
+    use components::Parameters;
+    use std::collections::BTreeMap;
+
+    #[test]
+    fn parameters_btreemap() {
+        let mut b_map: Parameters = BTreeMap::new();
+        b_map.insert("VALUE".into(), "BOOLEAN".into());
+        b_map.insert("CUTYPE".into(), "GROUP".into());
+        let para = parameters!("VALUE", "BOOLEAN"; "CUTYPE", "GROUP");
+        assert_eq!(b_map, para);
+    }
+}
+
 macro_rules! write_crlf {
     ($dst:expr) => (
         write!($dst, "\r\n")
@@ -14,33 +42,39 @@ macro_rules! write_crlf {
 macro_rules! property_builder {
     ($builder:ident, $name:expr) => {
         #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
-        pub struct $builder {
-            value: String,
-            parameters: Parameters,
+        pub struct $builder<'a> {
+            value: Cow<'a, str>,
+            parameters: Parameters<'a>,
         }
         
-        impl $builder {
-            pub fn new(value: String) -> Self {
+        impl<'a> $builder<'a> {
+            pub fn new<S>(value: S) -> Self
+            where
+                S: Into<Cow<'a, str>>,
+            {
                 $builder {
-                    value,
+                    value: escape_cow(value),
                     parameters: BTreeMap::new(),
                 }
             }
         
-            pub fn add<P: Into<Parameter>>(&mut self, parameter: P) {
+            pub fn add<P>(&mut self, parameter: P)
+            where
+                P: Into<Parameter<'a>>,
+            {
                 let param = parameter.into();
                 self.parameters.insert(param.key, param.value);
             }
         
-            pub fn append(&mut self, mut parameter: Parameters) {
+            pub fn append(&mut self, mut parameter: Parameters<'a>) {
                 self.parameters.append(&mut parameter);
             }
         }
         
-        impl From<$builder> for Property {
-            fn from(builder: $builder) -> Self {
+        impl<'a> From<$builder<'a>> for Property<'a> {
+            fn from(builder: $builder<'a>) -> Self {
                 Property {
-                    key: $name,
+                    key: $name.to_owned(),
                     value: builder.value,
                     parameters: builder.parameters,
                 }
@@ -53,20 +87,25 @@ macro_rules! property_builder {
 macro_rules! parameter_builder {
     ($builder:ident, $name:expr) => {
         #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
-        pub struct $builder {
-            value: String,
+        pub struct $builder<'a> {
+            value: Cow<'a, str>,
         }
         
-        impl $builder {
-            pub fn new(value: String) -> Self {
-                $builder { value }
+        impl<'a> $builder<'a> {
+            pub fn new<S>(value: S) -> Self
+            where
+                S: Into<Cow<'a, str>>,
+            {
+                $builder {
+                    value: escape_cow(value),
+                }
             }
         }
         
-        impl From<$builder> for Parameter {
-            fn from(builder: $builder) -> Self {
+        impl<'a> From<$builder<'a>> for Parameter<'a> {
+            fn from(builder: $builder<'a>) -> Self {
                 Parameter {
-                    key: $name,
+                    key: $name.to_owned(),
                     value: builder.value,
                 }
             }
@@ -78,20 +117,20 @@ macro_rules! parameter_builder {
 // The default value is implemented for the builder types!
 macro_rules! impl_default_property {
     ($builder:ident, $default:expr) => {
-        impl Default for $builder {
+        impl<'a> Default for $builder<'a> {
             fn default() -> Self {
                 $builder {
-                    value: $default,
+                    value: $default.into(),
                     parameters: BTreeMap::new(),
                 }
             }
         }
     };
     ($builder:ident) => {
-        impl Default for $builder {
+        impl<'a> Default for $builder<'a> {
             fn default() -> Self {
                 $builder {
-                    value: String::new(),
+                    value: Cow::default(),
                     parameters: BTreeMap::new(),
                 }
             }
@@ -101,21 +140,41 @@ macro_rules! impl_default_property {
 
 macro_rules! impl_default_parameter {
     ($builder:ident, $default:expr) => {
-        impl Default for $builder {
+        impl<'a> Default for $builder<'a> {
             fn default() -> Self {
-                $builder { value: $default }
+                $builder {
+                    value: $default.into(),
+                }
             }
         }
     };
     ($builder:ident) => {
-        impl Default for $builder {
+        impl<'a> Default for $builder<'a> {
             fn default() -> Self {
                 $builder {
-                    value: String::new(),
+                    value: Cow::default(),
                 }
             }
         }
     };
 }
 
-// TODO: parameters!
+macro_rules! impl_display_comps {
+    ($type:ident) => {
+        impl<'a> fmt::Display for $type<'a> {
+            fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+                write!(f, "{}", self.0)
+            }
+        }
+    };
+}
+
+macro_rules! impl_component_conversion {
+    ($component:ident) => {
+        impl<'a> From<$component<'a>> for Component<'a> {
+            fn from(component: $component<'a>) -> Self {
+                component.0
+            }
+        }
+    };
+}

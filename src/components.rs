@@ -1,26 +1,30 @@
 /// The low-level interface of the library.
 /// Components for building calendar objects are defined here.
+use std::borrow::Cow;
 use std::collections::BTreeMap;
 use std::fmt;
 use std::fmt::Write;
-use util::fold_line;
+use util::{escape_cow, fold_line};
 
 #[derive(Debug, Default, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
-pub struct Component {
+pub struct Component<'a> {
     pub(crate) name: String,
-    pub(crate) properties: BTreeMap<String, Vec<Property>>,
-    pub(crate) subcomponents: Vec<Component>,
+    pub(crate) properties: BTreeMap<String, Vec<Property<'a>>>,
+    pub(crate) subcomponents: Vec<Component<'a>>,
 }
 
-impl Component {
-    pub fn new(name: String) -> Self {
+impl<'a> Component<'a> {
+    pub fn new(name: &str) -> Self {
         Component {
-            name,
+            name: name.to_owned(),
             ..Default::default()
         }
     }
 
-    pub fn add_property<P: Into<Property>>(&mut self, property: P) {
+    pub fn add_property<P>(&mut self, property: P)
+    where
+        P: Into<Property<'a>>,
+    {
         let property = property.into();
         self.properties
             .entry(property.key.clone())
@@ -28,14 +32,17 @@ impl Component {
             .push(property);
     }
 
-    pub fn add_component<C: Into<Component>>(&mut self, component: C) {
+    pub fn add_component<C>(&mut self, component: C)
+    where
+        C: Into<Component<'a>>,
+    {
         self.subcomponents.push(component.into());
     }
 }
 
-impl fmt::Display for Component {
+impl<'a> fmt::Display for Component<'a> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write_crlf!(f, "BEGIN:{})", self.name)?;
+        write_crlf!(f, "BEGIN:{}", self.name)?;
         for properties in self.properties.values() {
             for property in properties {
                 write!(f, "{}", property)?;
@@ -49,61 +56,83 @@ impl fmt::Display for Component {
 }
 
 #[derive(Debug, Default, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
-pub struct Property {
+pub struct Property<'a> {
     pub(crate) key: String,
-    pub(crate) value: String,
-    pub(crate) parameters: Parameters,
+    pub(crate) value: Cow<'a, str>,
+    pub(crate) parameters: Parameters<'a>,
 }
 
-impl Property {
-    pub fn new(key: String, value: String) -> Self {
+impl<'a> Property<'a> {
+    pub fn new<S>(key: &str, value: S) -> Self
+    where
+        S: Into<Cow<'a, str>>,
+    {
         Property {
-            key,
-            value,
+            key: key.to_owned(),
+            value: escape_cow(value),
             parameters: BTreeMap::new(),
         }
     }
 
-    pub fn add<P: Into<Parameter>>(&mut self, parameter: P) {
+    pub fn add<P>(&mut self, parameter: P)
+    where
+        P: Into<Parameter<'a>>,
+    {
         let parameter = parameter.into();
         self.parameters.insert(parameter.key, parameter.value);
     }
 
-    pub fn append(&mut self, mut parameter: Parameters) {
+    pub fn append(&mut self, mut parameter: Parameters<'a>) {
         self.parameters.append(&mut parameter);
+    }
+
+    fn len(&self) -> usize {
+        // + 1 for the : in the property
+        let mut len = self.value.len() + self.key.len() + 1;
+        for (key, value) in &self.parameters {
+            // + 2 for the ; and = in the parameter
+            len = len + key.len() + value.len() + 2;
+        }
+        len
     }
 }
 
-impl fmt::Display for Property {
+impl<'a> fmt::Display for Property<'a> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let mut line = String::with_capacity(150);
-        write_crlf!(line, "{})", self.key)?;
+        let mut line = String::with_capacity(self.len());
+        write!(line, "{}", self.key)?;
         for (key, value) in &self.parameters {
             write!(line, ";{}={}", key, value)?;
         }
         write!(line, ":{}", self.value)?;
         line.shrink_to_fit();
-        write_crlf!(f, "{}", fold_line(&line))
+        write_crlf!(f, "{}", fold_line(line))
     }
 }
 
 // TODO: What to do with multiple values?
 #[derive(Debug, Default, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
-pub struct Parameter {
+pub struct Parameter<'a> {
     pub(crate) key: String,
-    pub(crate) value: String,
+    pub(crate) value: Cow<'a, str>,
 }
 
-impl Parameter {
-    pub fn new(key: String, value: String) -> Parameter {
-        Parameter { key, value }
+impl<'a> Parameter<'a> {
+    pub fn new<S>(key: &str, value: S) -> Self
+    where
+        S: Into<Cow<'a, str>>,
+    {
+        Parameter {
+            key: key.to_owned(),
+            value: escape_cow(value),
+        }
     }
 }
 
-impl fmt::Display for Parameter {
+impl<'a> fmt::Display for Parameter<'a> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, ";{}={}", self.key, self.value)
     }
 }
 
-pub type Parameters = BTreeMap<String, String>;
+pub type Parameters<'a> = BTreeMap<String, Cow<'a, str>>;

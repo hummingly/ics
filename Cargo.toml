@@ -1,6 +1,8 @@
 [package]
 name = "ics"
 version = "0.1.0"
-authors = ["Chi"]
+authors = ["hummingly <31522351+hummingly@users.noreply.github.com>"]
 
 [dependencies]
+regex = "1"
+lazy_static = "1"
