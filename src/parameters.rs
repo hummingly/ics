@@ -1,6 +1,6 @@
 use components::Parameter;
 use std::borrow::Cow;
-use util::escape_cow;
+use util::escape_text;
 
 parameter_builder!(AltRep, "ALTREP");
 parameter_builder!(CN, "CN");

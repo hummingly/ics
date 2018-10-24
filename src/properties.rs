@@ -1,7 +1,7 @@
 use components::{Parameter, Parameters, Property};
 use std::borrow::Cow;
 use std::collections::BTreeMap;
-use util::escape_cow;
+use util::escape_text;
 
 property_builder!(CalScale, "CALSCALE");
 property_builder!(Method, "METHOD");

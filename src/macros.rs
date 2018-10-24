@@ -53,7 +53,7 @@ macro_rules! property_builder {
                 S: Into<Cow<'a, str>>,
             {
                 $builder {
-                    value: escape_cow(value),
+                    value: escape_text(value),
                     parameters: BTreeMap::new(),
                 }
             }
@@ -74,7 +74,7 @@ macro_rules! property_builder {
         impl<'a> From<$builder<'a>> for Property<'a> {
             fn from(builder: $builder<'a>) -> Self {
                 Property {
-                    key: $name.to_owned(),
+                    key: $name.into(),
                     value: builder.value,
                     parameters: builder.parameters,
                 }
@@ -97,7 +97,7 @@ macro_rules! parameter_builder {
                 S: Into<Cow<'a, str>>,
             {
                 $builder {
-                    value: escape_cow(value),
+                    value: escape_text(value),
                 }
             }
         }
@@ -105,7 +105,7 @@ macro_rules! parameter_builder {
         impl<'a> From<$builder<'a>> for Parameter<'a> {
             fn from(builder: $builder<'a>) -> Self {
                 Parameter {
-                    key: $name.to_owned(),
+                    key: $name.into(),
                     value: builder.value,
                 }
             }

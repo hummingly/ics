@@ -3,6 +3,10 @@ name = "ics"
 version = "0.1.0"
 authors = ["hummingly <31522351+hummingly@users.noreply.github.com>"]
 
+[features]
+default =  ["fast_encoding"]
+fast_encoding = ["regex", "lazy_static"]
+
 [dependencies]
-regex = "1"
-lazy_static = "1"
+regex = { version = "1", optional = true }
+lazy_static = { version = "1", optional = true}

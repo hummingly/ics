@@ -4,19 +4,22 @@ use std::borrow::Cow;
 use std::collections::BTreeMap;
 use std::fmt;
 use std::fmt::Write;
-use util::{escape_cow, fold_line};
+use util::{escape_text, fold_line};
 
 #[derive(Debug, Default, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Component<'a> {
-    pub(crate) name: String,
-    pub(crate) properties: BTreeMap<String, Vec<Property<'a>>>,
+    pub(crate) name: Cow<'a, str>,
+    pub(crate) properties: BTreeMap<Cow<'a, str>, Vec<Property<'a>>>,
     pub(crate) subcomponents: Vec<Component<'a>>,
 }
 
 impl<'a> Component<'a> {
-    pub fn new(name: &str) -> Self {
+    pub fn new<S>(name: S) -> Self
+    where
+        S: Into<Cow<'a, str>>,
+    {
         Component {
-            name: name.to_owned(),
+            name: name.into(),
             ..Default::default()
         }
     }
@@ -57,19 +60,20 @@ impl<'a> fmt::Display for Component<'a> {
 
 #[derive(Debug, Default, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Property<'a> {
-    pub(crate) key: String,
+    pub(crate) key: Cow<'a, str>,
     pub(crate) value: Cow<'a, str>,
     pub(crate) parameters: Parameters<'a>,
 }
 
 impl<'a> Property<'a> {
-    pub fn new<S>(key: &str, value: S) -> Self
+    pub fn new<K, V>(key: K, value: V) -> Self
     where
-        S: Into<Cow<'a, str>>,
+        K: Into<Cow<'a, str>>,
+        V: Into<Cow<'a, str>>,
     {
         Property {
-            key: key.to_owned(),
-            value: escape_cow(value),
+            key: key.into(),
+            value: escape_text(value),
             parameters: BTreeMap::new(),
         }
     }
@@ -96,35 +100,46 @@ impl<'a> Property<'a> {
         len
     }
 }
+use util::CONTENT_LINE_LIMIT;
 
 impl<'a> fmt::Display for Property<'a> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let mut line = String::with_capacity(self.len());
-        write!(line, "{}", self.key)?;
-        for (key, value) in &self.parameters {
-            write!(line, ";{}={}", key, value)?;
+        let len = self.len();
+        if len <= CONTENT_LINE_LIMIT {
+            write!(f, "{}", self.key)?;
+            for (key, value) in &self.parameters {
+                write!(f, ";{}={}", key, value)?;
+            }
+            write_crlf!(f, ":{}", self.value)
+        } else {
+            let mut line = String::with_capacity(len + (len / CONTENT_LINE_LIMIT) * 3);
+            write!(line, "{}", self.key)?;
+            for (key, value) in &self.parameters {
+                write!(line, ";{}={}", key, value)?;
+            }
+            write!(line, ":{}", self.value)?;
+            fold_line(&mut line);
+            write_crlf!(f, "{}", line)
         }
-        write!(line, ":{}", self.value)?;
-        line.shrink_to_fit();
-        write_crlf!(f, "{}", fold_line(line))
     }
 }
 
 // TODO: What to do with multiple values?
 #[derive(Debug, Default, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Parameter<'a> {
-    pub(crate) key: String,
+    pub(crate) key: Cow<'a, str>,
     pub(crate) value: Cow<'a, str>,
 }
 
 impl<'a> Parameter<'a> {
-    pub fn new<S>(key: &str, value: S) -> Self
+    pub fn new<K, V>(key: K, value: V) -> Self
     where
-        S: Into<Cow<'a, str>>,
+        K: Into<Cow<'a, str>>,
+        V: Into<Cow<'a, str>>,
     {
         Parameter {
-            key: key.to_owned(),
-            value: escape_cow(value),
+            key: key.into(),
+            value: escape_text(value),
         }
     }
 }
@@ -135,4 +150,4 @@ impl<'a> fmt::Display for Parameter<'a> {
     }
 }
 
-pub type Parameters<'a> = BTreeMap<String, Cow<'a, str>>;
+pub type Parameters<'a> = BTreeMap<Cow<'a, str>, Cow<'a, str>>;
