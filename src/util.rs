@@ -1,17 +1,16 @@
 use regex::Regex;
 use std::borrow::Cow;
 
-pub(crate) const CONTENT_LINE_LIMIT: usize = 75;
-// TODO: const LINE_BREAK?
+pub(crate) const LINE_LIMIT: usize = 75;
 pub(crate) fn fold_line(content_line: &mut String) {
-    let len = content_line.len();
-    let mut boundary = 0;
     let input = content_line.clone();
     content_line.clear();
 
+    let len = content_line.len();
+    let mut boundary = 0;
     while boundary < len {
         let start = boundary;
-        boundary += CONTENT_LINE_LIMIT;
+        boundary += LINE_LIMIT;
         if boundary > len {
             boundary = len;
         } else {
@@ -97,17 +96,16 @@ fn escape_value_regex(input: Cow<str>) -> Cow<str> {
     }
 }
 
-// TODO: better tests
 #[cfg(test)]
 mod line_folding_tests {
     use super::fold_line;
-    use super::CONTENT_LINE_LIMIT;
+    use super::LINE_LIMIT;
 
     #[test]
     fn no_folding_short_line() {
         let mut line = String::from("This is a short line");
         let expected = line.clone();
-        assert!(line.len() < CONTENT_LINE_LIMIT);
+        assert!(line.len() < LINE_LIMIT);
         fold_line(&mut line);
         assert_eq!(line, expected);
     }
@@ -118,7 +116,7 @@ mod line_folding_tests {
             "Content lines that have a fixed length of 75 bytes shouldn't be line folded",
         );
         let expected = line.clone();
-        assert!(line.len() == CONTENT_LINE_LIMIT);
+        assert!(line.len() == LINE_LIMIT);
         fold_line(&mut line);
         assert_eq!(line, expected);
     }
@@ -126,7 +124,7 @@ mod line_folding_tests {
     #[test]
     fn folding_over_limit() {
         let mut line = String::from("Content lines that have a fixed length over 75 bytes should be line folded with CRLF and whitespace.");
-        assert!(line.len() > CONTENT_LINE_LIMIT);
+        assert!(line.len() > LINE_LIMIT);
         fold_line(&mut line);
 
         let expected = "Content lines that have a fixed length over 75 bytes should be line folded \r\n with CRLF and whitespace.";
@@ -138,7 +136,7 @@ mod line_folding_tests {
         let mut line = String::from(
             "Content lines shouldn't be folded in the middle of a UTF-8 character! 老虎.",
         );
-        assert!(line.len() > CONTENT_LINE_LIMIT);
+        assert!(line.len() > LINE_LIMIT);
         fold_line(&mut line);
 
         let expected =
@@ -149,7 +147,7 @@ mod line_folding_tests {
     #[test]
     fn folding_multi_lines() {
         let mut line = String::from("The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. ");
-        assert!(line.len() > CONTENT_LINE_LIMIT);
+        assert!(line.len() > LINE_LIMIT);
         fold_line(&mut line);
 
         let expected = "The quick brown fox jumps over the lazy dog. The quick brown fox jumps over\r\n  the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown\r\n  fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. ";

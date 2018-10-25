@@ -4,7 +4,7 @@ use std::borrow::Cow;
 use std::collections::BTreeMap;
 use std::fmt;
 use std::fmt::Write;
-use util::{escape_text, fold_line};
+use util::{escape_text, fold_line, LINE_LIMIT};
 
 #[derive(Debug, Default, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Component<'a> {
@@ -100,19 +100,18 @@ impl<'a> Property<'a> {
         len
     }
 }
-use util::CONTENT_LINE_LIMIT;
 
 impl<'a> fmt::Display for Property<'a> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let len = self.len();
-        if len <= CONTENT_LINE_LIMIT {
+        if len <= LINE_LIMIT {
             write!(f, "{}", self.key)?;
             for (key, value) in &self.parameters {
                 write!(f, ";{}={}", key, value)?;
             }
             write_crlf!(f, ":{}", self.value)
         } else {
-            let mut line = String::with_capacity(len + (len / CONTENT_LINE_LIMIT) * 3);
+            let mut line = String::with_capacity(len + (len / LINE_LIMIT) * 3);
             write!(line, "{}", self.key)?;
             for (key, value) in &self.parameters {
                 write!(line, ";{}={}", key, value)?;

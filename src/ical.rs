@@ -56,7 +56,6 @@ impl<'a> ICalendar<'a> {
     }
 }
 
-// TODO: Docs explaining that these properties are added by default.
 #[derive(Debug, Default, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Event<'a>(Component<'a>);
 
