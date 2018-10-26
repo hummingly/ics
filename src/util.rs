@@ -6,7 +6,7 @@ pub(crate) fn fold_line(content_line: &mut String) {
     let input = content_line.clone();
     content_line.clear();
 
-    let len = content_line.len();
+    let len = input.len();
     let mut boundary = 0;
     while boundary < len {
         let start = boundary;
@@ -26,8 +26,7 @@ pub(crate) fn fold_line(content_line: &mut String) {
     }
 }
 
-#[allow(dead_code)]
-pub(crate) fn escape_text<'a, S: Into<Cow<'a, str>>>(input: S) -> Cow<'a, str> {
+pub fn escape_text<'a, S: Into<Cow<'a, str>>>(input: S) -> Cow<'a, str> {
     let input = input.into();
 
     if cfg!(feature = "fast_encoding") {
@@ -47,7 +46,8 @@ fn escape_value(mut input: Cow<str>) -> Cow<str> {
     }
 
     if input.contains(escaped_char) {
-        let mut output = String::with_capacity(input.len() + (input.len() / 2));
+        let size = input.len() + input.chars().filter(|&c| escaped_char(c)).count();
+        let mut output = String::with_capacity(size);
         for c in input.chars() {
             match c {
                 ',' => output.push_str("\\,"),
@@ -58,7 +58,6 @@ fn escape_value(mut input: Cow<str>) -> Cow<str> {
                 _ => output.push(c),
             }
         }
-        output.shrink_to_fit();
         Cow::Owned(output)
     } else {
         input
@@ -70,9 +69,8 @@ fn escape_value_regex(input: Cow<str>) -> Cow<str> {
         static ref REGEX: Regex = Regex::new("[,;\\\\]|\r\n|\r").unwrap();
     }
 
-    let mut last_match = 0;
-
     if REGEX.is_match(&input) {
+        let mut last_match = 0;
         let matches = REGEX.find_iter(&input);
         let mut output = String::with_capacity(input.len() + (input.len() / 2));
         for m in matches {
@@ -93,6 +91,14 @@ fn escape_value_regex(input: Cow<str>) -> Cow<str> {
         Cow::Owned(output)
     } else {
         input
+    }
+}
+
+pub(crate) fn content_line_len(len: usize) -> usize {
+    if len % LINE_LIMIT == 0 {
+        len + ((len / LINE_LIMIT - 1) * 3)
+    } else {
+        len + ((len / LINE_LIMIT) * 3)
     }
 }
 
@@ -158,7 +164,7 @@ mod line_folding_tests {
 
 #[cfg(test)]
 mod escape_text_tests {
-    #[allow(unused_imports)]
+    use super::escape_text;
     use super::escape_value;
     use super::escape_value_regex;
 
@@ -184,7 +190,7 @@ mod escape_text_tests {
         use components::Property;
 
         let expected_value = "Hello\\, World! Today is a beautiful day to test: Escape Methods.\n Characters like \\; or \\\\ must be escaped.\n";
-        let property = Property::new("COMMENT", "Hello, World! Today is a beautiful day to test: Escape Methods.\n Characters like ; or \\ must be escaped.\r\n");
+        let property = Property::new("COMMENT", escape_text("Hello, World! Today is a beautiful day to test: Escape Methods.\n Characters like ; or \\ must be escaped.\r\n"));
         assert_eq!(expected_value, property.value);
     }
 }
