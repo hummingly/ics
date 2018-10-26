@@ -10,7 +10,7 @@ pub mod components;
 mod ical;
 pub mod parameters;
 pub mod properties;
-mod util;
+pub mod util;
 
 pub use ical::Alarm;
 pub use ical::Event;

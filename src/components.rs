@@ -4,7 +4,7 @@ use std::borrow::Cow;
 use std::collections::BTreeMap;
 use std::fmt;
 use std::fmt::Write;
-use util::{escape_text, fold_line, LINE_LIMIT};
+use util::{content_line_len, fold_line, LINE_LIMIT};
 
 #[derive(Debug, Default, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Component<'a> {
@@ -73,7 +73,7 @@ impl<'a> Property<'a> {
     {
         Property {
             key: key.into(),
-            value: escape_text(value),
+            value: value.into(),
             parameters: BTreeMap::new(),
         }
     }
@@ -111,7 +111,7 @@ impl<'a> fmt::Display for Property<'a> {
             }
             write_crlf!(f, ":{}", self.value)
         } else {
-            let mut line = String::with_capacity(len + (len / LINE_LIMIT) * 3);
+            let mut line = String::with_capacity(content_line_len(len));
             write!(line, "{}", self.key)?;
             for (key, value) in &self.parameters {
                 write!(line, ";{}={}", key, value)?;
@@ -138,7 +138,7 @@ impl<'a> Parameter<'a> {
     {
         Parameter {
             key: key.into(),
-            value: escape_text(value),
+            value: value.into(),
         }
     }
 }

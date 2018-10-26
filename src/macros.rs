@@ -53,7 +53,7 @@ macro_rules! property_builder {
                 S: Into<Cow<'a, str>>,
             {
                 $builder {
-                    value: escape_text(value),
+                    value: value.into(),
                     parameters: BTreeMap::new(),
                 }
             }
@@ -97,7 +97,7 @@ macro_rules! parameter_builder {
                 S: Into<Cow<'a, str>>,
             {
                 $builder {
-                    value: escape_text(value),
+                    value: value.into(),
                 }
             }
         }
