@@ -1,7 +1,11 @@
 use regex::Regex;
 use std::borrow::Cow;
 
+// Content lines must be folded after 75 bytes
 pub(crate) const LINE_LIMIT: usize = 75;
+// The method is used only once with a String which is why we can reuse the
+// String since we also know beforehand how much space must be allocated. (see
+// impl Display for Property)
 pub(crate) fn fold_line(content_line: &mut String) {
     let input = content_line.clone();
     content_line.clear();
@@ -11,12 +15,12 @@ pub(crate) fn fold_line(content_line: &mut String) {
     while boundary < len {
         let start = boundary;
         boundary += LINE_LIMIT;
-        if boundary > len {
-            boundary = len;
-        } else {
+        if boundary < len {
             while !input.is_char_boundary(boundary) {
                 boundary -= 1;
             }
+        } else {
+            boundary = len;
         }
 
         content_line.push_str(&input[start..boundary]);
@@ -108,6 +112,7 @@ fn escape_value_regex(input: Cow<str>) -> Cow<str> {
     }
 }
 
+// Calculates the new text length after inserting a Line Break
 pub(crate) fn content_line_len(len: usize) -> usize {
     if len % LINE_LIMIT == 0 {
         len + ((len / LINE_LIMIT - 1) * 3)

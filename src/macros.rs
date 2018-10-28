@@ -59,7 +59,8 @@ macro_rules! write_crlf {
 
 macro_rules! property_builder {
     ($builder:ident, $name:expr) => {
-        #[allow(missing_docs)]
+        #[doc=$name]
+        #[doc = " Property"]
         #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
         pub struct $builder<'a> {
             value: Cow<'a, str>,
@@ -67,7 +68,9 @@ macro_rules! property_builder {
         }
         
         impl<'a> $builder<'a> {
-            /// Creates the property with the given value.
+            #[doc = "Creates a new "]
+            #[doc=$name]
+            #[doc = " Property with the given value."]
             pub fn new<S>(value: S) -> Self
             where
                 S: Into<Cow<'a, str>>
@@ -110,14 +113,17 @@ macro_rules! property_builder {
 // Creation and conversion from builder types to Parameter
 macro_rules! parameter_builder {
     ($builder:ident, $name:expr) => {
-        #[allow(missing_docs)]
+        #[doc=$name]
+        #[doc = " Parameter"]
         #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
         pub struct $builder<'a> {
             value: Cow<'a, str>
         }
         
         impl<'a> $builder<'a> {
-            /// Creates the parameter with the given value.
+            #[doc = "Creates a new "]
+            #[doc=$name]
+            #[doc = " Parameter with the given value."]
             pub fn new<S>(value: S) -> Self
             where
                 S: Into<Cow<'a, str>>
