@@ -6,16 +6,15 @@ rust:
   - stable
   - beta
   - nightly
-  - 1.20.0
-  - 1.27.0
+  - 1.26.0
 matrix:
   include:
    - rust: nightly
      env: TASK=rustfmt
      before_script:
-      - rustup component add rustfmt-preview
+      - rustup component add rustfmt-preview --toolchain nightly
      script:
-      - cargo fmt -- --check
+      - cargo +nightly fmt --all -- --check
       - cargo build --verbose --all
       - cargo test --verbose --all
   allow_failures:
