@@ -19,14 +19,16 @@
 //! # Example
 //!
 //! ```
-//! use ics::{ICalendar, ToDo};
 //! use ics::properties::{Comment, Summary};
+//! use ics::{ICalendar, ToDo};
 //!
 //! // The ICalendar object is what is later written to the file.
 //! let mut calendar = ICalendar::new("2.0", "ics-rs");
 //!
-//! // Anthing that can be converted to a Cow<str> is accepted as value which means &str and String can be used freely.
-//! // For the sake of demonstrating the UID was taken from somewhere. Out of security reasons the UID shall be randomly generated from another crate.
+//! // Anthing that can be converted to a Cow<str> is accepted as value which means
+//! // &str and String can be used freely. For the sake of demonstrating the UID
+//! // was taken from somewhere. Out of security reasons the UID shall be randomly
+//! // generated from another crate.
 //! let mut todo = ToDo::new("d4092ed9-1667-4518-a7c0-bcfaac4f1fc6", "20181021T190000");
 //! todo.push(Summary::new("Katarina's Birthday Present"));
 //! todo.push(Comment::new("Buy her the Imagine Dragons tickets."));
