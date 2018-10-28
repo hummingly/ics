@@ -10,7 +10,6 @@ rust:
 matrix:
   include:
    - rust: nightly
-     env: TASK=rustfmt
      before_script:
       - rustup component add rustfmt-preview --toolchain nightly
      script:
