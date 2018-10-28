@@ -2,7 +2,7 @@
 The ics crate should provide a meaningful way to create correct iCalender files without being difficult or verbose. At the same time the crate should be easy to integrate into other projects by having few dependencies.
 
 # Description of the Specification
-An iCalender file is one calendar component containing other components such as: event, todo, journal, freebusy or timezone. Those components can contain components and/or properties which is a key-value pair that can optionally have parameters which are also a key-value pairs. Some components can contain subcomponents. Properties can reappear depending on the specification.
+An iCalender file is one calendar component containing other components such as: event, to-do, journal, freebusy or timezone. Those components can contain components and/or properties which is a key-value pair that can optionally have parameters which are also a key-value pairs. Some components can contain sub-components. Properties can reappear depending on the specification.
 
 After 75 bytes a newline and whitespace is inserted (CRLF ) and ',', ';' and '/' need to be escaped properly. Newlines are /n and text containg qoutes need to be quoted.
 
@@ -10,7 +10,7 @@ The sytax for components, properties and parameters are as follows:
 - Component:
 ```
 BEGIN COMPONENT
-// properties and subcomponents
+// properties and sub-components
 END COMPONENT
 ```
 - Property:
@@ -25,7 +25,7 @@ PARAMETER_KEY=PARAMETER_VALUE
 For now ics only supports RFC 5545.
 
 # Structure
-The crate contains a "low-level" and "high-level" interface. The basic components in the components module can be used to create new custom iCalender components, properties and parameters. This is much more low-level which most users won't need. The high-level components are specified by the RFC 5545. However, if more control is needed, custom properties and custom components can still be added. The ICalendar component is the calendar object which contains a stream of properties and components. Those components are also just a stream of properties and subcomponents.
+The crate contains a "low-level" and "high-level" interface. The basic components in the components module can be used to create new custom iCalender components, properties and parameters. This is much more low-level which most users won't need. The high-level components are specified by the RFC 5545. However, if more control is needed, custom properties and custom components can still be added. The ICalendar component is the calendar object which contains a stream of properties and components. Those components are also just a stream of properties and sub-components.
 
 ### Basic Structure/Hierarchy
 ```

@@ -1,8 +1,26 @@
-/// Macros to create data types and implement traits.
+/// Macro to create several parameters at once.
+///
+/// # Example
+/// ```
+/// # #[macro_use] extern crate ics;
+/// use ics::components::Property;
+/// use ics::properties::DtStart;
+///
+/// # fn main() {
+/// let mut date = DtStart::new("20180906");
+/// date.append(parameters!("TZID", "America/New_York"; "VALUE", "DATE"));
+/// assert_eq!(
+///     Property::from(date).to_string(),
+///     "DTSTART;TZID=America/New_York;VALUE=DATE:20180906\r\n"
+/// );
+/// # }
+/// ```
 #[macro_export]
 macro_rules! parameters {
     ($($key:expr, $value:expr);*) => {
         {
+            use std::collections::BTreeMap;
+            use $crate::components::Parameters;
             let mut parameters: Parameters = BTreeMap::new();
             $(
                 parameters.insert($key.into(), $value.into());
@@ -22,8 +40,8 @@ mod test {
         let mut b_map: Parameters = BTreeMap::new();
         b_map.insert("VALUE".into(), "BOOLEAN".into());
         b_map.insert("CUTYPE".into(), "GROUP".into());
-        let para = parameters!("VALUE", "BOOLEAN"; "CUTYPE", "GROUP");
-        assert_eq!(b_map, para);
+        let param = parameters!("VALUE", "BOOLEAN"; "CUTYPE", "GROUP");
+        assert_eq!(b_map, param);
     }
 }
 
@@ -41,31 +59,37 @@ macro_rules! write_crlf {
 
 macro_rules! property_builder {
     ($builder:ident, $name:expr) => {
+        #[allow(missing_docs)]
         #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
         pub struct $builder<'a> {
             value: Cow<'a, str>,
-            parameters: Parameters<'a>,
+            parameters: Parameters<'a>
         }
         
         impl<'a> $builder<'a> {
+            /// Creates the property with the given value.
             pub fn new<S>(value: S) -> Self
             where
-                S: Into<Cow<'a, str>>,
+                S: Into<Cow<'a, str>>
             {
                 $builder {
                     value: value.into(),
-                    parameters: BTreeMap::new(),
+                    parameters: BTreeMap::new()
                 }
             }
         
+            /// Adds a parameter to the property.
             pub fn add<P>(&mut self, parameter: P)
             where
-                P: Into<Parameter<'a>>,
+                P: Into<Parameter<'a>>
             {
                 let param = parameter.into();
                 self.parameters.insert(param.key, param.value);
             }
         
+            /// Adds several parameters at once to the property. For creating
+            /// several parameters at once, consult the documentation of
+            /// the `parameters!` macro.
             pub fn append(&mut self, mut parameter: Parameters<'a>) {
                 self.parameters.append(&mut parameter);
             }
@@ -76,7 +100,7 @@ macro_rules! property_builder {
                 Property {
                     key: $name.into(),
                     value: builder.value,
-                    parameters: builder.parameters,
+                    parameters: builder.parameters
                 }
             }
         }
@@ -86,18 +110,20 @@ macro_rules! property_builder {
 // Creation and conversion from builder types to Parameter
 macro_rules! parameter_builder {
     ($builder:ident, $name:expr) => {
+        #[allow(missing_docs)]
         #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
         pub struct $builder<'a> {
-            value: Cow<'a, str>,
+            value: Cow<'a, str>
         }
         
         impl<'a> $builder<'a> {
+            /// Creates the parameter with the given value.
             pub fn new<S>(value: S) -> Self
             where
-                S: Into<Cow<'a, str>>,
+                S: Into<Cow<'a, str>>
             {
                 $builder {
-                    value: value.into(),
+                    value: value.into()
                 }
             }
         }
@@ -106,7 +132,7 @@ macro_rules! parameter_builder {
             fn from(builder: $builder<'a>) -> Self {
                 Parameter {
                     key: $name.into(),
-                    value: builder.value,
+                    value: builder.value
                 }
             }
         }
@@ -121,7 +147,7 @@ macro_rules! impl_default_property {
             fn default() -> Self {
                 $builder {
                     value: $default.into(),
-                    parameters: BTreeMap::new(),
+                    parameters: BTreeMap::new()
                 }
             }
         }
@@ -131,7 +157,7 @@ macro_rules! impl_default_property {
             fn default() -> Self {
                 $builder {
                     value: Cow::default(),
-                    parameters: BTreeMap::new(),
+                    parameters: BTreeMap::new()
                 }
             }
         }
@@ -143,7 +169,7 @@ macro_rules! impl_default_parameter {
         impl<'a> Default for $builder<'a> {
             fn default() -> Self {
                 $builder {
-                    value: $default.into(),
+                    value: $default.into()
                 }
             }
         }
@@ -152,7 +178,7 @@ macro_rules! impl_default_parameter {
         impl<'a> Default for $builder<'a> {
             fn default() -> Self {
                 $builder {
-                    value: Cow::default(),
+                    value: Cow::default()
                 }
             }
         }

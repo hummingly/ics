@@ -1,3 +1,11 @@
+//! In the RFC 5545 specified properties except for IANA and non-standard
+//! properties ("X"-prefix parameters).
+//!
+//! Properties are key-value pairs which can have optionally several
+//! parameters. A property forms a content line which is line folded (CRLF +
+//! whitespace) after 75 bytes.
+//!
+//! For more information on the properties, please refer to the specification [RFC 5545 3.7. Calendar Properties](https://tools.ietf.org/html/rfc5545#section-3.7).
 use components::{Parameter, Parameters, Property};
 use std::borrow::Cow;
 use std::collections::BTreeMap;

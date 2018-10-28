@@ -26,7 +26,21 @@ pub(crate) fn fold_line(content_line: &mut String) {
     }
 }
 
-pub fn escape_text<'a, S: Into<Cow<'a, str>>>(input: S) -> Cow<'a, str> {
+/// Escapes comma, semicolon and backlash character with a backlash.
+///
+/// This method is only necessary for properties with the value type "TEXT".
+///
+/// #Example
+/// ```
+/// use ics::escape_text;
+///
+/// let line = "Hello, World! Today is a beautiful day to test: Escape Methods.\n Characters like ; or \\ must be escaped.";
+/// let expected = "Hello\\, World! Today is a beautiful day to test: Escape Methods.\n Characters like \\; or \\\\ must be escaped.";
+/// assert_eq!(expected, escape_text(line));
+pub fn escape_text<'a, S>(input: S) -> Cow<'a, str>
+where
+    S: Into<Cow<'a, str>>
+{
     let input = input.into();
 
     if cfg!(feature = "fast_encoding") {
@@ -55,7 +69,7 @@ fn escape_value(mut input: Cow<str>) -> Cow<str> {
                 '\\' => output.push_str("\\\\"),
                 // \r was in old MacOS versions the newline characters
                 '\r' => output.push_str("\n"),
-                _ => output.push(c),
+                _ => output.push(c)
             }
         }
         Cow::Owned(output)
@@ -82,7 +96,7 @@ fn escape_value_regex(input: Cow<str>) -> Cow<str> {
                 "\r\n" => output.push_str("\n"),
                 // \r was in old MacOS versions the newline characters
                 "\r" => output.push_str("\n"),
-                _ => unreachable!(),
+                _ => unreachable!()
             }
             last_match = m.end();
         }
@@ -119,7 +133,7 @@ mod line_folding_tests {
     #[test]
     fn no_folding_at_limit() {
         let mut line = String::from(
-            "Content lines that have a fixed length of 75 bytes shouldn't be line folded",
+            "Content lines that have a fixed length of 75 bytes shouldn't be line folded"
         );
         let expected = line.clone();
         assert!(line.len() == LINE_LIMIT);
@@ -140,7 +154,7 @@ mod line_folding_tests {
     #[test]
     fn folding_with_multibytes() {
         let mut line = String::from(
-            "Content lines shouldn't be folded in the middle of a UTF-8 character! 老虎.",
+            "Content lines shouldn't be folded in the middle of a UTF-8 character! 老虎."
         );
         assert!(line.len() > LINE_LIMIT);
         fold_line(&mut line);
@@ -190,7 +204,10 @@ mod escape_text_tests {
         use components::Property;
 
         let expected_value = "Hello\\, World! Today is a beautiful day to test: Escape Methods.\n Characters like \\; or \\\\ must be escaped.\n";
-        let property = Property::new("COMMENT", escape_text("Hello, World! Today is a beautiful day to test: Escape Methods.\n Characters like ; or \\ must be escaped.\r\n"));
+        let property = Property::new(
+            "COMMENT",
+            escape_text("Hello, World! Today is a beautiful day to test: Escape Methods.\n Characters like ; or \\ must be escaped.\r\n")
+        );
         assert_eq!(expected_value, property.value);
     }
 }

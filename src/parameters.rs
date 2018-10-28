@@ -1,3 +1,9 @@
+//! In the RFC 5545 specified parameters except for IANA and non-standard
+//! parameters ("X"-prefix parameters).
+//!
+//! Parameters are key-value pairs which can specify a property in detail.
+//!
+//! For more information on the parameters, please refer to the specification [RFC 5545 3.2. Property Parameters](https://tools.ietf.org/html/rfc5545#section-3.2).
 use components::Parameter;
 use std::borrow::Cow;
 
