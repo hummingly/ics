@@ -18,3 +18,7 @@ matrix:
       - cargo test --verbose --all
   allow_failures:
     - rust: nightly
+os:
+  - windows
+  - linux
+  - osx

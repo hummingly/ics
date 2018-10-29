@@ -1,11 +1,11 @@
 extern crate ics;
 
-use ics::parameters::Value;
+use ics::parameters::{FmtType, Related, Value};
 use ics::properties::{
-    Categories, Class, Completed, Description, DtEnd, DtStart, Due, FBTime, Organizer, Priority,
-    RRule, Status, Summary, Transp, URL
+    Attach, Attendee, Categories, Class, Completed, Description, DtEnd, DtStart, Due, FBTime,
+    LastModified, Organizer, Priority, RRule, Status, Summary, Transp, Trigger, TzName, URL
 };
-use ics::{escape_text, Event, FreeBusy, Journal, ToDo};
+use ics::{escape_text, Alarm, Event, FreeBusy, Journal, TimeZone, ToDo, ZoneTime};
 
 #[test]
 fn event() {
@@ -107,4 +107,57 @@ fn freebusy() {
     ));
 
     assert_eq!(freebusy.to_string(), expected);
+}
+
+#[test]
+fn time() {
+    let expected = "BEGIN:VTIMEZONE\r\n\
+                    LAST-MODIFIED:20050809T050000Z\r\n\
+                    TZID:America/New_York\r\n\
+                    BEGIN:STANDARD\r\n\
+                    DTSTART:20071104T020000\r\n\
+                    TZNAME:EST\r\n\
+                    TZOFFSETFROM:-0400\r\n\
+                    TZOFFSETTO:-0500\r\n\
+                    END:STANDARD\r\n\
+                    BEGIN:DAYLIGHT\r\n\
+                    DTSTART:20070311T020000\r\n\
+                    TZNAME:EDT\r\n\
+                    TZOFFSETFROM:-0500\r\n\
+                    TZOFFSETTO:-0400\r\n\
+                    END:DAYLIGHT\r\n\
+                    END:VTIMEZONE\r\n";
+
+    let mut standard = ZoneTime::standard("20071104T020000", "-0400", "-0500");
+    standard.push(TzName::new("EST"));
+    let mut daylight = ZoneTime::daylight("20070311T020000", "-0500", "-0400");
+    daylight.push(TzName::new("EDT"));
+
+    let mut timezone = TimeZone::new("America/New_York", standard);
+    timezone.push(LastModified::new("20050809T050000Z"));
+    timezone.add_zonetime(daylight);
+
+    assert_eq!(timezone.to_string(), expected);
+}
+
+#[test]
+fn alarm() {
+    let expected = "BEGIN:VALARM\r\n\
+                    ACTION:EMAIL\r\n\
+                    ATTACH;FMTTYPE=application/msword:http://example.com/templates/agenda.doc\r\n\
+                    ATTENDEE:mailto:john_doe@example.com\r\n\
+                    DESCRIPTION:A draft agenda needs to be sent out to the attendees to the wee\r\n kly managers meeting (MGR-LIST). Attached is a pointer the document templat\r\n e for the agenda file.\r\n\
+                    SUMMARY:*** REMINDER: SEND AGENDA FOR WEEKLY STAFF MEETING ***\r\n\
+                    TRIGGER;RELATED=END:-P2D\r\n\
+                    END:VALARM\r\n";
+
+    let mut trigger = Trigger::new("-P2D");
+    trigger.add(Related::new("END"));
+    let mut alarm = Alarm::email(trigger, Description::new("A draft agenda needs to be sent out to the attendees to the weekly managers meeting (MGR-LIST). Attached is a pointer the document template for the agenda file."), Summary::new("*** REMINDER: SEND AGENDA FOR WEEKLY STAFF MEETING ***"));
+    alarm.push(Attendee::new("mailto:john_doe@example.com"));
+    let mut attach = Attach::new("http://example.com/templates/agenda.doc");
+    attach.add(FmtType::new("application/msword"));
+    alarm.push(attach);
+
+    assert_eq!(alarm.to_string(), expected);
 }

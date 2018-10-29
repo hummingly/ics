@@ -250,11 +250,11 @@ impl<'a> ZoneTime<'a> {
     /// Creates a new "STANDARD" sub-component. The "DTSTART", "TZOFFSETFROM"
     /// and "TZOFFSETTO" properties are required. The "STANDARD" sub-component
     /// consists of a collection of properties that describe Standard Time.
-    pub fn standard<S, T, F>(dtstart: S, tz_offset_to: T, tz_offset_from: F) -> Self
+    pub fn standard<S, T, F>(dtstart: S, tz_offset_from: F, tz_offset_to: T) -> Self
     where
         S: Into<Cow<'a, str>>,
-        T: Into<Cow<'a, str>>,
-        F: Into<Cow<'a, str>>
+        F: Into<Cow<'a, str>>,
+        T: Into<Cow<'a, str>>
     {
         let mut zone_time = ZoneTime(Component::new("STANDARD"));
         zone_time.push(DtStart::new(dtstart));
@@ -267,11 +267,11 @@ impl<'a> ZoneTime<'a> {
     /// and "TZOFFSETTO" properties are required. The "DAYLIGHT" sub-component
     /// consists of a collection of properties that describe Daylight Saving
     /// Time.
-    pub fn daylight<S, T, F>(dtstart: S, tz_offset_to: T, tz_offset_from: F) -> Self
+    pub fn daylight<S, T, F>(dtstart: S, tz_offset_from: F, tz_offset_to: T) -> Self
     where
         S: Into<Cow<'a, str>>,
-        T: Into<Cow<'a, str>>,
-        F: Into<Cow<'a, str>>
+        F: Into<Cow<'a, str>>,
+        T: Into<Cow<'a, str>>
     {
         let mut zone_time = ZoneTime(Component::new("DAYLIGHT"));
         zone_time.push(DtStart::new(dtstart));
@@ -296,6 +296,8 @@ impl<'a> ZoneTime<'a> {
 #[derive(Debug, Default, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Alarm<'a>(Component<'a>);
 
+// The specific constructors use the specific property builder types since the
+// required properties can have defined parameters.
 impl<'a> Alarm<'a> {
     fn new<S>(kind: S) -> Self
     where
@@ -307,40 +309,28 @@ impl<'a> Alarm<'a> {
     }
 
     /// Creates a new audio alarm. The "TRIGGER" property is required.
-    pub fn audio<T>(trigger: T) -> Self
-    where
-        T: Into<Cow<'a, str>>
-    {
+    pub fn audio(trigger: Trigger<'a>) -> Self {
         let mut alarm = Alarm::new("AUDIO");
-        alarm.push(Trigger::new(trigger));
+        alarm.push(trigger);
         alarm
     }
 
     /// Creates a new display alarm. The "TRIGGER" and "DESCRIPTION" properties
     /// are required.
-    pub fn display<T, D>(trigger: T, description: D) -> Self
-    where
-        T: Into<Cow<'a, str>>,
-        D: Into<Cow<'a, str>>
-    {
+    pub fn display(trigger: Trigger<'a>, description: Description<'a>) -> Self {
         let mut alarm = Alarm::new("DISPLAY");
-        alarm.push(Trigger::new(trigger));
-        alarm.push(Description::new(description));
+        alarm.push(trigger);
+        alarm.push(description);
         alarm
     }
 
     /// Creates a new email alarm. The "TRIGGER", "DESCRIPTION" and "SUMMARY"
     /// properties are required.
-    pub fn email<T, D, S>(trigger: T, description: D, summary: S) -> Self
-    where
-        T: Into<Cow<'a, str>>,
-        D: Into<Cow<'a, str>>,
-        S: Into<Cow<'a, str>>
-    {
+    pub fn email(trigger: Trigger<'a>, description: Description<'a>, summary: Summary<'a>) -> Self {
         let mut alarm = Alarm::new("EMAIL");
-        alarm.push(Trigger::new(trigger));
-        alarm.push(Description::new(description));
-        alarm.push(Summary::new(summary));
+        alarm.push(trigger);
+        alarm.push(description);
+        alarm.push(summary);
         alarm
     }
 
