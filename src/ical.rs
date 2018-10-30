@@ -299,27 +299,24 @@ pub struct Alarm<'a>(Component<'a>);
 // The specific constructors use the specific property builder types since the
 // required properties can have defined parameters.
 impl<'a> Alarm<'a> {
-    fn new<S>(kind: S) -> Self
-    where
-        S: Into<Cow<'a, str>>
-    {
+    /// Creates a new "VALARM" calendar component. The "ACTION" and "TRIGGER"
+    /// properties are required.
+    pub fn new(action: Action<'a>, trigger: Trigger<'a>) -> Self {
         let mut alarm = Alarm(Component::new("VALARM"));
-        alarm.push(Action::new(kind));
+        alarm.push(action);
+        alarm.push(trigger);
         alarm
     }
 
     /// Creates a new audio alarm. The "TRIGGER" property is required.
     pub fn audio(trigger: Trigger<'a>) -> Self {
-        let mut alarm = Alarm::new("AUDIO");
-        alarm.push(trigger);
-        alarm
+        Alarm::new(Action::new("AUDIO"), trigger)
     }
 
     /// Creates a new display alarm. The "TRIGGER" and "DESCRIPTION" properties
     /// are required.
     pub fn display(trigger: Trigger<'a>, description: Description<'a>) -> Self {
-        let mut alarm = Alarm::new("DISPLAY");
-        alarm.push(trigger);
+        let mut alarm = Alarm::new(Action::new("DISPLAY"), trigger);
         alarm.push(description);
         alarm
     }
@@ -327,8 +324,7 @@ impl<'a> Alarm<'a> {
     /// Creates a new email alarm. The "TRIGGER", "DESCRIPTION" and "SUMMARY"
     /// properties are required.
     pub fn email(trigger: Trigger<'a>, description: Description<'a>, summary: Summary<'a>) -> Self {
-        let mut alarm = Alarm::new("EMAIL");
-        alarm.push(trigger);
+        let mut alarm = Alarm::new(Action::new("EMAIL"), trigger);
         alarm.push(description);
         alarm.push(summary);
         alarm

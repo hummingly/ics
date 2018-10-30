@@ -2,7 +2,7 @@ extern crate ics;
 
 use ics::parameters::{FmtType, Related, Value};
 use ics::properties::{
-    Attach, Attendee, Categories, Class, Completed, Description, DtEnd, DtStart, Due, FBTime,
+    Attach, Attendee, Categories, Class, Completed, Description, DtEnd, DtStart, Due, FreeBusyTime,
     LastModified, Organizer, Priority, RRule, Status, Summary, Transp, Trigger, TzName, URL
 };
 use ics::{escape_text, Alarm, Event, FreeBusy, Journal, TimeZone, ToDo, ZoneTime};
@@ -98,9 +98,9 @@ fn freebusy() {
     let mut freebusy = FreeBusy::new("b68378cf-872d-44f1-9703-5e3725c56e71", "19970901T120000Z");
     freebusy.push(DtStart::new("19980313T141711Z"));
     freebusy.push(DtEnd::new("19980410T141711Z"));
-    freebusy.push(FBTime::new("19980314T233000Z/19980315T003000Z"));
-    freebusy.push(FBTime::new("19980316T153000Z/19980316T163000Z"));
-    freebusy.push(FBTime::new("19980318T030000Z/19980318T040000Z"));
+    freebusy.push(FreeBusyTime::new("19980314T233000Z/19980315T003000Z"));
+    freebusy.push(FreeBusyTime::new("19980316T153000Z/19980316T163000Z"));
+    freebusy.push(FreeBusyTime::new("19980318T030000Z/19980318T040000Z"));
     freebusy.push(Organizer::new("jsmith@example.com"));
     freebusy.push(URL::new(
         "http://www.example.com/calendar/busytime/jsmith.ifb"
@@ -152,7 +152,7 @@ fn alarm() {
                     END:VALARM\r\n";
 
     let mut trigger = Trigger::new("-P2D");
-    trigger.add(Related::new("END"));
+    trigger.add(Related::End);
     let mut alarm = Alarm::email(trigger, Description::new("A draft agenda needs to be sent out to the attendees to the weekly managers meeting (MGR-LIST). Attached is a pointer the document template for the agenda file."), Summary::new("*** REMINDER: SEND AGENDA FOR WEEKLY STAFF MEETING ***"));
     alarm.push(Attendee::new("mailto:john_doe@example.com"));
     let mut attach = Attach::new("http://example.com/templates/agenda.doc");

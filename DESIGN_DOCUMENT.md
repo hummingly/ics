@@ -1,10 +1,10 @@
 # Purpose
-The ics crate should provide a meaningful way to create correct iCalender files without being difficult or verbose. At the same time the crate should be easy to integrate into other projects by having few dependencies.
+The ics crate should provide a meaningful way to create correct iCalender files without being difficult to set up. At the same time the crate should be easy to integrate into other projects by having few dependencies.
 
 # Description of the Specification
 An iCalender file is one calendar component containing other components such as: event, to-do, journal, freebusy or timezone. Those components can contain components and/or properties which is a key-value pair that can optionally have parameters which are also a key-value pairs. Some components can contain sub-components. Properties can reappear depending on the specification.
 
-After 75 bytes a newline and whitespace is inserted (CRLF ) and ',', ';' and '/' need to be escaped properly. Newlines are /n and text containg qoutes need to be quoted.
+After 75 bytes a newline and whitespace is inserted (CRLF ) and `,`, `;` and `/` need to be escaped properly. Newlines are `/n` and text containg qoutes need to be quoted.
 
 The sytax for components, properties and parameters are as follows:
 - Component:
@@ -82,7 +82,7 @@ The interface should guide the user on how to use the library but not hinder usi
 
 ### Cow vs. String
 One problem that the library faces is that everything is text (file format) which means everything could be a String. A String, however, is on the Heap, which means memory can be dynamically allocated but many allocations are performance killer and not every device has 16 GB or needs it. Furthermore, a String is good for mutations which is good since we need to fold and escape characters in content lines.
-However, not every text value needs to be escaped, nor do key values ever change. This is where Cow comes into play. We can keep a reference (&str) as long as we want and do not need to clone if there are no mutations. However, we can get an owned value if necessary and that also removes many life time issues in theory. The crate was not tested properly yet which means this assumption might change.
+However, not every text value needs to be escaped or folded, nor do key values ever change. This is where Cow comes into play. We can keep a reference (&str) as long as we want and do not need to clone if there is no need for mutations. However, we can get an owned value if necessary and that also removes many life time issues in theory.
 
 ### BTreeMap vs. Vec & HashMap
 This is a design decision copied from the vobject crate. The pros are that we get an ordered view and searching is easy. For future implementations that is great. Right now it is sometimes an unnecessary allocation. It makes sense that many parameters are stored as a map since a Parameter has only a key and value. HashMap would be an option if that would not mean that every property and component could not implement the Hash trait which ironically means that those could not be used in a HashMap. Another thing is that not every property appears only once. In a way BTreeMap wins by not offering too much.
