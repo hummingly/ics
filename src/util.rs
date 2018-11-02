@@ -1,3 +1,4 @@
+#[cfg(feature = "fast_text")]
 use regex::Regex;
 use std::borrow::Cow;
 
@@ -47,11 +48,11 @@ where
 {
     let input = input.into();
 
-    if cfg!(feature = "fast_encoding") {
-        escape_value_regex(input)
-    } else {
-        escape_value(input)
+    if cfg!(feature = "fast_text") {
+        #[cfg(feature = "fast_text")]
+        return escape_value_regex(input);
     }
+    escape_value(input)
 }
 
 fn escape_value(mut input: Cow<str>) -> Cow<str> {
@@ -82,6 +83,7 @@ fn escape_value(mut input: Cow<str>) -> Cow<str> {
     }
 }
 // https://lise-henry.github.io/articles/optimising_strings.html
+#[cfg(feature = "fast_text")]
 fn escape_value_regex(input: Cow<str>) -> Cow<str> {
     lazy_static! {
         static ref REGEX: Regex = Regex::new("[,;\\\\]|\r\n|\r").unwrap();
@@ -185,6 +187,7 @@ mod line_folding_tests {
 mod escape_text_tests {
     use super::escape_text;
     use super::escape_value;
+    #[cfg(feature = "fast_text")]
     use super::escape_value_regex;
 
     #[test]
@@ -192,6 +195,7 @@ mod escape_text_tests {
         let s = ",\r\n;:\\ \n \r\n";
         let expected = "\\,\n\\;:\\\\ \n \n";
         assert_eq!(expected, escape_value(s.into()));
+        #[cfg(feature = "fast_text")]
         assert_eq!(expected, escape_value_regex(s.into()));
     }
 
@@ -200,6 +204,7 @@ mod escape_text_tests {
         let s = "This is a simple sentence.";
         let expected = s.clone();
         assert_eq!(expected, escape_value(s.into()));
+        #[cfg(feature = "fast_text")]
         assert_eq!(expected, escape_value_regex(s.into()));
     }
 

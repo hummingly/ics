@@ -6,7 +6,7 @@ use properties::{
 use std::borrow::Cow;
 use std::fmt;
 
-/// The iCalendar object specified as "VCALENDAR".
+/// The iCalendar object specified as VCALENDAR.
 ///
 /// An `ICalendar` consists of calendar properties and one or more calendar components. Properties are attributes that apply to the calendar object as a whole. (see [RFC 5545 3.4 iCalendar Object](https://tools.ietf.org/html/rfc5545#section-3.4))
 /// ICalendar can be thought of as the iCalendar file. This is where the
@@ -73,7 +73,7 @@ impl<'a> ICalendar<'a> {
     }
 }
 
-/// The "VEVENT" calendar component.
+/// The VEVENT calendar component.
 ///
 /// An `Event` component is a grouping of component properties, possibly including an Alarm, that represents a scheduled amount of time on a calendar. (see [RFC 5545 3.6.1. Event Component](https://tools.ietf.org/html/rfc5545#section-3.6.1))
 #[derive(Debug, Default, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
@@ -106,7 +106,7 @@ impl<'a> Event<'a> {
     }
 }
 
-/// The "VTODO" calendar component.
+/// The VTODO calendar component.
 ///
 /// A ToDo component is a grouping of component properties, possibly including an Alarm, that represent an action-item or assignment. (see [RFC 5545 3.6.2. To-Do Component](https://tools.ietf.org/html/rfc5545#section-3.6.2))
 #[derive(Debug, Default, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
@@ -142,7 +142,7 @@ impl<'a> ToDo<'a> {
     }
 }
 
-/// The "VJOURNAL" calendar component.
+/// The VJOURNAL calendar component.
 ///
 /// A `Journal` component is a grouping of component properties that represent one or more descriptive text notes associated with a particular calendar date. (see [RFC 5545 3.6.3. Journal Component](https://tools.ietf.org/html/rfc5545#section-3.6.3))
 #[derive(Debug, Default, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
@@ -173,7 +173,7 @@ impl<'a> Journal<'a> {
     }
 }
 
-/// The "VFREEBUSY" calendar component.
+/// The VFREEBUSY calendar component.
 ///
 ///  A `FreeBusy` component is a grouping of component properties that represents either a request for free or busy time information, a reply to a request for free or busy time information, or a published set of busy time information. (see [RFC 5545 3.6.4. Free/Busy Component Component](https://tools.ietf.org/html/rfc5545#section-3.6.4))
 #[derive(Debug, Default, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
@@ -204,7 +204,7 @@ impl<'a> FreeBusy<'a> {
     }
 }
 
-/// The "VTIMEZONE" calendar component.
+/// The VTIMEZONE calendar component.
 ///
 ///  A `TimeZone` component is unambiguously defined by the set of time measurement rules (`ZoneTime`) determined by the governing body for a given geographic area. (see [RFC 5545 3.6.5. Time Zone Component Component](https://tools.ietf.org/html/rfc5545#section-3.6.5))
 #[derive(Debug, Default, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
@@ -240,7 +240,7 @@ impl<'a> TimeZone<'a> {
     }
 }
 
-/// The "STRANDARD" or "DAYLIGHT" sub-component of "VTIMEZONE".
+/// The STRANDARD or DAYLIGHT sub-component of VTIMEZONE.
 ///
 ///  Each "VTIMEZONE" calendar component consists of a collection of one or more sub-components that describe the rule for a particular observance (either a Standard Time or a Daylight Saving Time observance). (see [RFC 5545 3.6.5. Time Zone Component Component](https://tools.ietf.org/html/rfc5545#page-63))
 #[derive(Debug, Default, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
@@ -290,7 +290,7 @@ impl<'a> ZoneTime<'a> {
     }
 }
 
-/// The "VALARM" calendar component, a sub-component for "VEVENT" and "VTODO".
+/// The VALARM calendar component, a sub-component for VEVENT and VTODO.
 ///
 /// An `Alarm` component is a grouping of component properties that is a reminder or alarm for an event or a to-do. For example, it may be used to define a reminder for a pending event or an overdue to-do. (see [RFC 5545 3.6.6. Alarm Component](https://tools.ietf.org/html/rfc5545#section-3.6.6))
 #[derive(Debug, Default, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]

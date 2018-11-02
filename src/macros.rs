@@ -58,15 +58,16 @@ macro_rules! write_crlf {
 }
 
 macro_rules! property_builder {
-    ($builder:ident, $name:expr) => {
+    ($(#[$attr:meta],)* $builder:ident, $name:expr) => {
         #[doc=$name]
         #[doc = " Property"]
+        $(#[$attr])*
         #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
         pub struct $builder<'a> {
             value: Cow<'a, str>,
             parameters: Parameters<'a>
         }
-        
+
         impl<'a> $builder<'a> {
             #[doc = "Creates a new "]
             #[doc=$name]
@@ -80,7 +81,7 @@ macro_rules! property_builder {
                     parameters: BTreeMap::new()
                 }
             }
-        
+
             /// Adds a parameter to the property.
             pub fn add<P>(&mut self, parameter: P)
             where
@@ -89,7 +90,7 @@ macro_rules! property_builder {
                 let param = parameter.into();
                 self.parameters.insert(param.key, param.value);
             }
-        
+
             /// Adds several parameters at once to the property. For creating
             /// several parameters at once, consult the documentation of
             /// the `parameters!` macro.
@@ -97,7 +98,60 @@ macro_rules! property_builder {
                 self.parameters.append(&mut parameter);
             }
         }
-        
+
+        impl<'a> From<$builder<'a>> for Property<'a> {
+            fn from(builder: $builder<'a>) -> Self {
+                Property {
+                    key: $name.into(),
+                    value: builder.value,
+                    parameters: builder.parameters
+                }
+            }
+        }
+    };
+    // Remember that this for newer properties with values
+    ($(#[$attr:meta],)* $builder:ident, $name:expr, $value:expr) => {
+        #[doc=$name]#[doc = " Property\n\n"]
+        #[doc = "Newer properties that have a different value type than TEXT have to include the \"VALUE\" parameter. This property already contains \"VALUE:"]
+        #[doc=$value]#[doc=", do not add this parameter manually."]
+        $(#[$attr])*
+        #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
+        pub struct $builder<'a> {
+            value: Cow<'a, str>,
+            parameters: Parameters<'a>
+        }
+
+        impl<'a> $builder<'a> {
+            #[doc = "Creates a new "]
+            #[doc=$name]
+            #[doc = " Property with the given value."]
+            pub fn new<S>(value: S) -> Self
+            where
+                S: Into<Cow<'a, str>>
+            {
+                $builder {
+                    value: value.into(),
+                    parameters: parameters!("VALUE", $value)
+                }
+            }
+
+            /// Adds a parameter to the property.
+            pub fn add<P>(&mut self, parameter: P)
+            where
+                P: Into<Parameter<'a>>
+            {
+                let param = parameter.into();
+                self.parameters.insert(param.key, param.value);
+            }
+
+            /// Adds several parameters at once to the property. For creating
+            /// several parameters at once, consult the documentation of
+            /// the `parameters!` macro.
+            pub fn append(&mut self, mut parameter: Parameters<'a>) {
+                self.parameters.append(&mut parameter);
+            }
+        }
+
         impl<'a> From<$builder<'a>> for Property<'a> {
             fn from(builder: $builder<'a>) -> Self {
                 Property {
@@ -112,14 +166,15 @@ macro_rules! property_builder {
 
 // Creation and conversion from builder types to Parameter
 macro_rules! parameter_builder {
-    ($builder:ident, $name:expr) => {
+    ($(#[$attr:meta],)* $builder:ident, $name:expr) => {
         #[doc=$name]
         #[doc = " Parameter"]
+        $(#[$attr])*
         #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
         pub struct $builder<'a> {
             value: Cow<'a, str>
         }
-        
+
         impl<'a> $builder<'a> {
             #[doc = "Creates a new "]
             #[doc=$name]
@@ -133,7 +188,7 @@ macro_rules! parameter_builder {
                 }
             }
         }
-        
+
         impl<'a> From<$builder<'a>> for Parameter<'a> {
             fn from(builder: $builder<'a>) -> Self {
                 Parameter {
@@ -148,7 +203,8 @@ macro_rules! parameter_builder {
 // Some properties/parameters have default values.
 // The default value is implemented for the builder types!
 macro_rules! impl_default_property {
-    ($builder:ident, $default:expr) => {
+    ($(#[$attr:meta],)* $builder:ident, $default:expr) => {
+        $(#[$attr])*
         impl<'a> Default for $builder<'a> {
             fn default() -> Self {
                 $builder {
@@ -158,20 +214,19 @@ macro_rules! impl_default_property {
             }
         }
     };
-    ($builder:ident) => {
+    ($(#[$attr:meta],)* $builder:ident) => {
+        $(#[$attr])*
         impl<'a> Default for $builder<'a> {
             fn default() -> Self {
-                $builder {
-                    value: Cow::default(),
-                    parameters: BTreeMap::new()
-                }
+                $builder::new(Cow::default())
             }
         }
     };
 }
 
 macro_rules! impl_default_parameter {
-    ($builder:ident, $default:expr) => {
+    ($(#[$attr:meta],)* $builder:ident, $default:expr) => {
+        $(#[$attr])*
         impl<'a> Default for $builder<'a> {
             fn default() -> Self {
                 $builder {
@@ -180,12 +235,11 @@ macro_rules! impl_default_parameter {
             }
         }
     };
-    ($builder:ident) => {
+    ($(#[$attr:meta],)* $builder:ident) => {
+        $(#[$attr])*
         impl<'a> Default for $builder<'a> {
             fn default() -> Self {
-                $builder {
-                    value: Cow::default()
-                }
+                $builder::new(Cow::default())
             }
         }
     };

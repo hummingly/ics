@@ -1,0 +1,21 @@
+# Version 0.2.0
+- Removes the Into<Cow<str>> implementation from Parameter enums.
+- Properties and Parameter as defined in [RFC7986](https://tools.ietf.org/html/rfc7986) were added under a feature flag `rfc7986` which is enabled by default.
+  ### New Properties
+  - `NAME` Property
+  - `REFRESH-INTERVAL` Property
+  - `SOURCE` Property
+  - `COLOR` Property
+  - `IMAGE` Property
+  - `CONFERENCE` Property
+  ### New Parameters
+  - `DISPLAY` Property Parameter
+  - `EMAIL` Property Parameter
+  - `FEATURE` Property Parameter
+  - `LABEL` Property Parameter
+
+# Version 0.1.1
+- Fixes badges on `README` and documentation.
+
+# Version 0.1.0
+- Release!

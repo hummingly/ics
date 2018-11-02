@@ -1,29 +1,3 @@
-[![Crates.io](https://img.shields.io/crates/v/ics.svg)](https://crates.io/crates/ics)
-![Crates.io](https://img.shields.io/crates/l/rustc-serialize.svg)
-[![Build Status](https://travis-ci.com/hummingly/ics.svg?branch=master)](https://travis-ci.com/hummingly/ics)
-[![Documentation](https://docs.rs/ics/badge.svg)](https://docs.rs/ics)
-
-A library for creating iCalendar files as specified in [RFC5545](https://tools.ietf.org/html/rfc5545) and [RFC7986](https://tools.ietf.org/html/rfc7986).
-
-## Installation
-To use this library add the library as a dependency in your `Cargo.toml`:
-```toml
-[dependencies]
-ics = "0.2"
-```
-
-Optionally you can disable default features.
-```toml
-[dependencies.ics]
-version = "0.2"
-default-features = false
- ```
-Available features:
-  - `fast_text` (enabled by default): faster text processing in methods like `escape_text` but pulls in dependencies (regex and lazy_static)
-  - `rfc7986` (enabled by default): adds properties from the newer specification
-
-## Usage
-```rust
 extern crate ics;
 
 use ics::properties::{Categories, Description, DtEnd, DtStart, Organizer, Status, Summary};
@@ -80,20 +54,3 @@ fn main() {
     END:VCALENDAR
     */
 }
-```
-
-## License
-
-Licensed under either of
-
- * Apache License, Version 2.0
-   ([LICENSE-APACHE](LICENSE-APACHE) or http://www.apache.org/licenses/LICENSE-2.0)
- * MIT license
-   ([LICENSE-MIT](LICENSE-MIT) or http://opensource.org/licenses/MIT)
-
-at your option.
-
-## Contribution
-
-Contributions are always welcome!
-Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in the work by you, as defined in the Apache-2.0 license, shall be dual licensed as above, without any additional terms or conditions.

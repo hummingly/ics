@@ -16,6 +16,7 @@ matrix:
       - cargo +nightly fmt --all -- --check
       - cargo build --verbose --all
       - cargo test --verbose --all
+      - cargo test --no-default-features --verbose --all
   allow_failures:
     - rust: nightly
 os:

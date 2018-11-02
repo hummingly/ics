@@ -23,6 +23,14 @@ parameter_builder!(Role, "ROLE");
 parameter_builder!(SentBy, "SENT-BY");
 parameter_builder!(TzIDParam, "TZID");
 parameter_builder!(Value, "VALUE");
+#[cfg(feature = "rfc7986")]
+parameter_builder!(#[cfg(feature = "rfc7986")], Display, "DISPLAY");
+#[cfg(feature = "rfc7986")]
+parameter_builder!(#[cfg(feature = "rfc7986")], Email, "EMAIL");
+#[cfg(feature = "rfc7986")]
+parameter_builder!(#[cfg(feature = "rfc7986")], Feature, "FEATURE");
+#[cfg(feature = "rfc7986")]
+parameter_builder!(#[cfg(feature = "rfc7986")], Label, "LABEL");
 
 impl_default_parameter!(AltRep);
 impl_default_parameter!(CN);
@@ -40,6 +48,14 @@ impl_default_parameter!(Role, "REQ-PARTICIPANT");
 impl_default_parameter!(SentBy);
 impl_default_parameter!(TzIDParam);
 impl_default_parameter!(Value);
+#[cfg(feature = "rfc7986")]
+impl_default_parameter!(#[cfg(feature = "rfc7986")], Display, "BADGE");
+#[cfg(feature = "rfc7986")]
+impl_default_parameter!(#[cfg(feature = "rfc7986")], Email);
+#[cfg(feature = "rfc7986")]
+impl_default_parameter!(#[cfg(feature = "rfc7986")], Feature);
+#[cfg(feature = "rfc7986")]
+impl_default_parameter!(#[cfg(feature = "rfc7986")], Label);
 
 /// ENCODING Parameter
 #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
@@ -50,9 +66,9 @@ pub enum Encoding {
     Base64
 }
 
-impl<'a> From<Encoding> for Cow<'a, str> {
-    fn from(builder: Encoding) -> Self {
-        match builder {
+impl Encoding {
+    fn into_value<'a>(self) -> Cow<'a, str> {
+        match self {
             Encoding::Bit8 => Cow::Borrowed("8BIT"),
             Encoding::Base64 => Cow::Borrowed("BASE64")
         }
@@ -63,7 +79,7 @@ impl<'a> From<Encoding> for Parameter<'a> {
     fn from(builder: Encoding) -> Self {
         Parameter {
             key: "ENCODING".into(),
-            value: builder.into()
+            value: builder.into_value()
         }
     }
 }
@@ -81,11 +97,9 @@ pub enum Range {
     ThisAndFuture
 }
 
-impl<'a> From<Range> for Cow<'a, str> {
-    fn from(builder: Range) -> Self {
-        match builder {
-            Range::ThisAndFuture => Cow::Borrowed("THISANDFUTURE")
-        }
+impl Range {
+    fn into_value<'a>(self) -> Cow<'a, str> {
+        Cow::Borrowed("THISANDFUTURE")
     }
 }
 
@@ -93,7 +107,7 @@ impl<'a> From<Range> for Parameter<'a> {
     fn from(builder: Range) -> Self {
         Parameter {
             key: "RANGE".into(),
-            value: builder.into()
+            value: builder.into_value()
         }
     }
 }
@@ -113,9 +127,9 @@ pub enum Related {
     End
 }
 
-impl<'a> From<Related> for Cow<'a, str> {
-    fn from(builder: Related) -> Self {
-        match builder {
+impl Related {
+    fn into_value<'a>(self) -> Cow<'a, str> {
+        match self {
             Related::Start => Cow::Borrowed("START"),
             Related::End => Cow::Borrowed("END")
         }
@@ -126,7 +140,7 @@ impl<'a> From<Related> for Parameter<'a> {
     fn from(builder: Related) -> Self {
         Parameter {
             key: "RELATED".into(),
-            value: builder.into()
+            value: builder.into_value()
         }
     }
 }
@@ -146,9 +160,9 @@ pub enum RSVP {
     False
 }
 
-impl<'a> From<RSVP> for Cow<'a, str> {
-    fn from(builder: RSVP) -> Self {
-        match builder {
+impl RSVP {
+    fn into_value<'a>(self) -> Cow<'a, str> {
+        match self {
             RSVP::True => Cow::Borrowed("TRUE"),
             RSVP::False => Cow::Borrowed("FALSE")
         }
@@ -159,7 +173,7 @@ impl<'a> From<RSVP> for Parameter<'a> {
     fn from(builder: RSVP) -> Self {
         Parameter {
             key: "RSVP".into(),
-            value: builder.into()
+            value: builder.into_value()
         }
     }
 }
