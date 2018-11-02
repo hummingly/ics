@@ -13,12 +13,11 @@ matrix:
      before_script:
       - rustup component add rustfmt-preview --toolchain nightly
      script:
-      - cargo +nightly fmt --all -- --check
-      - cargo build --verbose --all
-      - cargo test --verbose --all
-      - cargo test --no-default-features --verbose --all
+      - cargo +nightly fmt -- --check
+      - cargo test --no-default-features --verbose
   allow_failures:
     - rust: nightly
 os:
   - linux
   - osx
+  - windows
