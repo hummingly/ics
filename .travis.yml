@@ -20,6 +20,5 @@ matrix:
   allow_failures:
     - rust: nightly
 os:
-  - windows
   - linux
   - osx

@@ -22,7 +22,7 @@ PROPERTY_KEY(;PARAMETER)*:PROPERTY_VALUE
 PARAMETER_KEY=PARAMETER_VALUE
 ```
 
-For now ics only supports RFC 5545.
+Ics only supports RFC5545 and RFC7986.
 
 # Structure
 The crate contains a "low-level" and "high-level" interface. The basic components in the components module can be used to create new custom iCalender components, properties and parameters. This is much more low-level which most users won't need. The high-level components are specified by the RFC 5545. However, if more control is needed, custom properties and custom components can still be added. The ICalendar component is the calendar object which contains a stream of properties and components. Those components are also just a stream of properties and sub-components.
