@@ -18,9 +18,9 @@ Optionally you can disable default features.
 version = "0.2"
 default-features = false
  ```
-Available features:
-  - `fast_text` (enabled by default): faster text processing in methods like `escape_text` but pulls in dependencies (regex and lazy_static)
-  - `rfc7986` (enabled by default): adds properties from the newer specification
+## Features
+- `fast_text` (enabled by default): faster text processing in methods like `escape_text` but pulls in dependencies (regex and lazy_static)
+- `rfc7986` (enabled by default): adds properties from the newer specification
 
 ## Usage
 ```rust
