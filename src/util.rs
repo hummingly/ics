@@ -1,5 +1,3 @@
-#[cfg(feature = "fast_text")]
-use regex::Regex;
 use std::borrow::Cow;
 
 // Content lines must be folded after 75 bytes
@@ -85,6 +83,8 @@ fn escape_value(mut input: Cow<str>) -> Cow<str> {
 // https://lise-henry.github.io/articles/optimising_strings.html
 #[cfg(feature = "fast_text")]
 fn escape_value_regex(input: Cow<str>) -> Cow<str> {
+    use regex::Regex;
+
     lazy_static! {
         static ref REGEX: Regex = Regex::new("[,;\\\\]|\r\n|\r").unwrap();
     }

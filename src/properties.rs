@@ -1,11 +1,11 @@
-//! In the RFC 5545 specified properties except for IANA and non-standard
-//! properties ("X"-prefix parameters).
+//! In the RFC5545 and RFC7986 specified properties except for IANA and
+//! non-standard properties ("X"-prefix parameters).
 //!
 //! Properties are key-value pairs which can have optionally several
 //! parameters. A property forms a content line which is line folded (CRLF +
 //! whitespace) after 75 bytes.
 //!
-//! For more information on the properties, please refer to the specification [RFC 5545 3.7. Calendar Properties](https://tools.ietf.org/html/rfc5545#section-3.7).
+//! For more information on the properties, please refer to the specification [RFC5545 3.7. Calendar Properties](https://tools.ietf.org/html/rfc5545#section-3.7).
 use components::{Parameter, Parameters, Property};
 use std::borrow::Cow;
 use std::collections::BTreeMap;
@@ -57,15 +57,15 @@ property_builder!(LastModified, "LAST-MODIFIED");
 property_builder!(Sequence, "SEQUENCE");
 property_builder!(RequestStatus, "REQUEST-STATUS");
 #[cfg(feature = "rfc7986")]
-property_builder!(#[cfg(feature = "rfc7986")], Name, "Name");
+property_builder!(Name, "Name");
 #[cfg(feature = "rfc7986")]
-property_builder!(#[cfg(feature = "rfc7986")], RefreshInterval, "REFRESH-INTERVAL", "DURATION");
+property_builder!(RefreshInterval, "REFRESH-INTERVAL", "DURATION");
 #[cfg(feature = "rfc7986")]
-property_builder!(#[cfg(feature = "rfc7986")], Source, "SOURCE", "URI");
+property_builder!(Source, "SOURCE", "URI");
 #[cfg(feature = "rfc7986")]
-property_builder!(#[cfg(feature = "rfc7986")], Color, "COLOR");
+property_builder!(Color, "COLOR");
 #[cfg(feature = "rfc7986")]
-property_builder!(#[cfg(feature = "rfc7986")], Conference, "CONFERENCE", "URI");
+property_builder!(Conference, "CONFERENCE", "URI");
 
 /// IMAGE Property
 ///
@@ -182,12 +182,12 @@ impl_default_property!(LastModified);
 impl_default_property!(Sequence, "0");
 impl_default_property!(RequestStatus);
 #[cfg(feature = "rfc7986")]
-impl_default_property!(#[cfg(feature = "rfc7986")], Name);
+impl_default_property!(Name);
 #[cfg(feature = "rfc7986")]
-impl_default_property!(#[cfg(feature = "rfc7986")], RefreshInterval);
+impl_default_property!(RefreshInterval);
 #[cfg(feature = "rfc7986")]
-impl_default_property!(#[cfg(feature = "rfc7986")], Source);
+impl_default_property!(Source);
 #[cfg(feature = "rfc7986")]
-impl_default_property!(#[cfg(feature = "rfc7986")], Color);
+impl_default_property!(Color);
 #[cfg(feature = "rfc7986")]
-impl_default_property!(#[cfg(feature = "rfc7986")], Conference);
+impl_default_property!(Conference);

@@ -8,7 +8,9 @@ use std::fmt;
 
 /// The iCalendar object specified as VCALENDAR.
 ///
-/// An `ICalendar` consists of calendar properties and one or more calendar components. Properties are attributes that apply to the calendar object as a whole. (see [RFC 5545 3.4 iCalendar Object](https://tools.ietf.org/html/rfc5545#section-3.4))
+/// An `ICalendar` consists of calendar properties and one or more calendar
+/// components. Properties are attributes that apply to the calendar object as a
+/// whole. (see [RFC5545 3.4 iCalendar Object](https://tools.ietf.org/html/rfc5545#section-3.4))
 /// ICalendar can be thought of as the iCalendar file. This is where the
 /// specified components are added. To save the object as file, it needs to be
 /// written to a file.
@@ -75,14 +77,16 @@ impl<'a> ICalendar<'a> {
 
 /// The VEVENT calendar component.
 ///
-/// An `Event` component is a grouping of component properties, possibly including an Alarm, that represents a scheduled amount of time on a calendar. (see [RFC 5545 3.6.1. Event Component](https://tools.ietf.org/html/rfc5545#section-3.6.1))
+/// An `Event` component is a grouping of component properties, possibly
+/// including an Alarm, that represents a scheduled amount of time on a
+/// calendar. (see [RFC5545 3.6.1. Event Component](https://tools.ietf.org/html/rfc5545#section-3.6.1))
 #[derive(Debug, Default, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Event<'a>(Component<'a>);
 
 impl<'a> Event<'a> {
     /// Creates a new "VEVENT" calendar component. The "UID" and "DTSTAMP"
-    /// properties are required. A UID should be generated random if possible
-    /// for security reasons.
+    /// properties are required. A UID should be generated randomly for security
+    /// reasons.
     pub fn new<U, D>(uid: U, dtstamp: D) -> Self
     where
         U: Into<Cow<'a, str>>,
@@ -94,7 +98,7 @@ impl<'a> Event<'a> {
         event
     }
 
-    /// Adds a property to the event. The RFC 5545 specifies which properties
+    /// Adds a property to the event. The RFC5545 specifies which properties
     /// can be added to an event.
     pub fn push<P: Into<Property<'a>>>(&mut self, property: P) {
         self.0.add_property(property);
@@ -108,14 +112,15 @@ impl<'a> Event<'a> {
 
 /// The VTODO calendar component.
 ///
-/// A ToDo component is a grouping of component properties, possibly including an Alarm, that represent an action-item or assignment. (see [RFC 5545 3.6.2. To-Do Component](https://tools.ietf.org/html/rfc5545#section-3.6.2))
+/// A ToDo component is a grouping of component properties, possibly including
+/// an Alarm, that represent an action-item or assignment. (see [RFC5545 3.6.2. To-Do Component](https://tools.ietf.org/html/rfc5545#section-3.6.2))
 #[derive(Debug, Default, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct ToDo<'a>(Component<'a>);
 
 impl<'a> ToDo<'a> {
     /// Creates a new "VTODO" calendar component. The "UID" and "DTSTAMP"
-    /// properties are required. A UID should be generated random if possible
-    /// for security reasons.
+    /// properties are required. A UID should be generated randomly for security
+    /// reasons.
     pub fn new<U, D>(uid: U, dtstamp: D) -> Self
     where
         U: Into<Cow<'a, str>>,
@@ -127,7 +132,7 @@ impl<'a> ToDo<'a> {
         todo
     }
 
-    /// Adds a property to the to-do. The RFC 5545 specifies which properties
+    /// Adds a property to the to-do. The RFC5545 specifies which properties
     /// can be added to a to-do.
     pub fn push<P>(&mut self, property: P)
     where
@@ -144,14 +149,16 @@ impl<'a> ToDo<'a> {
 
 /// The VJOURNAL calendar component.
 ///
-/// A `Journal` component is a grouping of component properties that represent one or more descriptive text notes associated with a particular calendar date. (see [RFC 5545 3.6.3. Journal Component](https://tools.ietf.org/html/rfc5545#section-3.6.3))
+/// A `Journal` component is a grouping of component properties that represent
+/// one or more descriptive text notes associated with a particular calendar
+/// date. (see [RFC5545 3.6.3. Journal Component](https://tools.ietf.org/html/rfc5545#section-3.6.3))
 #[derive(Debug, Default, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Journal<'a>(Component<'a>);
 
 impl<'a> Journal<'a> {
     /// Creates a new "VJOURNAL" calendar component. The "UID" and "DTSTAMP"
-    /// properties are required. A UID should be generated random if possible
-    /// for security reasons.
+    /// properties are required. A UID should be generated randomly for security
+    /// reasons.
     pub fn new<U, D>(uid: U, dtstamp: D) -> Self
     where
         U: Into<Cow<'a, str>>,
@@ -163,7 +170,7 @@ impl<'a> Journal<'a> {
         journal
     }
 
-    /// Adds a property to the journal. The RFC 5545 specifies which properties
+    /// Adds a property to the journal. The RFC5545 specifies which properties
     /// can be added to a journal.
     pub fn push<P>(&mut self, property: P)
     where
@@ -175,14 +182,17 @@ impl<'a> Journal<'a> {
 
 /// The VFREEBUSY calendar component.
 ///
-///  A `FreeBusy` component is a grouping of component properties that represents either a request for free or busy time information, a reply to a request for free or busy time information, or a published set of busy time information. (see [RFC 5545 3.6.4. Free/Busy Component Component](https://tools.ietf.org/html/rfc5545#section-3.6.4))
+///  A `FreeBusy` component is a grouping of component properties that
+/// represents either a request for free or busy time information, a reply to a
+/// request for free or busy time information, or a published set of busy time
+/// information. (see [RFC5545 3.6.4. Free/Busy Component Component](https://tools.ietf.org/html/rfc5545#section-3.6.4))
 #[derive(Debug, Default, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct FreeBusy<'a>(Component<'a>);
 
 impl<'a> FreeBusy<'a> {
     /// Creates a new "VFREEBUSY" calendar component. The "UID" and "DTSTAMP"
-    /// properties are required. A UID should be generated random if possible
-    /// for security reasons.
+    /// properties are required. A UID should be generated randomly for security
+    /// reasons.
     pub fn new<U, D>(uid: U, dtstamp: D) -> Self
     where
         U: Into<Cow<'a, str>>,
@@ -194,7 +204,7 @@ impl<'a> FreeBusy<'a> {
         freebusy
     }
 
-    /// Adds a property to the free busy schedule. The RFC 5545 specifies which
+    /// Adds a property to the free busy schedule. The RFC5545 specifies which
     /// properties can be added to a free busy schedule.
     pub fn push<P>(&mut self, property: P)
     where
@@ -206,7 +216,9 @@ impl<'a> FreeBusy<'a> {
 
 /// The VTIMEZONE calendar component.
 ///
-///  A `TimeZone` component is unambiguously defined by the set of time measurement rules (`ZoneTime`) determined by the governing body for a given geographic area. (see [RFC 5545 3.6.5. Time Zone Component Component](https://tools.ietf.org/html/rfc5545#section-3.6.5))
+///  A `TimeZone` component is unambiguously defined by the set of time
+/// measurement rules (`ZoneTime`) determined by the governing body for a given
+/// geographic area. (see [RFC5545 3.6.5. Time Zone Component Component](https://tools.ietf.org/html/rfc5545#section-3.6.5))
 #[derive(Debug, Default, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct TimeZone<'a>(Component<'a>);
 
@@ -224,7 +236,7 @@ impl<'a> TimeZone<'a> {
         timezone
     }
 
-    /// Adds a property to the time zone. The RFC 5545 specifies which
+    /// Adds a property to the time zone. The RFC5545 specifies which
     /// properties can be added to a time zone.
     pub fn push<P>(&mut self, property: P)
     where
@@ -242,7 +254,9 @@ impl<'a> TimeZone<'a> {
 
 /// The STRANDARD or DAYLIGHT sub-component of VTIMEZONE.
 ///
-///  Each "VTIMEZONE" calendar component consists of a collection of one or more sub-components that describe the rule for a particular observance (either a Standard Time or a Daylight Saving Time observance). (see [RFC 5545 3.6.5. Time Zone Component Component](https://tools.ietf.org/html/rfc5545#page-63))
+///  Each "VTIMEZONE" calendar component consists of a collection of one or more
+/// sub-components that describe the rule for a particular observance (either a
+/// Standard Time or a Daylight Saving Time observance). (see [RFC5545 3.6.5. Time Zone Component Component](https://tools.ietf.org/html/rfc5545#page-63))
 #[derive(Debug, Default, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct ZoneTime<'a>(Component<'a>);
 
@@ -280,7 +294,7 @@ impl<'a> ZoneTime<'a> {
         zone_time
     }
 
-    /// Adds a property to the zone time. The RFC 5545 specifies which
+    /// Adds a property to the zone time. The RFC5545 specifies which
     /// properties can be added to a zone time.
     pub fn push<P>(&mut self, property: P)
     where
@@ -292,7 +306,9 @@ impl<'a> ZoneTime<'a> {
 
 /// The VALARM calendar component, a sub-component for VEVENT and VTODO.
 ///
-/// An `Alarm` component is a grouping of component properties that is a reminder or alarm for an event or a to-do. For example, it may be used to define a reminder for a pending event or an overdue to-do. (see [RFC 5545 3.6.6. Alarm Component](https://tools.ietf.org/html/rfc5545#section-3.6.6))
+/// An `Alarm` component is a grouping of component properties that is a
+/// reminder or alarm for an event or a to-do. For example, it may be used to
+/// define a reminder for a pending event or an overdue to-do. (see [RFC5545 3.6.6. Alarm Component](https://tools.ietf.org/html/rfc5545#section-3.6.6))
 #[derive(Debug, Default, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Alarm<'a>(Component<'a>);
 
@@ -330,7 +346,7 @@ impl<'a> Alarm<'a> {
         alarm
     }
 
-    /// Adds a property to the alarm. The RFC 5545 specifies which property can
+    /// Adds a property to the alarm. The RFC5545 specifies which property can
     /// be added depending on the kind of alarm.
     pub fn push<P>(&mut self, property: P)
     where

@@ -49,7 +49,7 @@
 //!
 //! // Write `calendar` to a file.
 //! let data = calendar.to_string();
-//! let mut file = File::create("icalendar.ics").expect("Unable to create file");
+//! let mut file = File::create("birthday.ics").expect("Unable to create file");
 //! file.write_all(data.as_bytes())
 //!     .expect("Unable to write data");
 //! ```

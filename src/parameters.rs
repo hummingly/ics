@@ -1,9 +1,9 @@
-//! In the RFC 5545 specified parameters except for IANA and non-standard
-//! parameters ("X"-prefix parameters).
+//! In the RFC5545 and RFC7986 specified parameters except for IANA and
+//! non-standard parameters ("X"-prefix parameters).
 //!
 //! Parameters are key-value pairs which can specify a property in detail.
 //!
-//! For more information on the parameters, please refer to the specification [RFC 5545 3.2. Property Parameters](https://tools.ietf.org/html/rfc5545#section-3.2).
+//! For more information on the parameters, please refer to the specification [RFC5545 3.2. Property Parameters](https://tools.ietf.org/html/rfc5545#section-3.2).
 use components::Parameter;
 use std::borrow::Cow;
 
@@ -24,13 +24,13 @@ parameter_builder!(SentBy, "SENT-BY");
 parameter_builder!(TzIDParam, "TZID");
 parameter_builder!(Value, "VALUE");
 #[cfg(feature = "rfc7986")]
-parameter_builder!(#[cfg(feature = "rfc7986")], Display, "DISPLAY");
+parameter_builder!(Display, "DISPLAY");
 #[cfg(feature = "rfc7986")]
-parameter_builder!(#[cfg(feature = "rfc7986")], Email, "EMAIL");
+parameter_builder!(Email, "EMAIL");
 #[cfg(feature = "rfc7986")]
-parameter_builder!(#[cfg(feature = "rfc7986")], Feature, "FEATURE");
+parameter_builder!(Feature, "FEATURE");
 #[cfg(feature = "rfc7986")]
-parameter_builder!(#[cfg(feature = "rfc7986")], Label, "LABEL");
+parameter_builder!(Label, "LABEL");
 
 impl_default_parameter!(AltRep);
 impl_default_parameter!(CN);
@@ -49,20 +49,20 @@ impl_default_parameter!(SentBy);
 impl_default_parameter!(TzIDParam);
 impl_default_parameter!(Value);
 #[cfg(feature = "rfc7986")]
-impl_default_parameter!(#[cfg(feature = "rfc7986")], Display, "BADGE");
+impl_default_parameter!(Display, "BADGE");
 #[cfg(feature = "rfc7986")]
-impl_default_parameter!(#[cfg(feature = "rfc7986")], Email);
+impl_default_parameter!(Email);
 #[cfg(feature = "rfc7986")]
-impl_default_parameter!(#[cfg(feature = "rfc7986")], Feature);
+impl_default_parameter!(Feature);
 #[cfg(feature = "rfc7986")]
-impl_default_parameter!(#[cfg(feature = "rfc7986")], Label);
+impl_default_parameter!(Label);
 
 /// ENCODING Parameter
 #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub enum Encoding {
-    /// Text Encoding defined in RFC 2045
+    /// Text Encoding defined in RFC2045
     Bit8,
-    /// Binary Encoding Format defined in RFC 4648
+    /// Binary Encoding Format defined in RFC4648
     Base64
 }
 
