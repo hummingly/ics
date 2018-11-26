@@ -1,3 +1,11 @@
+# Version 0.2.2
+- Fixes inconsistency in the documentation.
+- Add note about RFC7986 support in the documentation.
+
+# Version 0.2.1
+- Finishes the documentation on features.
+- Improves/extends the main example in the documentation.
+
 # Version 0.2.0
 - Removes the Into<Cow<str>> implementation from Parameter enums.
 - Properties and Parameter as defined in [RFC7986](https://tools.ietf.org/html/rfc7986) were added under a feature flag `rfc7986` which is enabled by default.

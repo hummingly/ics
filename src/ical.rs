@@ -98,8 +98,8 @@ impl<'a> Event<'a> {
         event
     }
 
-    /// Adds a property to the event. The RFC5545 specifies which properties
-    /// can be added to an event.
+    /// Adds a property to the event. RFC5545 and RFC7986 specify which
+    /// properties can be added to an event.
     pub fn push<P: Into<Property<'a>>>(&mut self, property: P) {
         self.0.add_property(property);
     }
@@ -132,8 +132,8 @@ impl<'a> ToDo<'a> {
         todo
     }
 
-    /// Adds a property to the to-do. The RFC5545 specifies which properties
-    /// can be added to a to-do.
+    /// Adds a property to the to-do. RFC5545 and RFC7986 specify which
+    /// properties can be added to a to-do.
     pub fn push<P>(&mut self, property: P)
     where
         P: Into<Property<'a>>
@@ -170,8 +170,8 @@ impl<'a> Journal<'a> {
         journal
     }
 
-    /// Adds a property to the journal. The RFC5545 specifies which properties
-    /// can be added to a journal.
+    /// Adds a property to the journal. RFC5545 and RFC7986 specify which
+    /// properties can be added to a journal.
     pub fn push<P>(&mut self, property: P)
     where
         P: Into<Property<'a>>

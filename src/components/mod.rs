@@ -18,11 +18,11 @@
 //!     }
 //! }
 //! ```
+mod contentline;
 use std::borrow::Cow;
 use std::collections::BTreeMap;
 use std::fmt;
 use std::fmt::Write;
-use util::{content_line_len, fold_line, LINE_LIMIT};
 
 /// A `Component` contains properties and sometimes sub-components.
 ///
@@ -136,31 +136,31 @@ impl<'a> Property<'a> {
         }
         len
     }
+
+    fn write_content<W: Write>(&self, writer: &mut W) -> fmt::Result {
+        write!(writer, "{}", self.key)?;
+        for (key, value) in &self.parameters {
+            write!(writer, ";{}={}", key, value)?;
+        }
+        write!(writer, ":{}", self.value)
+    }
 }
 
 impl<'a> fmt::Display for Property<'a> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let len = self.len();
-        if len <= LINE_LIMIT {
-            write!(f, "{}", self.key)?;
-            for (key, value) in &self.parameters {
-                write!(f, ";{}={}", key, value)?;
-            }
-            write_crlf!(f, ":{}", self.value)
+        if len <= contentline::LIMIT {
+            self.write_content(f)?;
+            write_crlf!(f)
         } else {
-            let mut line = String::with_capacity(content_line_len(len));
-            write!(line, "{}", self.key)?;
-            for (key, value) in &self.parameters {
-                write!(line, ";{}={}", key, value)?;
-            }
-            write!(line, ":{}", self.value)?;
-            fold_line(&mut line);
+            let mut line = String::with_capacity(contentline::size(len));
+            self.write_content(&mut line)?;
+            contentline::fold(&mut line);
             write_crlf!(f, "{}", line)
         }
     }
 }
 
-// TODO: What to do with multiple values?
 /// A `Parameter` is a key-value that can be added to a property to specify it
 /// more.
 ///

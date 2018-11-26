@@ -58,10 +58,8 @@ macro_rules! write_crlf {
 }
 
 macro_rules! property_builder {
-    ($(#[$attr:meta],)* $builder:ident, $name:expr) => {
-        #[doc=$name]
-        #[doc = " Property"]
-        $(#[$attr])*
+    ($builder:ident, $name:expr) => {
+        #[doc=$name] #[doc = " Property"]
         #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
         pub struct $builder<'a> {
             value: Cow<'a, str>,
@@ -110,11 +108,10 @@ macro_rules! property_builder {
         }
     };
     // Remember that this for newer properties with values
-    ($(#[$attr:meta],)* $builder:ident, $name:expr, $value:expr) => {
+    ($builder:ident, $name:expr, $value:expr) => {
         #[doc=$name]#[doc = " Property\n\n"]
         #[doc = "Newer properties that have a different value type than TEXT have to include the \"VALUE\" parameter. This property already contains \"VALUE:"]
         #[doc=$value]#[doc=", do not add this parameter manually."]
-        $(#[$attr])*
         #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
         pub struct $builder<'a> {
             value: Cow<'a, str>,
@@ -166,15 +163,13 @@ macro_rules! property_builder {
 
 // Creation and conversion from builder types to Parameter
 macro_rules! parameter_builder {
-    ($(#[$attr:meta],)* $builder:ident, $name:expr) => {
+    ($builder:ident, $name:expr) => {
         #[doc=$name]
         #[doc = " Parameter"]
-        $(#[$attr])*
         #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
         pub struct $builder<'a> {
             value: Cow<'a, str>
         }
-
         impl<'a> $builder<'a> {
             #[doc = "Creates a new "]
             #[doc=$name]
@@ -188,7 +183,6 @@ macro_rules! parameter_builder {
                 }
             }
         }
-
         impl<'a> From<$builder<'a>> for Parameter<'a> {
             fn from(builder: $builder<'a>) -> Self {
                 Parameter {
@@ -203,8 +197,7 @@ macro_rules! parameter_builder {
 // Some properties/parameters have default values.
 // The default value is implemented for the builder types!
 macro_rules! impl_default_property {
-    ($(#[$attr:meta],)* $builder:ident, $default:expr) => {
-        $(#[$attr])*
+    ($builder:ident, $default:expr) => {
         impl<'a> Default for $builder<'a> {
             fn default() -> Self {
                 $builder {
@@ -214,8 +207,7 @@ macro_rules! impl_default_property {
             }
         }
     };
-    ($(#[$attr:meta],)* $builder:ident) => {
-        $(#[$attr])*
+    ($builder:ident) => {
         impl<'a> Default for $builder<'a> {
             fn default() -> Self {
                 $builder::new(Cow::default())
@@ -225,8 +217,7 @@ macro_rules! impl_default_property {
 }
 
 macro_rules! impl_default_parameter {
-    ($(#[$attr:meta],)* $builder:ident, $default:expr) => {
-        $(#[$attr])*
+    ($builder:ident, $default:expr) => {
         impl<'a> Default for $builder<'a> {
             fn default() -> Self {
                 $builder {
@@ -235,8 +226,7 @@ macro_rules! impl_default_parameter {
             }
         }
     };
-    ($(#[$attr:meta],)* $builder:ident) => {
-        $(#[$attr])*
+    ($builder:ident) => {
         impl<'a> Default for $builder<'a> {
             fn default() -> Self {
                 $builder::new(Cow::default())

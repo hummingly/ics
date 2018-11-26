@@ -1,34 +1,5 @@
 use std::borrow::Cow;
 
-// Content lines must be folded after 75 bytes
-pub(crate) const LINE_LIMIT: usize = 75;
-// The method is used only once with a String which is why we can reuse the
-// String since we also know beforehand how much space must be allocated. (see
-// impl Display for Property)
-pub(crate) fn fold_line(content_line: &mut String) {
-    let input = content_line.clone();
-    content_line.clear();
-
-    let len = input.len();
-    let mut boundary = 0;
-    while boundary < len {
-        let start = boundary;
-        boundary += LINE_LIMIT;
-        if boundary < len {
-            while !input.is_char_boundary(boundary) {
-                boundary -= 1;
-            }
-        } else {
-            boundary = len;
-        }
-
-        content_line.push_str(&input[start..boundary]);
-        if boundary < len {
-            content_line.push_str("\r\n ");
-        }
-    }
-}
-
 /// Escapes comma, semicolon and backlash character with a backlash.
 ///
 /// This method is only necessary for properties with the value type "TEXT".
@@ -44,13 +15,11 @@ pub fn escape_text<'a, S>(input: S) -> Cow<'a, str>
 where
     S: Into<Cow<'a, str>>
 {
-    let input = input.into();
-
     if cfg!(feature = "fast_text") {
         #[cfg(feature = "fast_text")]
-        return escape_value_regex(input);
+        return escape_value_regex(input.into());
     }
-    escape_value(input)
+    escape_value(input.into())
 }
 
 fn escape_value(mut input: Cow<str>) -> Cow<str> {
@@ -58,14 +27,13 @@ fn escape_value(mut input: Cow<str>) -> Cow<str> {
         input = input.replace("\r\n", "\n").into();
     }
 
-    fn escaped_char(c: char) -> bool {
-        c == ',' || c == ';' || c == '\\'
-    }
+    let escaped_chars = |c| c == ',' || c == ';' || c == '\\';
+    if let Some(index) = input.find(|c| c == '\r' || escaped_chars(c)) {
+        let extra_bytes = input.chars().filter(|&c| escaped_chars(c)).count();
+        let mut output = String::with_capacity(input.len() + extra_bytes);
+        output.push_str(&input[0..index]);
 
-    if input.contains(escaped_char) {
-        let size = input.len() + input.chars().filter(|&c| escaped_char(c)).count();
-        let mut output = String::with_capacity(size);
-        for c in input.chars() {
+        for c in input[index..].chars() {
             match c {
                 ',' => output.push_str("\\,"),
                 ';' => output.push_str("\\;"),
@@ -80,6 +48,7 @@ fn escape_value(mut input: Cow<str>) -> Cow<str> {
         input
     }
 }
+
 // https://lise-henry.github.io/articles/optimising_strings.html
 #[cfg(feature = "fast_text")]
 fn escape_value_regex(input: Cow<str>) -> Cow<str> {
@@ -90,9 +59,12 @@ fn escape_value_regex(input: Cow<str>) -> Cow<str> {
     }
 
     if REGEX.is_match(&input) {
+        let escaped_chars = |c| c == ',' || c == ';' || c == '\\';
+        let extra_bytes = input.chars().filter(|&c| escaped_chars(c)).count();
+        let mut output = String::with_capacity(input.len() + extra_bytes);
+
         let mut last_match = 0;
         let matches = REGEX.find_iter(&input);
-        let mut output = String::with_capacity(input.len() + (input.len() / 2));
         for m in matches {
             output.push_str(&input[last_match..m.start()]);
             match &input[m.start()..m.end()] {
@@ -112,75 +84,6 @@ fn escape_value_regex(input: Cow<str>) -> Cow<str> {
     } else {
         input
     }
-}
-
-// Calculates the new text length after inserting a Line Break
-pub(crate) fn content_line_len(len: usize) -> usize {
-    if len % LINE_LIMIT == 0 {
-        len + ((len / LINE_LIMIT - 1) * 3)
-    } else {
-        len + ((len / LINE_LIMIT) * 3)
-    }
-}
-
-#[cfg(test)]
-mod line_folding_tests {
-    use super::fold_line;
-    use super::LINE_LIMIT;
-
-    #[test]
-    fn no_folding_short_line() {
-        let mut line = String::from("This is a short line");
-        let expected = line.clone();
-        assert!(line.len() < LINE_LIMIT);
-        fold_line(&mut line);
-        assert_eq!(line, expected);
-    }
-
-    #[test]
-    fn no_folding_at_limit() {
-        let mut line = String::from(
-            "Content lines that have a fixed length of 75 bytes shouldn't be line folded"
-        );
-        let expected = line.clone();
-        assert!(line.len() == LINE_LIMIT);
-        fold_line(&mut line);
-        assert_eq!(line, expected);
-    }
-
-    #[test]
-    fn folding_over_limit() {
-        let mut line = String::from("Content lines that have a fixed length over 75 bytes should be line folded with CRLF and whitespace.");
-        assert!(line.len() > LINE_LIMIT);
-        fold_line(&mut line);
-
-        let expected = "Content lines that have a fixed length over 75 bytes should be line folded \r\n with CRLF and whitespace.";
-        assert_eq!(line, expected);
-    }
-
-    #[test]
-    fn folding_with_multibytes() {
-        let mut line = String::from(
-            "Content lines shouldn't be folded in the middle of a UTF-8 character! 老虎."
-        );
-        assert!(line.len() > LINE_LIMIT);
-        fold_line(&mut line);
-
-        let expected =
-            "Content lines shouldn't be folded in the middle of a UTF-8 character! 老\r\n 虎.";
-        assert_eq!(line, expected);
-    }
-
-    #[test]
-    fn folding_multi_lines() {
-        let mut line = String::from("The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. ");
-        assert!(line.len() > LINE_LIMIT);
-        fold_line(&mut line);
-
-        let expected = "The quick brown fox jumps over the lazy dog. The quick brown fox jumps over\r\n  the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown\r\n  fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. ";
-        assert_eq!(line, expected);
-    }
-
 }
 
 #[cfg(test)]
