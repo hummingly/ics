@@ -3,10 +3,7 @@ pub const LIMIT: usize = 75;
 
 pub fn fold(content: &mut String) {
     // drain the first 75 bytes or before if the boundary is not on a char boundary
-    let mut boundary = LIMIT;
-    while !content.is_char_boundary(boundary) {
-        boundary -= 1;
-    }
+    let mut boundary = next_boundary(content.as_bytes(), LIMIT);
     let input: String = content.drain(boundary..).collect();
     content.push_str("\r\n ");
 
@@ -16,15 +13,27 @@ pub fn fold(content: &mut String) {
         let start = boundary;
         boundary += LIMIT;
         if boundary < len {
-            while !input.is_char_boundary(boundary) {
-                boundary -= 1;
-            }
+            boundary = next_boundary(input.as_bytes(), boundary);
             content.push_str(&input[start..boundary]);
             content.push_str("\r\n ");
         } else {
             content.push_str(&input[start..len]);
         }
     }
+}
+
+// Returns the next char boundary at or before index
+fn next_boundary(bytes: &[u8], index: usize) -> usize {
+    // 'The start and end of the string are considered to be boundaries.'
+    if index == 0 {
+        return index;
+    } else if index >= bytes.len() {
+        return bytes.len();
+    }
+    bytes[0..=index]
+        .iter()
+        .rposition(|&i| (i as i8) >= -0x40) // bit magic i < 128 || i >= 192
+        .unwrap_or(0)
 }
 
 // Calculates the new text length after inserting a Line Break

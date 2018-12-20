@@ -40,7 +40,7 @@ fn main() {
     BEGIN:VEVENT
     CATEGORIES:CONFERENCE
     DESCRIPTION:Networld+Interop Conference and Exhibit
-    Atlanta World Congress 
+    Atlanta World Congress
      Center
     Atlanta\, Georgia
     DTEND:19960920T220000Z
