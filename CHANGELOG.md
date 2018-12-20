@@ -1,3 +1,9 @@
+# Version 0.2.3
+- Refactoring
+  - moved content line methods to components into module
+  - replaced is_char_boundary with next_boundary
+- Dropping Windows support in Travis due to incredible long build times for the size of this project.
+
 # Version 0.2.2
 - Fixes inconsistency in the documentation.
 - Add note about RFC7986 support in the documentation.

@@ -11,7 +11,7 @@ matrix:
   include:
    - rust: nightly
      before_script:
-      - rustup component add rustfmt-preview --toolchain nightly
+      - rustup component add rustfmt --toolchain nightly
      script:
       - cargo +nightly fmt -- --check
       - cargo test --no-default-features --verbose
@@ -20,4 +20,3 @@ matrix:
 os:
   - linux
   - osx
-  - windows
