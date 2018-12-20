@@ -37,7 +37,7 @@ pub fn size(len: usize) -> usize {
 }
 
 #[cfg(test)]
-mod line_folding_tests {
+mod tests {
     use super::fold;
     use super::size;
     use super::LIMIT;

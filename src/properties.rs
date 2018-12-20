@@ -56,84 +56,6 @@ property_builder!(DtStamp, "DTSTAMP");
 property_builder!(LastModified, "LAST-MODIFIED");
 property_builder!(Sequence, "SEQUENCE");
 property_builder!(RequestStatus, "REQUEST-STATUS");
-#[cfg(feature = "rfc7986")]
-property_builder!(Name, "Name");
-#[cfg(feature = "rfc7986")]
-property_builder!(RefreshInterval, "REFRESH-INTERVAL", "DURATION");
-#[cfg(feature = "rfc7986")]
-property_builder!(Source, "SOURCE", "URI");
-#[cfg(feature = "rfc7986")]
-property_builder!(Color, "COLOR");
-#[cfg(feature = "rfc7986")]
-property_builder!(Conference, "CONFERENCE", "URI");
-
-/// IMAGE Property
-///
-/// Newer properties that have a different value type than TEXT have to include
-/// the "VALUE" parameter. This property already contains the "VALUE" parameter,
-/// do not add this parameter manually. Depending on the constructor the value
-/// can be either "URI" or "BINARY".
-#[cfg(feature = "rfc7986")]
-#[derive(Debug, Default, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
-pub struct Image<'a> {
-    value: Cow<'a, str>,
-    parameters: Parameters<'a>
-}
-
-#[cfg(feature = "rfc7986")]
-impl<'a> Image<'a> {
-    /// Creates a new IMAGE Property with the given value. The value type is
-    /// "URI".
-    pub fn uri<S>(value: S) -> Self
-    where
-        S: Into<Cow<'a, str>>
-    {
-        Image {
-            value: value.into(),
-            parameters: parameters!("VALUE", "URI")
-        }
-    }
-
-    /// Creates a new IMAGE Property with the given value. The value type is
-    /// "BINARY" which is why the "ENCODING" parameter with the value "BASE64"
-    /// is also added.
-    pub fn binary<S>(value: S) -> Self
-    where
-        S: Into<Cow<'a, str>>
-    {
-        Image {
-            value: value.into(),
-            parameters: parameters!("ENCODING", "BASE64"; "VALUE", "BINARY")
-        }
-    }
-
-    /// Adds a parameter to the property.
-    pub fn add<P>(&mut self, parameter: P)
-    where
-        P: Into<Parameter<'a>>
-    {
-        let param = parameter.into();
-        self.parameters.insert(param.key, param.value);
-    }
-
-    /// Adds several parameters at once to the property. For creating
-    /// several parameters at once, consult the documentation of
-    /// the `parameters!` macro.
-    pub fn append(&mut self, mut parameter: Parameters<'a>) {
-        self.parameters.append(&mut parameter);
-    }
-}
-
-#[cfg(feature = "rfc7986")]
-impl<'a> From<Image<'a>> for Property<'a> {
-    fn from(builder: Image<'a>) -> Self {
-        Property {
-            key: "IMAGE".into(),
-            value: builder.value,
-            parameters: builder.parameters
-        }
-    }
-}
 
 impl_default_property!(CalScale, "GREGORIAN");
 impl_default_property!(Method);
@@ -181,13 +103,89 @@ impl_default_property!(DtStamp);
 impl_default_property!(LastModified);
 impl_default_property!(Sequence, "0");
 impl_default_property!(RequestStatus);
+
 #[cfg(feature = "rfc7986")]
-impl_default_property!(Name);
+pub use self::rfc7986::*;
+
 #[cfg(feature = "rfc7986")]
-impl_default_property!(RefreshInterval);
-#[cfg(feature = "rfc7986")]
-impl_default_property!(Source);
-#[cfg(feature = "rfc7986")]
-impl_default_property!(Color);
-#[cfg(feature = "rfc7986")]
-impl_default_property!(Conference);
+mod rfc7986 {
+    use components::{Parameter, Parameters, Property};
+    use std::borrow::Cow;
+    use std::collections::BTreeMap;
+    property_builder!(Name, "Name");
+    property_builder!(RefreshInterval, "REFRESH-INTERVAL", "DURATION");
+    property_builder!(Source, "SOURCE", "URI");
+    property_builder!(Color, "COLOR");
+    property_builder!(Conference, "CONFERENCE", "URI");
+
+    impl_default_property!(Name);
+    impl_default_property!(RefreshInterval);
+    impl_default_property!(Source);
+    impl_default_property!(Color);
+    impl_default_property!(Conference);
+
+    /// IMAGE Property
+    ///
+    /// Newer properties that have a different value type than TEXT have to
+    /// include the "VALUE" parameter. This property already contains the
+    /// "VALUE" parameter, do not add this parameter manually. Depending on
+    /// the constructor the value can be either "URI" or "BINARY".
+    #[derive(Debug, Default, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
+    pub struct Image<'a> {
+        value: Cow<'a, str>,
+        parameters: Parameters<'a>
+    }
+
+    impl<'a> Image<'a> {
+        /// Creates a new IMAGE Property with the given value. The value type is
+        /// "URI".
+        pub fn uri<S>(value: S) -> Self
+        where
+            S: Into<Cow<'a, str>>
+        {
+            Image {
+                value: value.into(),
+                parameters: parameters!("VALUE", "URI")
+            }
+        }
+
+        /// Creates a new IMAGE Property with the given value. The value type is
+        /// "BINARY" which is why the "ENCODING" parameter with the value
+        /// "BASE64" is also added.
+        pub fn binary<S>(value: S) -> Self
+        where
+            S: Into<Cow<'a, str>>
+        {
+            Image {
+                value: value.into(),
+                parameters: parameters!("ENCODING", "BASE64"; "VALUE", "BINARY")
+            }
+        }
+
+        /// Adds a parameter to the property.
+        pub fn add<P>(&mut self, parameter: P)
+        where
+            P: Into<Parameter<'a>>
+        {
+            let param = parameter.into();
+            self.parameters.insert(param.key, param.value);
+        }
+
+        /// Adds several parameters at once to the property. For creating
+        /// several parameters at once, consult the documentation of
+        /// the `parameters!` macro.
+        pub fn append(&mut self, mut parameter: Parameters<'a>) {
+            self.parameters.append(&mut parameter);
+        }
+    }
+
+    impl<'a> From<Image<'a>> for Property<'a> {
+        fn from(builder: Image<'a>) -> Self {
+            Property {
+                key: "IMAGE".into(),
+                value: builder.value,
+                parameters: builder.parameters
+            }
+        }
+    }
+}

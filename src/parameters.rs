@@ -23,14 +23,6 @@ parameter_builder!(Role, "ROLE");
 parameter_builder!(SentBy, "SENT-BY");
 parameter_builder!(TzIDParam, "TZID");
 parameter_builder!(Value, "VALUE");
-#[cfg(feature = "rfc7986")]
-parameter_builder!(Display, "DISPLAY");
-#[cfg(feature = "rfc7986")]
-parameter_builder!(Email, "EMAIL");
-#[cfg(feature = "rfc7986")]
-parameter_builder!(Feature, "FEATURE");
-#[cfg(feature = "rfc7986")]
-parameter_builder!(Label, "LABEL");
 
 impl_default_parameter!(AltRep);
 impl_default_parameter!(CN);
@@ -48,14 +40,6 @@ impl_default_parameter!(Role, "REQ-PARTICIPANT");
 impl_default_parameter!(SentBy);
 impl_default_parameter!(TzIDParam);
 impl_default_parameter!(Value);
-#[cfg(feature = "rfc7986")]
-impl_default_parameter!(Display, "BADGE");
-#[cfg(feature = "rfc7986")]
-impl_default_parameter!(Email);
-#[cfg(feature = "rfc7986")]
-impl_default_parameter!(Feature);
-#[cfg(feature = "rfc7986")]
-impl_default_parameter!(Label);
 
 /// ENCODING Parameter
 #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
@@ -182,4 +166,22 @@ impl Default for RSVP {
     fn default() -> Self {
         RSVP::False
     }
+}
+
+#[cfg(feature = "rfc7986")]
+pub use self::rfc7986::*;
+
+#[cfg(feature = "rfc7986")]
+mod rfc7986 {
+    use components::Parameter;
+    use std::borrow::Cow;
+    parameter_builder!(Display, "DISPLAY");
+    parameter_builder!(Email, "EMAIL");
+    parameter_builder!(Feature, "FEATURE");
+    parameter_builder!(Label, "LABEL");
+
+    impl_default_parameter!(Display, "BADGE");
+    impl_default_parameter!(Email);
+    impl_default_parameter!(Feature);
+    impl_default_parameter!(Label);
 }
