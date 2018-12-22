@@ -11,13 +11,10 @@ pub fn fold(content: &mut String) {
     boundary = 0;
     while boundary < len {
         let start = boundary;
-        boundary += LIMIT;
+        boundary = next_boundary(input.as_bytes(), boundary + LIMIT);
+        content.push_str(&input[start..boundary]);
         if boundary < len {
-            boundary = next_boundary(input.as_bytes(), boundary);
-            content.push_str(&input[start..boundary]);
             content.push_str("\r\n ");
-        } else {
-            content.push_str(&input[start..len]);
         }
     }
 }

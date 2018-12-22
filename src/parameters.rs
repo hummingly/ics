@@ -9,37 +9,20 @@ use std::borrow::Cow;
 
 parameter_builder!(AltRep, "ALTREP");
 parameter_builder!(CN, "CN");
-parameter_builder!(CUType, "CUTYPE");
+parameter_builder!(CUType, "CUTYPE", "INDIVIDUAL");
 parameter_builder!(DelegatedFrom, "DELEGATED-FROM");
 parameter_builder!(DelegatedTo, "DELEGATED-TO");
 parameter_builder!(Dir, "DIR");
 parameter_builder!(FmtType, "FMTTYPE");
-parameter_builder!(FBType, "FBTYPE");
+parameter_builder!(FBType, "FBTYPE", "BUSY");
 parameter_builder!(Language, "LANGUAGE");
 parameter_builder!(Member, "MEMBER");
-parameter_builder!(PartStat, "PARTSTAT");
-parameter_builder!(RelType, "RELTYPE");
-parameter_builder!(Role, "ROLE");
+parameter_builder!(PartStat, "PARTSTAT", "NEEDS-ACTION");
+parameter_builder!(RelType, "RELTYPE", "PARENT");
+parameter_builder!(Role, "ROLE", "REQ-PARTICIPANT");
 parameter_builder!(SentBy, "SENT-BY");
 parameter_builder!(TzIDParam, "TZID");
 parameter_builder!(Value, "VALUE");
-
-impl_default_parameter!(AltRep);
-impl_default_parameter!(CN);
-impl_default_parameter!(CUType, "INDIVIDUAL");
-impl_default_parameter!(DelegatedFrom);
-impl_default_parameter!(DelegatedTo);
-impl_default_parameter!(Dir);
-impl_default_parameter!(FmtType);
-impl_default_parameter!(FBType, "BUSY");
-impl_default_parameter!(Language);
-impl_default_parameter!(Member);
-impl_default_parameter!(PartStat, "NEEDS-ACTION");
-impl_default_parameter!(RelType, "PARENT");
-impl_default_parameter!(Role, "REQ-PARTICIPANT");
-impl_default_parameter!(SentBy);
-impl_default_parameter!(TzIDParam);
-impl_default_parameter!(Value);
 
 /// ENCODING Parameter
 #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
@@ -175,13 +158,8 @@ pub use self::rfc7986::*;
 mod rfc7986 {
     use components::Parameter;
     use std::borrow::Cow;
-    parameter_builder!(Display, "DISPLAY");
+    parameter_builder!(Display, "DISPLAY", "BADGE");
     parameter_builder!(Email, "EMAIL");
     parameter_builder!(Feature, "FEATURE");
     parameter_builder!(Label, "LABEL");
-
-    impl_default_parameter!(Display, "BADGE");
-    impl_default_parameter!(Email);
-    impl_default_parameter!(Feature);
-    impl_default_parameter!(Label);
 }

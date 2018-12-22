@@ -57,9 +57,61 @@ macro_rules! write_crlf {
     );
 }
 
+// Creation and conversion from builder types to Property
 macro_rules! property_builder {
     ($builder:ident, $name:expr) => {
-        #[doc=$name] #[doc = " Property"]
+        #[doc=$name]
+        #[doc = " Property"]
+        #[derive(Debug, Default, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
+        pub struct $builder<'a> {
+            value: Cow<'a, str>,
+            parameters: Parameters<'a>
+        }
+
+        impl<'a> $builder<'a> {
+            #[doc = "Creates a new "]
+            #[doc=$name]
+            #[doc = " Property with the given value."]
+            pub fn new<S>(value: S) -> Self
+            where
+                S: Into<Cow<'a, str>>
+            {
+                $builder {
+                    value: value.into(),
+                    ..Default::default()
+                }
+            }
+
+            /// Adds a parameter to the property.
+            pub fn add<P>(&mut self, parameter: P)
+            where
+                P: Into<Parameter<'a>>
+            {
+                let param = parameter.into();
+                self.parameters.insert(param.key, param.value);
+            }
+
+            /// Adds several parameters at once to the property. For creating
+            /// several parameters at once, consult the documentation of
+            /// the `parameters!` macro.
+            pub fn append(&mut self, mut parameter: Parameters<'a>) {
+                self.parameters.append(&mut parameter);
+            }
+        }
+
+        impl<'a> From<$builder<'a>> for Property<'a> {
+            fn from(builder: $builder<'a>) -> Self {
+                Property {
+                    key: $name.into(),
+                    value: builder.value,
+                    parameters: builder.parameters
+                }
+            }
+        }
+    };
+    ($builder:ident, $name:expr, $default_value:expr) => {
+        #[doc=$name]
+        #[doc = " Property"]
         #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
         pub struct $builder<'a> {
             value: Cow<'a, str>,
@@ -106,8 +158,20 @@ macro_rules! property_builder {
                 }
             }
         }
+        impl<'a> Default for $builder<'a> {
+            fn default() -> Self {
+                $builder {
+                    value: $default_value.into(),
+                    parameters: BTreeMap::new()
+                }
+            }
+        }
     };
-    // Remember that this for newer properties with values
+}
+
+// Creation and conversion from builder types to Property with default value
+// types as parameter
+macro_rules! property_builder_with_value_param {
     ($builder:ident, $name:expr, $value:expr) => {
         #[doc=$name]#[doc = " Property\n\n"]
         #[doc = "Newer properties that have a different value type than TEXT have to include the \"VALUE\" parameter. This property already contains \"VALUE:"]
@@ -158,12 +222,46 @@ macro_rules! property_builder {
                 }
             }
         }
+        impl<'a> Default for $builder<'a> {
+            fn default() -> Self {
+                $builder::new(Cow::default())
+            }
+        }
     };
 }
 
 // Creation and conversion from builder types to Parameter
 macro_rules! parameter_builder {
     ($builder:ident, $name:expr) => {
+        #[doc=$name]
+        #[doc = " Parameter"]
+        #[derive(Debug, Default, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
+        pub struct $builder<'a> {
+            value: Cow<'a, str>
+        }
+        impl<'a> $builder<'a> {
+            #[doc = "Creates a new "]
+            #[doc=$name]
+            #[doc = " Parameter with the given value."]
+            pub fn new<S>(value: S) -> Self
+            where
+                S: Into<Cow<'a, str>>
+            {
+                $builder {
+                    value: value.into()
+                }
+            }
+        }
+        impl<'a> From<$builder<'a>> for Parameter<'a> {
+            fn from(builder: $builder<'a>) -> Self {
+                Parameter {
+                    key: $name.into(),
+                    value: builder.value
+                }
+            }
+        }
+    };
+    ($builder:ident, $name:expr, $default_value:expr) => {
         #[doc=$name]
         #[doc = " Parameter"]
         #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
@@ -191,45 +289,11 @@ macro_rules! parameter_builder {
                 }
             }
         }
-    };
-}
-
-// Some properties/parameters have default values.
-// The default value is implemented for the builder types!
-macro_rules! impl_default_property {
-    ($builder:ident, $default:expr) => {
         impl<'a> Default for $builder<'a> {
             fn default() -> Self {
                 $builder {
-                    value: $default.into(),
-                    parameters: BTreeMap::new()
+                    value: $default_value.into()
                 }
-            }
-        }
-    };
-    ($builder:ident) => {
-        impl<'a> Default for $builder<'a> {
-            fn default() -> Self {
-                $builder::new(Cow::default())
-            }
-        }
-    };
-}
-
-macro_rules! impl_default_parameter {
-    ($builder:ident, $default:expr) => {
-        impl<'a> Default for $builder<'a> {
-            fn default() -> Self {
-                $builder {
-                    value: $default.into()
-                }
-            }
-        }
-    };
-    ($builder:ident) => {
-        impl<'a> Default for $builder<'a> {
-            fn default() -> Self {
-                $builder::new(Cow::default())
             }
         }
     };
