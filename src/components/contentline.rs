@@ -2,8 +2,8 @@
 pub const LIMIT: usize = 75;
 
 pub fn fold(content: &mut String) {
-    // drain the first 75 bytes or before if the boundary is not on a char boundary
-    let mut boundary = next_boundary(content.as_bytes(), LIMIT);
+    // drain until the first char boundary closest to the limit
+    let mut boundary = next_boundary(&content, LIMIT);
     let input: String = content.drain(boundary..).collect();
     content.push_str("\r\n ");
 
@@ -11,7 +11,7 @@ pub fn fold(content: &mut String) {
     boundary = 0;
     while boundary < len {
         let start = boundary;
-        boundary = next_boundary(input.as_bytes(), boundary + LIMIT);
+        boundary = next_boundary(&input, boundary + LIMIT);
         content.push_str(&input[start..boundary]);
         if boundary < len {
             content.push_str("\r\n ");
@@ -20,14 +20,14 @@ pub fn fold(content: &mut String) {
 }
 
 // Returns the next char boundary at or before index
-fn next_boundary(bytes: &[u8], index: usize) -> usize {
+fn next_boundary(input: &str, index: usize) -> usize {
     // 'The start and end of the string are considered to be boundaries.'
     if index == 0 {
         return index;
-    } else if index >= bytes.len() {
-        return bytes.len();
+    } else if index >= input.len() {
+        return input.len();
     }
-    bytes[0..=index]
+    input.as_bytes()[..=index]
         .iter()
         .rposition(|&i| (i as i8) >= -0x40) // bit magic i < 128 || i >= 192
         .unwrap_or(0)
