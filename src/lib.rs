@@ -69,6 +69,7 @@ mod ical;
 pub mod parameters;
 pub mod properties;
 mod util;
+mod value_data_type;
 
 pub use ical::Alarm;
 pub use ical::Event;
