@@ -44,9 +44,7 @@ pub fn size(len: usize) -> usize {
 
 #[cfg(test)]
 mod tests {
-    use super::fold;
-    use super::size;
-    use super::LIMIT;
+    use super::{fold, size, LIMIT};
 
     // There are no test for short input because the function is only called once
     // when the length is longer than the LIMIT! The contentline method is

@@ -5,6 +5,9 @@ use properties::{
 };
 use std::borrow::Cow;
 use std::fmt;
+use std::fs::File;
+use std::io::{self, Write};
+use std::path::Path;
 
 /// The iCalendar object specified as VCALENDAR.
 ///
@@ -72,6 +75,16 @@ impl<'a> ICalendar<'a> {
     /// Adds a `TimeZone` component to the iCalendar object.
     pub fn add_timezone(&mut self, timezone: TimeZone<'a>) {
         self.add_component(timezone);
+    }
+
+    /// Creates file with given path and saves iCalendar object.
+    pub fn save_file<P: AsRef<Path>>(&self, filename: P) -> io::Result<()> {
+        self.save(File::create(filename)?)
+    }
+
+    /// Saves iCalendar object in file.
+    pub fn save(&self, mut file: File) -> io::Result<()> {
+        write!(file, "{}", self)
     }
 }
 
@@ -356,20 +369,11 @@ impl<'a> Alarm<'a> {
     }
 }
 
-impl_display_comps!(ICalendar);
-impl_display_comps!(Event);
-impl_display_comps!(ToDo);
-impl_display_comps!(Journal);
-impl_display_comps!(FreeBusy);
-impl_display_comps!(TimeZone);
-impl_display_comps!(ZoneTime);
-impl_display_comps!(Alarm);
-
-impl_component_conversion!(ICalendar);
-impl_component_conversion!(Event);
-impl_component_conversion!(ToDo);
-impl_component_conversion!(Journal);
-impl_component_conversion!(FreeBusy);
-impl_component_conversion!(TimeZone);
-impl_component_conversion!(ZoneTime);
-impl_component_conversion!(Alarm);
+impl_component!(ICalendar);
+impl_component!(Event);
+impl_component!(ToDo);
+impl_component!(Journal);
+impl_component!(FreeBusy);
+impl_component!(TimeZone);
+impl_component!(ZoneTime);
+impl_component!(Alarm);

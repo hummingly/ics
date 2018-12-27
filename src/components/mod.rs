@@ -129,12 +129,11 @@ impl<'a> Property<'a> {
 
     fn len(&self) -> usize {
         // + 1 for the : in the property
-        let mut len = self.value.len() + self.key.len() + 1;
-        for (key, value) in &self.parameters {
-            // + 2 for the ; and = in the parameter
-            len = len + key.len() + value.len() + 2;
-        }
-        len
+        // + 2 for the ; and = in the parameter
+        self.parameters.iter().fold(
+            self.value.len() + self.key.len() + 1,
+            |len, (k, v)| len + k.len() + v.len() + 2
+        )
     }
 
     fn write_content<W: Write>(&self, writer: &mut W) -> fmt::Result {
@@ -195,3 +194,23 @@ impl<'a> fmt::Display for Parameter<'a> {
 /// `Parameters` is a collection of `Parameter`s. It can be created with the
 /// `parameters!` macro.
 pub type Parameters<'a> = BTreeMap<Cow<'a, str>, Cow<'a, str>>;
+
+#[cfg(test)]
+mod tests {
+    use super::{Parameter, Property};
+    
+    #[test]
+    fn simple() {
+        let property = Property::new("SUMMARY", "Simple");
+        let expected = 14;
+        assert_eq!(property.len(), expected);
+    }
+
+    #[test]
+    fn with_parameter() {
+        let mut property = Property::new("SUMMARY", "Simple");
+        property.add(Parameter::new("VALUE", "TEXT"));
+        let expected = 25;
+        assert_eq!(property.len(), expected);
+    }
+}
