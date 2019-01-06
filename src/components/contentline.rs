@@ -4,7 +4,7 @@ pub const LIMIT: usize = 75;
 pub fn fold(content: &mut String) {
     // drain until the first char boundary closest to the limit
     let mut boundary = next_boundary(&content, LIMIT);
-    let input: String = content.drain(boundary..).collect();
+    let input = content.split_off(boundary);
     content.push_str("\r\n ");
 
     let len = input.len();
@@ -29,7 +29,7 @@ fn next_boundary(input: &str, index: usize) -> usize {
     }
     input.as_bytes()[..=index]
         .iter()
-        .rposition(|&i| (i as i8) >= -0x40) // bit magic i < 128 || i >= 192
+        .rposition(|&i| i < 128 || i >= 192)
         .unwrap_or(0)
 }
 
