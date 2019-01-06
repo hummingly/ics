@@ -299,18 +299,14 @@ macro_rules! parameter_builder {
     };
 }
 
-macro_rules! impl_display_comps {
-    ($type:ident) => {
-        impl<'a> fmt::Display for $type<'a> {
+// Implements common traits for Components
+macro_rules! impl_component {
+    ($component:ident) => {
+        impl<'a> fmt::Display for $component<'a> {
             fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
                 write!(f, "{}", self.0)
             }
         }
-    };
-}
-
-macro_rules! impl_component_conversion {
-    ($component:ident) => {
         impl<'a> From<$component<'a>> for Component<'a> {
             fn from(component: $component<'a>) -> Self {
                 component.0
