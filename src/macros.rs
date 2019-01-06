@@ -171,6 +171,8 @@ macro_rules! property_builder {
 
 // Creation and conversion from builder types to Property with default value
 // types as parameter
+// This matters right now only for the newer properties from RFC7986.
+#[cfg(feature = "rfc7986")]
 macro_rules! property_builder_with_value_param {
     ($builder:ident, $name:expr, $value:expr) => {
         #[doc=$name]#[doc = " Property\n\n"]

@@ -130,10 +130,11 @@ impl<'a> Property<'a> {
     fn len(&self) -> usize {
         // + 1 for the : in the property
         // + 2 for the ; and = in the parameter
-        self.parameters.iter().fold(
-            self.value.len() + self.key.len() + 1,
-            |len, (k, v)| len + k.len() + v.len() + 2
-        )
+        self.parameters
+            .iter()
+            .fold(self.value.len() + self.key.len() + 1, |len, (k, v)| {
+                len + k.len() + v.len() + 2
+            })
     }
 
     fn write_content<W: Write>(&self, writer: &mut W) -> fmt::Result {
@@ -198,7 +199,7 @@ pub type Parameters<'a> = BTreeMap<Cow<'a, str>, Cow<'a, str>>;
 #[cfg(test)]
 mod tests {
     use super::{Parameter, Property};
-    
+
     #[test]
     fn simple() {
         let property = Property::new("SUMMARY", "Simple");

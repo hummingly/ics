@@ -28,21 +28,23 @@ fn escape_value(mut input: Cow<str>) -> Cow<str> {
     }
 
     let escaped_chars = |c| c == ',' || c == ';' || c == '\\';
-    if let Some(index) = input.find(|c| c == '\r' || escaped_chars(c)) {
-        let extra_bytes = input.chars().filter(|&c| escaped_chars(c)).count();
-        let mut output = String::with_capacity(input.len() + extra_bytes);
-        output.push_str(&input[0..index]);
-
-        for c in input[index..].chars() {
-            match c {
-                ',' => output.push_str("\\,"),
-                ';' => output.push_str("\\;"),
-                '\\' => output.push_str("\\\\"),
-                // \r was in old MacOS versions the newline characters
-                '\r' => output.push_str("\n"),
-                _ => output.push(c)
+    if input.contains(|c| c == '\r' || escaped_chars(c)) {
+        let size = input.len() + input.chars().filter(|&c| escaped_chars(c)).count();
+        let mut output = String::with_capacity(size);
+        let mut last_end = 0;
+        for (start, part) in input.match_indices(escaped_chars) {
+            output.push_str(&input[last_end..start]);
+            match part {
+                "," => output.push_str("\\,"),
+                ";" => output.push_str("\\;"),
+                "\\" => output.push_str("\\\\"),
+                // \r was in old MacOS versions the newline character
+                "\r" => output.push_str("\n"),
+                _ => unreachable!()
             }
+            last_end = start + part.len();
         }
+        output.push_str(&input[last_end..input.len()]);
         Cow::Owned(output)
     } else {
         input
