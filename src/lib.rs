@@ -54,12 +54,6 @@
 
 #![forbid(unsafe_code, missing_docs)]
 
-#[cfg(feature = "fast_text")]
-#[macro_use]
-extern crate lazy_static;
-#[cfg(feature = "fast_text")]
-extern crate regex;
-
 #[macro_use]
 mod macros;
 pub mod components;
