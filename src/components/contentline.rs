@@ -26,10 +26,13 @@ pub fn fold(content: &mut String) {
 }
 
 fn next_boundary(input: &str, index: usize) -> Option<usize> {
-    input.as_bytes()[..=index]
+    match input.as_bytes()[..=index]
         .iter()
         .rposition(|&i| i < 128 || i >= 192)
-        .filter(|&x| x > 0)
+    {
+        Some(0) | None => None,
+        Some(i) => Some(i)
+    }
 }
 
 // Calculates the new estimated text length after inserting line breaks
