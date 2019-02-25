@@ -77,14 +77,14 @@ impl<'a> ICalendar<'a> {
         self.add_component(timezone);
     }
 
-    /// Creates file with given path and saves iCalendar object.
-    pub fn save_file<P: AsRef<Path>>(&self, filename: P) -> io::Result<()> {
-        self.save(File::create(filename)?)
+    /// Write iCalendar object to a writer.
+    pub fn write<W: Write>(&self, mut writer: W) -> io::Result<()> {
+        write!(writer, "{}", self)
     }
 
-    /// Saves iCalendar object in file.
-    pub fn save(&self, mut file: File) -> io::Result<()> {
-        write!(file, "{}", self)
+    /// Creates a file from the path and writes the iCalendar object into it.
+    pub fn save_file<P: AsRef<Path>>(&self, filename: P) -> io::Result<()> {
+        self.write(File::create(filename)?)
     }
 }
 
