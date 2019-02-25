@@ -30,37 +30,29 @@
 //! ```
 //! use ics::properties::{Comment, Status, Summary};
 //! use ics::{ICalendar, ToDo};
-//! use std::fs::File;
-//! use std::io::Write;
 //!
-//! // The ICalendar object is what is later written to the file.
-//! let mut calendar = ICalendar::new("2.0", "ics-rs");
+//! fn main() -> std::io::Result<()> {
+//!     // The ICalendar object is what is later written to the file.
+//!     let mut calendar = ICalendar::new("2.0", "ics-rs");
 //!
-//! // Anthing that can be converted to a Cow<str> is accepted as value which means
-//! // &str and String can be used freely. For the sake of demonstrating the UID was
-//! // taken from somewhere. Out of security reasons the UID should always be
-//! // randomly generated.
-//! let mut todo = ToDo::new("d4092ed9-1667-4518-a7c0-bcfaac4f1fc6", "20181021T190000");
-//! todo.push(Summary::new("Katarina's Birthday Present"));
-//! todo.push(Comment::new("Buy her Imagine Dragons tickets!"));
-//! todo.push(Status::new("NEEDS-ACTION"));
+//!     // Anything that can be converted to a Cow<str> is accepted as value which means
+//!     // &str and String can be used freely. For the sake of demonstrating the UID was
+//!     // taken from somewhere. Out of security reasons the UID should always be
+//!     // randomly generated.
+//!     let mut todo = ToDo::new("d4092ed9-1667-4518-a7c0-bcfaac4f1fc6", "20181021T190000");
+//!     todo.push(Summary::new("Katarina's Birthday Present"));
+//!     todo.push(Comment::new("Buy her Imagine Dragons tickets!"));
+//!     todo.push(Status::new("NEEDS-ACTION"));
 //!
-//! calendar.add_todo(todo);
+//!     calendar.add_todo(todo);
 //!
-//! // Write `calendar` to a file.
-//! let data = calendar.to_string();
-//! let mut file = File::create("birthday.ics").expect("Unable to create file");
-//! file.write_all(data.as_bytes())
-//!     .expect("Unable to write data");
+//!     // Write `calendar` to a file.
+//!     calendar.save_file("birthday.ics")?;
+//!     Ok(())
+//! }
 //! ```
 
-#![deny(missing_docs)]
-
-#[cfg(feature = "fast_text")]
-#[macro_use]
-extern crate lazy_static;
-#[cfg(feature = "fast_text")]
-extern crate regex;
+#![forbid(unsafe_code, missing_docs)]
 
 #[macro_use]
 mod macros;

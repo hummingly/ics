@@ -9,10 +9,5 @@ readme = "README.md"
 keywords = ["iCalendar", "ics", "calendar"]
 
 [features]
-default =  ["fast_text", "rfc7986"]
-fast_text = ["regex", "lazy_static"]
+default =  ["rfc7986"]
 rfc7986 = []
-
-[dependencies]
-regex = { version = "1", optional = true }
-lazy_static = { version = "1", optional = true}

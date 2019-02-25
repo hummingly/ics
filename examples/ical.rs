@@ -2,10 +2,8 @@ extern crate ics;
 
 use ics::properties::{Categories, Description, DtEnd, DtStart, Organizer, Status, Summary};
 use ics::{escape_text, Event, ICalendar};
-use std::fs::File;
-use std::io::Write;
 
-fn main() {
+fn main() -> std::io::Result<()> {
     // create new iCalendar object
     let mut calendar = ICalendar::new("2.0", "-//xyz Corp//NONSGML PDA Calendar Version 1.0//EN");
 
@@ -29,9 +27,8 @@ fn main() {
     calendar.add_event(event);
 
     // write calendar to file
-    let data = calendar.to_string();
-    let mut f = File::create("icalendar.ics").expect("Unable to create file");
-    f.write_all(data.as_bytes()).expect("Unable to write data");
+    calendar.save_file("icalendar.ics")?;
+    Ok(())
 
     /* inside icalendar.ics
     BEGIN:VCALENDAR
