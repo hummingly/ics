@@ -14,17 +14,16 @@ This version is officially supported and tested in CI. Changes to the minimum su
 To use this library add the library as a dependency in your `Cargo.toml`:
 ```toml
 [dependencies]
-ics = "0.2"
+ics = "0.3"
 ```
 
 Optionally you can disable default features.
 ```toml
 [dependencies.ics]
-version = "0.2"
+version = "0.3"
 default-features = false
  ```
 ## Features
-- `fast_text` (enabled by default): faster text processing in methods like `escape_text` but pulls in dependencies (regex and lazy_static)
 - `rfc7986` (enabled by default): adds properties from the newer specification
 
 ## Usage

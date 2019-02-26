@@ -14,9 +14,9 @@ use std::path::Path;
 /// An `ICalendar` consists of calendar properties and one or more calendar
 /// components. Properties are attributes that apply to the calendar object as a
 /// whole. (see [RFC5545 3.4 iCalendar Object](https://tools.ietf.org/html/rfc5545#section-3.4))
-/// ICalendar can be thought of as the iCalendar file. This is where the
-/// specified components are added. To save the object as file, it needs to be
-/// written to a file.
+/// The ICalendar struct can be thought of as the iCalendar object. This is
+/// where the specified components are added. To save the object as file, it
+/// needs to be written to a file.
 #[derive(Debug, Default, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct ICalendar<'a>(Component<'a>);
 
@@ -77,14 +77,22 @@ impl<'a> ICalendar<'a> {
         self.add_component(timezone);
     }
 
-    /// Creates file with given path and saves iCalendar object.
-    pub fn save_file<P: AsRef<Path>>(&self, filename: P) -> io::Result<()> {
-        self.save(File::create(filename)?)
+    /// Generic convenience method to write the content of the iCalendar object
+    /// to a writer in the iCalendar format.
+    pub fn write<W>(&self, mut writer: W) -> io::Result<()>
+    where
+        W: Write
+    {
+        write!(writer, "{}", self)
     }
 
-    /// Saves iCalendar object in file.
-    pub fn save(&self, mut file: File) -> io::Result<()> {
-        write!(file, "{}", self)
+    /// Creates a file from the path and saves the content of the iCalendar
+    /// object in the iCalendar format inside the file.
+    pub fn save_file<P>(&self, filename: P) -> io::Result<()>
+    where
+        P: AsRef<Path>
+    {
+        self.write(File::create(filename)?)
     }
 }
 

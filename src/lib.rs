@@ -6,23 +6,18 @@
 //! To use this library add the library as a dependency in your `Cargo.toml`:
 //! ```toml
 //! [dependencies]
-//! ics = "0.2"
+//! ics = "0.3"
 //! ```
 //!
 //! By default some features are enabled. If you wish to disable them, specify
 //! in your `Cargo.toml`:
 //! ```toml
 //! [dependencies.ics]
-//! version = "0.2"
+//! version = "0.3"
 //! default-features = false
-//!
-//! // optionally pick features
-//! features = ["..."]
 //! ```
 //!
 //! # Features
-//! - `fast_text` (enabled by default): faster text processing in methods like
-//!   `escape_text` but pulls in dependencies (regex and lazy_static)
 //! - `rfc7986` (enabled by default): adds properties from the newer
 //!   specification [RFC7986](https://tools.ietf.org/html/rfc7986)
 //!
@@ -57,6 +52,7 @@
 #[macro_use]
 mod macros;
 pub mod components;
+mod contentline;
 mod ical;
 pub mod parameters;
 pub mod properties;

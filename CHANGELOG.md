@@ -1,3 +1,18 @@
+# Version 0.3.0
+### API:
+- adds convenience method for saving `ICalendar` object in a writer (i.e. files)
+- removes `fast_text` feature
+### Documentation:
+- adds minimum rustc version to README
+- fixes typos in documentation
+- adds the `?` operator in examples to make it more idiomatic
+### Misc
+- lots of refactoring in macros
+- improved fold algorithm (more robust)
+- changed escape_text to be similar to regex version
+- adds keyword `ical`
+- separated `components` module
+
 # Version 0.2.3
 - Refactoring
   - moved content line methods to components into module
