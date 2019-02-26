@@ -79,13 +79,19 @@ impl<'a> ICalendar<'a> {
 
     /// Generic convenience method to write the content of the iCalendar object
     /// to a writer in the iCalendar format.
-    pub fn write<W: Write>(&self, mut writer: W) -> io::Result<()> {
+    pub fn write<W>(&self, mut writer: W) -> io::Result<()>
+    where
+        W: Write
+    {
         write!(writer, "{}", self)
     }
 
     /// Creates a file from the path and saves the content of the iCalendar
     /// object in the iCalendar format inside the file.
-    pub fn save_file<P: AsRef<Path>>(&self, filename: P) -> io::Result<()> {
+    pub fn save_file<P>(&self, filename: P) -> io::Result<()>
+    where
+        P: AsRef<Path>
+    {
         self.write(File::create(filename)?)
     }
 }
