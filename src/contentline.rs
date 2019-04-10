@@ -2,30 +2,27 @@
 pub const LIMIT: usize = 75;
 
 pub fn fold(content: &mut String) {
-    if content.len() > LIMIT {
-        // drain until the first char boundary closest to the limit
-        if let Some(first_boundary) = next_boundary(&content, LIMIT) {
-            let input = content.split_off(first_boundary);
-            let len = input.len();
+    // drain until the first char boundary closest to the limit
+    if let Some(first_boundary) = next_boundary(&content, LIMIT) {
+        let input = content.split_off(first_boundary);
+        let len = input.len();
 
-            let mut boundary = 0;
-            while boundary < len {
-                content.push_str("\r\n ");
-                let index = boundary + LIMIT;
-                boundary = if index < len {
-                    let next_boundary = next_boundary(&input, index).unwrap_or(len);
-                    content.push_str(&input[boundary..next_boundary]);
-                    next_boundary
-                } else {
-                    content.push_str(&input[boundary..len]);
-                    len
-                };
-            }
+        let mut boundary = 0;
+        while boundary < len {
+            content.push_str("\r\n ");
+            boundary = {
+                let next_boundary = next_boundary(&input, boundary + LIMIT).unwrap_or(len);
+                content.push_str(&input[boundary..next_boundary]);
+                next_boundary
+            };
         }
     }
 }
 
 fn next_boundary(input: &str, index: usize) -> Option<usize> {
+    if index >= input.len() {
+        return None;
+    }
     match input.as_bytes()[..=index]
         .iter()
         .rposition(|&i| i < 128 || i >= 192)
