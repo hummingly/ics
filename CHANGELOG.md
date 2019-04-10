@@ -8,7 +8,7 @@
 
 ### Misc
 
-- simplifying fold algorithm
+- simplified fold algorithm
 
 ## Version 0.3.0
 
