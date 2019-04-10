@@ -1,6 +1,6 @@
 [package]
 name = "ics"
-version = "0.3.0"
+version = "0.3.1"
 authors = ["hummingly <31522351+hummingly@users.noreply.github.com>"]
 description = "A library for creating iCalendar files as specified in RFC5545 and RFC7986."
 license = "MIT OR Apache-2.0"
