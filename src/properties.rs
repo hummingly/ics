@@ -64,7 +64,7 @@ pub use self::rfc7986::*;
 mod rfc7986 {
     use components::{Parameter, Parameters, Property};
     use std::borrow::Cow;
-    property_builder!(Name, "Name");
+    property_builder!(Name, "NAME");
     property_builder_with_value_param!(RefreshInterval, "REFRESH-INTERVAL", "DURATION");
     property_builder_with_value_param!(Source, "SOURCE", "URI");
     property_builder!(Color, "COLOR");

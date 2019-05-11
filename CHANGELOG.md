@@ -1,73 +1,87 @@
 # Changelog
 
+## Version 0.3.2
+
+### Bug Fix:
+- `NAME` property was not properly capitalized
+
 ## Version 0.3.1
 
-### Documentation
+### Documentation:
 
-- improved method descriptions of `ICalendar struct`
+- Improved method descriptions of `ICalendar struct`
 
-### Misc
+### Misc:
 
-- simplified fold algorithm
+- Simplified fold algorithm
 
 ## Version 0.3.0
 
 ### API:
 
-- adds convenience method for saving `ICalendar` object in a writer (i.e. files)
-- removes `fast_text` feature
+- Added convenience method for saving `ICalendar` object in a writer (i.e. files)
+- Removed `fast_text` feature
 
 ### Documentation:
 
-- adds minimum rustc version to README
-- fixes typos in documentation
-- adds the `?` operator in examples to make it more idiomatic
+- Added minimum rustc version to README
+- Fixed typos
+- Added the `?` operator in examples to make it more idiomatic
 
-### Misc
+### Misc:
 
-- lots of refactoring in macros
-- improved fold algorithm (more robust)
-- changed escape_text to be similar to regex version
-- adds keyword `ical`
-- separated `components` module
+- Refactored a lot of macros
+- Improved fold algorithm (more robust)
+- Changed escape_text to be similar to regex version
+- Added keyword `ical`
+- Separated `components` module
 
 ## Version 0.2.3
 
-- Refactoring
-  - moved content line methods to components into module
-  - replaced is_char_boundary with next_boundary
+### Misc:
+
+- Moved content line methods to components into module
+- Replaced is_char_boundary with next_boundary
 - Dropping Windows support in Travis due to incredible long build times for the size of this project.
 
 ## Version 0.2.2
 
-- Fixes inconsistency in the documentation.
-- Add note about RFC7986 support in the documentation.
+### Documentation:
+
+- Fixes inconsistency
+- Adds note about RFC7986 support
 
 ## Version 0.2.1
 
-- Finishes the documentation on features.
-- Improves/extends the main example in the documentation.
+### Documentation:
+
+- Finishes the documentation on features
+- Improves/extends the main example
 
 ## Version 0.2.0
 
-- Removes the Into<Cow<str>> implementation from Parameter enums.
-- Properties and Parameter as defined in [RFC7986](https://tools.ietf.org/html/rfc7986) were added under a feature flag `rfc7986` which is enabled by default.
-  ### New Properties
-  - `NAME` Property
-  - `REFRESH-INTERVAL` Property
-  - `SOURCE` Property
-  - `COLOR` Property
-  - `IMAGE` Property
-  - `CONFERENCE` Property
-  ### New Parameters
-  - `DISPLAY` Property Parameter
-  - `EMAIL` Property Parameter
-  - `FEATURE` Property Parameter
-  - `LABEL` Property Parameter
+### API:
+
+- Removes the Into<Cow<str>> implementation from Parameter enums
+- Properties and Parameters as defined in [RFC7986](https://tools.ietf.org/html/rfc7986) were added under a feature flag `rfc7986` which is enabled by default.
+  #### New Properties!
+  - `NAME`
+  - `REFRESH-INTERVAL`
+  - `SOURCE`
+  - `COLOR`
+  - `IMAGE`
+  - `CONFERENCE`
+  #### New Parameters!
+  - `DISPLAY`
+  - `EMAIL`
+  - `FEATURE`
+  - `LABEL`
 
 ## Version 0.1.1
 
-- Fixes badges on `README` and documentation.
+### Misc:
+
+- Fixes badges on `README` and documentation
 
 ## Version 0.1.0
 
