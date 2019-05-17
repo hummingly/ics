@@ -91,7 +91,7 @@ mod rfc7986 {
         {
             Image {
                 value: value.into(),
-                parameters: parameters!("VALUE", "URI")
+                parameters: parameters!("VALUE" => "URI")
             }
         }
 
@@ -104,7 +104,7 @@ mod rfc7986 {
         {
             Image {
                 value: value.into(),
-                parameters: parameters!("ENCODING", "BASE64"; "VALUE", "BINARY")
+                parameters: parameters!("ENCODING" => "BASE64"; "VALUE" => "BINARY")
             }
         }
 
@@ -120,8 +120,8 @@ mod rfc7986 {
         /// Adds several parameters at once to the property. For creating
         /// several parameters at once, consult the documentation of
         /// the `parameters!` macro.
-        pub fn append(&mut self, mut parameter: Parameters<'a>) {
-            self.parameters.append(&mut parameter);
+        pub fn append(&mut self, mut parameters: Parameters<'a>) {
+            self.parameters.append(&mut parameters);
         }
     }
 

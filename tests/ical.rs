@@ -10,20 +10,20 @@ use ics::{escape_text, Alarm, Event, ICalendar, ToDo};
 #[test]
 fn icalendar_event() {
     let expected = "BEGIN:VCALENDAR\r\n\
-                    PRODID:-//xyz Corp//NONSGML PDA Calendar Version 1.0//EN\r\n\
                     VERSION:2.0\r\n\
+                    PRODID:-//xyz Corp//NONSGML PDA Calendar Version 1.0//EN\r\n\
                     BEGIN:VEVENT\r\n\
+                    UID:b68378cf-872d-44f1-9703-5e3725c56e71\r\n\
+                    DTSTAMP:19960704T120000Z\r\n\
+                    ORGANIZER:mailto:jsmith@example.com\r\n\
+                    DTSTART:19960918T143000Z\r\n\
+                    DTEND:19960920T220000Z\r\n\
+                    STATUS:CONFIRMED\r\n\
                     CATEGORIES:CONFERENCE\r\n\
+                    SUMMARY:Networld+Interop Conference\r\n\
                     DESCRIPTION:Networld+Interop Conference and Exhibit\n\
                     Atlanta World Congress \r\n Center\n\
                     Atlanta\\, Georgia\r\n\
-                    DTEND:19960920T220000Z\r\n\
-                    DTSTAMP:19960704T120000Z\r\n\
-                    DTSTART:19960918T143000Z\r\n\
-                    ORGANIZER:mailto:jsmith@example.com\r\n\
-                    STATUS:CONFIRMED\r\n\
-                    SUMMARY:Networld+Interop Conference\r\n\
-                    UID:b68378cf-872d-44f1-9703-5e3725c56e71\r\n\
                     END:VEVENT\r\n\
                     END:VCALENDAR\r\n";
 
@@ -49,23 +49,23 @@ fn icalendar_event() {
 #[test]
 fn icalendar_todo() {
     let expected = "BEGIN:VCALENDAR\r\n\
-                    PRODID:-//ABC Corporation//NONSGML My Product//EN\r\n\
                     VERSION:2.0\r\n\
+                    PRODID:-//ABC Corporation//NONSGML My Product//EN\r\n\
                     BEGIN:VTODO\r\n\
-                    ATTENDEE;PARTSTAT=ACCEPTED:mailto:jqpublic@example.com\r\n\
+                    UID:b68378cf-872d-44f1-9703-5e3725c56e71\r\n\
                     DTSTAMP:19980130T134500Z\r\n\
-                    DUE:19980415T000000\r\n\
                     ORGANIZER:mailto:unclesam@example.com\r\n\
-                    SEQUENCE:2\r\n\
+                    ATTENDEE;PARTSTAT=ACCEPTED:mailto:jqpublic@example.com\r\n\
+                    DUE:19980415T000000\r\n\
                     STATUS:NEEDS-ACTION\r\n\
                     SUMMARY:Submit Income Taxes\r\n\
-                    UID:b68378cf-872d-44f1-9703-5e3725c56e71\r\n\
+                    SEQUENCE:2\r\n\
                     BEGIN:VALARM\r\n\
                     ACTION:AUDIO\r\n\
-                    ATTACH;FMTTYPE=audio/basic:http://example.com/pub/audio-files/ssbanner.aud\r\n\
-                    DURATION:PT1H\r\n\
-                    REPEAT:4\r\n\
                     TRIGGER:19980403T120000Z\r\n\
+                    ATTACH;FMTTYPE=audio/basic:http://example.com/pub/audio-files/ssbanner.aud\r\n\
+                    REPEAT:4\r\n\
+                    DURATION:PT1H\r\n\
                     END:VALARM\r\n\
                     END:VTODO\r\n\
                     END:VCALENDAR\r\n";

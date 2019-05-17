@@ -8,7 +8,7 @@
 ///
 /// # fn main() {
 /// let mut date = DtStart::new("20180906");
-/// date.append(parameters!("TZID", "America/New_York"; "VALUE", "DATE"));
+/// date.append(parameters!("TZID" => "America/New_York"; "VALUE" => "DATE"));
 /// assert_eq!(
 ///     Property::from(date).to_string(),
 ///     "DTSTART;TZID=America/New_York;VALUE=DATE:20180906\r\n"
@@ -17,7 +17,7 @@
 /// ```
 #[macro_export]
 macro_rules! parameters {
-    ($($key:expr, $value:expr);*) => {
+    ($($key:expr => $value:expr);*) => {
         {
             use std::collections::BTreeMap;
             use $crate::components::Parameters;
@@ -36,11 +36,11 @@ mod test {
     use std::collections::BTreeMap;
 
     #[test]
-    fn parameters_btreemap() {
+    fn parameters() {
         let mut b_map: Parameters = BTreeMap::new();
         b_map.insert("VALUE".into(), "BOOLEAN".into());
         b_map.insert("CUTYPE".into(), "GROUP".into());
-        let param = parameters!("VALUE", "BOOLEAN"; "CUTYPE", "GROUP");
+        let param = parameters!("VALUE" => "BOOLEAN"; "CUTYPE" => "GROUP");
         assert_eq!(b_map, param);
     }
 }
@@ -94,8 +94,8 @@ macro_rules! property_builder {
             /// Adds several parameters at once to the property. For creating
             /// several parameters at once, consult the documentation of
             /// the `parameters!` macro.
-            pub fn append(&mut self, mut parameter: Parameters<'a>) {
-                self.parameters.append(&mut parameter);
+            pub fn append(&mut self, mut parameters: Parameters<'a>) {
+                self.parameters.append(&mut parameters);
             }
         }
 
@@ -144,8 +144,8 @@ macro_rules! property_builder {
             /// Adds several parameters at once to the property. For creating
             /// several parameters at once, consult the documentation of
             /// the `parameters!` macro.
-            pub fn append(&mut self, mut parameter: Parameters<'a>) {
-                self.parameters.append(&mut parameter);
+            pub fn append(&mut self, mut parameters: Parameters<'a>) {
+                self.parameters.append(&mut parameters);
             }
         }
 
@@ -194,7 +194,7 @@ macro_rules! property_builder_with_value_param {
             {
                 $builder {
                     value: value.into(),
-                    parameters: parameters!("VALUE", $value)
+                    parameters: parameters!("VALUE" => $value)
                 }
             }
 
@@ -210,8 +210,8 @@ macro_rules! property_builder_with_value_param {
             /// Adds several parameters at once to the property. For creating
             /// several parameters at once, consult the documentation of
             /// the `parameters!` macro.
-            pub fn append(&mut self, mut parameter: Parameters<'a>) {
-                self.parameters.append(&mut parameter);
+            pub fn append(&mut self, mut parameters: Parameters<'a>) {
+                self.parameters.append(&mut parameters);
             }
         }
 

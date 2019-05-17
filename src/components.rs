@@ -31,7 +31,7 @@ use std::fmt::Write;
 #[derive(Debug, Default, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Component<'a> {
     pub(crate) name: Cow<'a, str>,
-    pub(crate) properties: BTreeMap<Cow<'a, str>, Vec<Property<'a>>>,
+    pub(crate) properties: Vec<Property<'a>>,
     pub(crate) subcomponents: Vec<Component<'a>>
 }
 
@@ -53,11 +53,7 @@ impl<'a> Component<'a> {
     where
         P: Into<Property<'a>>
     {
-        let property = property.into();
-        self.properties
-            .entry(property.key.clone())
-            .or_insert_with(Vec::new)
-            .push(property);
+        self.properties.push(property.into());
     }
 
     /// Adds a sub-component to this component.
@@ -72,10 +68,8 @@ impl<'a> Component<'a> {
 impl<'a> fmt::Display for Component<'a> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write_crlf!(f, "BEGIN:{}", self.name)?;
-        for properties in self.properties.values() {
-            for property in properties {
-                write!(f, "{}", property)?;
-            }
+        for property in &self.properties {
+            write!(f, "{}", property)?;
         }
         for component in &self.subcomponents {
             write!(f, "{}", component)?;
@@ -107,7 +101,7 @@ impl<'a> Property<'a> {
         Property {
             key: key.into(),
             value: value.into(),
-            parameters: BTreeMap::new()
+            ..Default::default()
         }
     }
 
@@ -123,8 +117,8 @@ impl<'a> Property<'a> {
     /// Adds several parameters at once to a property. For creating several
     /// parameters at once, consult the documentation of the `parameters!`
     /// macro.
-    pub fn append(&mut self, mut parameter: Parameters<'a>) {
-        self.parameters.append(&mut parameter);
+    pub fn append(&mut self, mut parameters: Parameters<'a>) {
+        self.parameters.append(&mut parameters);
     }
 
     fn len(&self) -> usize {
@@ -188,7 +182,7 @@ impl<'a> Parameter<'a> {
 
 impl<'a> fmt::Display for Parameter<'a> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, ";{}={}", self.key, self.value)
+        write!(f, "{}={}", self.key, self.value)
     }
 }
 
