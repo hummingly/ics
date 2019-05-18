@@ -1,8 +1,32 @@
 # Changelog
 
+## Version 0.4.0
+
+### Breaking Changes
+
+- Changed `parameters!` input syntax from `,` to `=>` to separate key and value
+- Properties aren't ordered anymore but shown in the order they were added. This change was made to reduce the unnecessary complexity to store properties but mainly also because it is very annoying to compare the input code with the generated iCalendar file. The previous implementation would prevent duplicated properties but this won't generate erroneous files.
+
+### API
+
+- Format defintions (constants) for the following parameters were added:
+  - `CUType`
+  - `FBType`
+  - `RelType`
+  - `Role`
+  - `Value`
+  - `Display`
+  - `Feature`
+  - `PartStat` is a little bit more unique given that some definitions are only defined in some components (VEVENT, VTODO and VJOURNAL) which is why 3 structs were added: `PartStatEvent`, `PartStatToDo` and `PartStatJournal`. They define constants that return `PartStat` instances which means `PartStatEvent::NEEDS_ACTION` and `PartStatToDo::NEEDS_ACTION` return the same, for example, but that way there is no need to look up which participation status is available for which component.
+
+### Misc
+
+- `BTreeMap` was changed to `Vec` in `Property` to remove overhead/complexity
+
 ## Version 0.3.2
 
 ### Bug Fix:
+
 - `NAME` property was not properly capitalized
 
 ## Version 0.3.1
@@ -62,7 +86,7 @@
 
 ### API:
 
-- Removes the Into<Cow<str>> implementation from Parameter enums
+- Removes the `Into<Cow<str>>` implementation from Parameter enums
 - Properties and Parameters as defined in [RFC7986](https://tools.ietf.org/html/rfc7986) were added under a feature flag `rfc7986` which is enabled by default.
   #### New Properties!
   - `NAME`
