@@ -7,6 +7,7 @@
 - Changed `parameters!` input syntax from `,` to `=>` to separate key and value
 - Properties aren't ordered anymore but shown in the order they were added. This change was made to reduce the unnecessary complexity to store properties but mainly also because it is very annoying to compare the input code with the generated iCalendar file. The previous implementation would prevent duplicated properties but this won't generate erroneous files.
 - `Parameter`s are now formatted without a semicolon: "KEY=VALUE".
+- Derived `Default` implementations were removed on properties and parameters because it does not make sense to have an empty value, resulting in only the key being displayed.
 
 ### API
 

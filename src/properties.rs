@@ -10,19 +10,19 @@ use components::{Parameter, Parameters, Property};
 use std::borrow::Cow;
 use std::collections::BTreeMap;
 
-property_builder!(CalScale, "CALSCALE", "GREGORIAN");
+property_builder!(CalScale, "CALSCALE");
 property_builder!(Method, "METHOD");
 property_builder!(ProdID, "PRODID");
 property_builder!(Version, "VERSION");
 property_builder!(Attach, "ATTACH");
 property_builder!(Categories, "CATEGORIES");
-property_builder!(Class, "CLASS", "PUBLIC");
+property_builder!(Class, "CLASS");
 property_builder!(Comment, "COMMENT");
 property_builder!(Description, "DESCRIPTION");
 property_builder!(Geo, "GEO");
 property_builder!(Location, "LOCATION");
 property_builder!(PercentComplete, "PERCENT-COMPLETE");
-property_builder!(Priority, "PRIORITY", "0");
+property_builder!(Priority, "PRIORITY");
 property_builder!(Resources, "RESOURCES");
 property_builder!(Status, "STATUS");
 property_builder!(Summary, "SUMMARY");
@@ -32,7 +32,7 @@ property_builder!(Due, "DUE");
 property_builder!(DtStart, "DTSTART");
 property_builder!(Duration, "DURATION");
 property_builder!(FreeBusyTime, "FREEBUSY");
-property_builder!(Transp, "TRANSP", "OPAQUE");
+property_builder!(Transp, "TRANSP");
 property_builder!(TzID, "TZID");
 property_builder!(TzName, "TZNAME");
 property_builder!(TzOffsetFrom, "TZOFFSETFROM");
@@ -49,13 +49,20 @@ property_builder!(ExDate, "EXDATE");
 property_builder!(RDate, "RDATE");
 property_builder!(RRule, "RRULE");
 property_builder!(Action, "ACTION");
-property_builder!(Repeat, "REPEAT", "0");
+property_builder!(Repeat, "REPEAT");
 property_builder!(Trigger, "TRIGGER");
 property_builder!(Created, "CREATED");
 property_builder!(DtStamp, "DTSTAMP");
 property_builder!(LastModified, "LAST-MODIFIED");
-property_builder!(Sequence, "SEQUENCE", "0");
+property_builder!(Sequence, "SEQUENCE");
 property_builder!(RequestStatus, "REQUEST-STATUS");
+
+impl_default_prop!(CalScale, "GREGORIAN");
+impl_default_prop!(Class, "PUBLIC");
+impl_default_prop!(Priority, "0");
+impl_default_prop!(Transp, "OPAQUE");
+impl_default_prop!(Repeat, "0");
+impl_default_prop!(Sequence, "0");
 
 #[cfg(feature = "rfc7986")]
 pub use self::rfc7986::*;
@@ -64,11 +71,12 @@ pub use self::rfc7986::*;
 mod rfc7986 {
     use components::{Parameter, Parameters, Property};
     use std::borrow::Cow;
+    use std::collections::BTreeMap;
     property_builder!(Name, "NAME");
-    property_builder_with_value_param!(RefreshInterval, "REFRESH-INTERVAL", "DURATION");
-    property_builder_with_value_param!(Source, "SOURCE", "URI");
+    property_builder_with_parameter!(RefreshInterval, "REFRESH-INTERVAL", "DURATION");
+    property_builder_with_parameter!(Source, "SOURCE", "URI");
     property_builder!(Color, "COLOR");
-    property_builder_with_value_param!(Conference, "CONFERENCE", "URI");
+    property_builder_with_parameter!(Conference, "CONFERENCE", "URI");
 
     /// IMAGE Property
     ///
@@ -76,7 +84,7 @@ mod rfc7986 {
     /// include the "VALUE" parameter. This property already contains the
     /// "VALUE" parameter, do not add this parameter manually. Depending on
     /// the constructor the value can be either "URI" or "BINARY".
-    #[derive(Debug, Default, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
+    #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
     pub struct Image<'a> {
         value: Cow<'a, str>,
         parameters: Parameters<'a>
