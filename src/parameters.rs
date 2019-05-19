@@ -1,8 +1,22 @@
 //! In the RFC5545 and RFC7986 specified parameters except for IANA and
 //! non-standard parameters ("X"-prefix parameters).
 //!
-//! Parameters are key-value pairs which can specify a property in detail.
+//! Parameters are key-value pairs which can specify a property in detail. Some
+//! of them also specify format definitions or defined values. Those are either
+//! defined as enums or associated constants on their respective parameter.
 //!
+//! # Example
+//! ```
+//! use ics::components::Parameter;
+//! use ics::parameters::CUType;
+//!
+//! // Using associated constants or enums should be preferred over using the
+//! // generic constructors whenever possible
+//! let individual = CUType::INDIVIDUAL;
+//!
+//! assert_eq!(CUType::new("INDIVIDUAL"), individual);
+//! assert_eq!(Parameter::new("CUTYPE", "INDIVIDUAL"), individual.into());
+//! ```
 //! For more information on parameters, please refer to the specification [RFC5545 3.2. Property Parameters](https://tools.ietf.org/html/rfc5545#section-3.2) and [RFC7986 6. Property Parameters](https://tools.ietf.org/html/rfc7986#section-6).
 use components::Parameter;
 use std::borrow::Cow;
