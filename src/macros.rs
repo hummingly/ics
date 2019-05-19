@@ -236,6 +236,22 @@ macro_rules! def_param_consts {
     };
 }
 
+macro_rules! def_prop_consts {
+    ($(#[$outer:meta])* $type:ident, $($(#[$inner:meta])* $const_ident:ident, $value:expr);*) => {
+        $(#[$outer])*
+        impl<'a> $type<'a> {
+            $(
+                $(#[$inner])*
+                ///
+                #[doc = "Parameter Value: "]#[doc = $value]
+                pub fn $const_ident() -> Self {
+                    Self::new($value)
+                }
+            )*
+        }
+    };
+}
+
 macro_rules! impl_default_prop {
     ($type:ident, $default:expr) => {
         impl<'a> Default for $type<'a> {

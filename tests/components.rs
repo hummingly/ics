@@ -22,13 +22,13 @@ fn event() {
 
     let mut event = Event::new("b68378cf-872d-44f1-9703-5e3725c56e71", "19970901T130000Z");
     event.push(Categories::new("ANNIVERSARY,PERSONAL,SPECIAL OCCASION"));
-    event.push(Class::new("CONFIDENTIAL"));
+    event.push(Class::confidential());
     let mut date = DtStart::new("19971102");
-    date.add(Value::new("DATE"));
+    date.add(Value::DATE);
     event.push(date);
     event.push(RRule::new("FREQ=YEARLY"));
     event.push(Summary::new("Our Blissful Anniversary"));
-    event.push(Transp::new("TRANSPARENT"));
+    event.push(Transp::transparent());
 
     assert_eq!(event.to_string(), expected);
 }
@@ -52,7 +52,7 @@ fn todo() {
     todo.push(Due::new("20070709T130000Z"));
     todo.push(Priority::new("1"));
     todo.push(Summary::new("Submit Revised Internet-Draft"));
-    todo.push(Status::new("NEEDS-ACTION"));
+    todo.push(Status::needs_action());
 
     assert_eq!(todo.to_string(), expected);
 }
@@ -71,7 +71,7 @@ fn journal() {
 
     let mut journal = Journal::new("b68378cf-872d-44f1-9703-5e3725c56e71", "19970901T130000Z");
     let mut date = DtStart::new("19970317");
-    date.add(Value::new("DATE"));
+    date.add(Value::DATE);
     journal.push(date);
     journal.push(Summary::new("Staff meeting minutes"));
     journal.push(Description::new(escape_text("1. Staff meeting: Participants include Joe, Lisa, and Bob. Aurora project plans were reviewed. There is currently no budget reserves for this project. Lisa will escalate to management. Next meeting on Tuesday.\n\

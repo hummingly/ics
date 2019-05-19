@@ -43,7 +43,7 @@ fn main() -> std::io::Result<()> {
     event.push(Organizer::new("mailto:jsmith@example.com"));
     event.push(DtStart::new("19960918T143000Z"));
     event.push(DtEnd::new("19960920T220000Z"));
-    event.push(Status::new("CONFIRMED"));
+    event.push(Status::confirmed());
     event.push(Categories::new("CONFERENCE"));
     event.push(Summary::new("Networld+Interop Conference"));
     // values that are "TEXT" must be escaped (only if the text contains a comma,

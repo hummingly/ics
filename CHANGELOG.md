@@ -11,6 +11,11 @@
 
 ### API
 
+- Format defintions (associated functions) for the following properties were added:
+  - `Class`
+  - `Status`
+  - `Transp`
+  - `Action`
 - Format defintions (constants) for the following parameters were added:
   - `CUType`
   - `FBType`

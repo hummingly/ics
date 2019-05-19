@@ -33,7 +33,7 @@ fn icalendar_event() {
     event.push(Organizer::new("mailto:jsmith@example.com"));
     event.push(DtStart::new("19960918T143000Z"));
     event.push(DtEnd::new("19960920T220000Z"));
-    event.push(Status::new("CONFIRMED"));
+    event.push(Status::confirmed());
     event.push(Categories::new("CONFERENCE"));
     event.push(Summary::new("Networld+Interop Conference"));
     event.push(Description::new(escape_text(
@@ -75,10 +75,10 @@ fn icalendar_todo() {
     let mut todo = ToDo::new("b68378cf-872d-44f1-9703-5e3725c56e71", "19980130T134500Z");
     todo.push(Organizer::new("mailto:unclesam@example.com"));
     let mut attendee = Attendee::new("mailto:jqpublic@example.com");
-    attendee.add(PartStat::new("ACCEPTED"));
+    attendee.add(PartStat::ACCEPTED);
     todo.push(attendee);
     todo.push(Due::new("19980415T000000"));
-    todo.push(Status::new("NEEDS-ACTION"));
+    todo.push(Status::needs_action());
     todo.push(Summary::new("Submit Income Taxes"));
     todo.push(Sequence::new("2"));
     let mut alarm = Alarm::audio(Trigger::new("19980403T120000Z"));

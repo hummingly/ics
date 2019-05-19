@@ -39,7 +39,7 @@ parameter_builder!(TzIDParam, "TZID");
 parameter_builder!(Value, "VALUE");
 
 def_param_consts!(
-    /// [Format definitions of calender user types](https://tools.ietf.org/html/rfc5545#section-3.2.3)"
+    /// [Format definitions of calender user types](https://tools.ietf.org/html/rfc5545#section-3.2.3)
     CUType,
     /// Default Value
     INDIVIDUAL, "INDIVIDUAL";

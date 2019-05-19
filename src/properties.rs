@@ -57,10 +57,66 @@ property_builder!(LastModified, "LAST-MODIFIED");
 property_builder!(Sequence, "SEQUENCE");
 property_builder!(RequestStatus, "REQUEST-STATUS");
 
+def_prop_consts!(
+    /// [Format definitions of classifications](https://tools.ietf.org/html/rfc5545#section-3.8.1.3)
+    Class,
+    // Default Value
+    public, "PUBLIC";
+    private, "PRIVATE";
+    confidential, "CONFIDENTIAL"
+);
+
+def_prop_consts!(
+    /// [Format definitions of statuses](https://tools.ietf.org/html/rfc5545#section-3.8.1.11)
+    Status,
+    /// `Status` for a tentative event
+    tentative, "TENTATIVE";
+    /// `Status` for a definite event
+    confirmed, "CONFIRMED";
+    /// `Status` for a cancelled Event, To-Do or Journal
+    cancelled, "CANCELLED";
+    /// `Status` for a To-Do that needs action
+    needs_action, "NEEDS-ACTION";
+    /// `Status` for a completed To-Do
+    completed, "COMPLETED";
+    /// `Status` for an in-process To-Do
+    in_process, "IN-PROCESS";
+    /// `Status` for a draft Journal
+    draft, "DRAFT";
+    /// `Status` for a final Journal
+    final_status, "FINAL"
+);
+
+def_prop_consts!(
+    /// [Format definitions of time transparency](https://tools.ietf.org/html/rfc5545#section-3.8.2.7)
+    Transp,
+    // Default Value
+    opaque, "OPAQUE";
+    transparent, "TRANSPARENT"
+);
+
+def_prop_consts!(
+    /// [Format definitions of alarm actions](https://tools.ietf.org/html/rfc5545#section-3.8.6.1)
+    Action,
+    audio, "AUDIO";
+    display, "DISPLAY";
+    email, "EMAIL"
+);
+
+impl<'a> Default for Class<'a> {
+    fn default() -> Self {
+        Self::public()
+    }
+}
+
+impl<'a> Default for Transp<'a> {
+    fn default() -> Self {
+        Self::opaque()
+    }
+}
+
 impl_default_prop!(CalScale, "GREGORIAN");
-impl_default_prop!(Class, "PUBLIC");
 impl_default_prop!(Priority, "0");
-impl_default_prop!(Transp, "OPAQUE");
 impl_default_prop!(Repeat, "0");
 impl_default_prop!(Sequence, "0");
 
