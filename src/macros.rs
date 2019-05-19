@@ -203,44 +203,6 @@ macro_rules! parameter_builder {
             }
         }
     };
-    ($builder:ident, $name:expr, $default_value:expr) => {
-        #[doc=$name]
-        #[doc = " Parameter"]
-        #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
-        pub struct $builder<'a> {
-            value: Cow<'a, str>
-        }
-
-        impl<'a> $builder<'a> {
-            #[doc = "Creates a new "]
-            #[doc=$name]
-            #[doc = " Parameter with the given value."]
-            pub fn new<S>(value: S) -> Self
-            where
-                S: Into<Cow<'a, str>>
-            {
-                $builder {
-                    value: value.into()
-                }
-            }
-        }
-        impl<'a> From<$builder<'a>> for Parameter<'a> {
-            fn from(builder: $builder<'a>) -> Self {
-                Parameter {
-                    key: $name.into(),
-                    value: builder.value
-                }
-            }
-        }
-
-        impl<'a> Default for $builder<'a> {
-            fn default() -> Self {
-                $builder {
-                    value: $default_value.into()
-                }
-            }
-        }
-    };
 }
 
 // Creation and conversion from builder types to Property with default value
@@ -323,13 +285,14 @@ macro_rules! impl_component {
     };
 }
 
-// TODO: inner doc comments instead of only value
 macro_rules! def_param_consts {
-    ($(#[$outer:meta])* $type:ident, $($const_ident:ident, $value:expr);*) => {
+    ($(#[$outer:meta])* $type:ident, $($(#[$inner:meta])* $const_ident:ident, $value:expr);*) => {
         $(#[$outer])*
         impl<'a> $type<'a> {
             $(
-                #[doc = $value]
+                $(#[$inner])*
+                ///
+                #[doc = "Parameter Value: "]#[doc = $value]
                 pub const $const_ident: Self = Self {
                     value: Cow::Borrowed($value)
                 };

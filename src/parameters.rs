@@ -9,17 +9,17 @@ use std::borrow::Cow;
 
 parameter_builder!(AltRep, "ALTREP");
 parameter_builder!(CN, "CN");
-parameter_builder!(CUType, "CUTYPE", "INDIVIDUAL");
+parameter_builder!(CUType, "CUTYPE");
 parameter_builder!(DelegatedFrom, "DELEGATED-FROM");
 parameter_builder!(DelegatedTo, "DELEGATED-TO");
 parameter_builder!(Dir, "DIR");
 parameter_builder!(FmtType, "FMTTYPE");
-parameter_builder!(FBType, "FBTYPE", "BUSY");
+parameter_builder!(FBType, "FBTYPE");
 parameter_builder!(Language, "LANGUAGE");
 parameter_builder!(Member, "MEMBER");
-parameter_builder!(PartStat, "PARTSTAT", "NEEDS-ACTION");
-parameter_builder!(RelType, "RELTYPE", "PARENT");
-parameter_builder!(Role, "ROLE", "REQ-PARTICIPANT");
+parameter_builder!(PartStat, "PARTSTAT");
+parameter_builder!(RelType, "RELTYPE");
+parameter_builder!(Role, "ROLE");
 parameter_builder!(SentBy, "SENT-BY");
 parameter_builder!(TzIDParam, "TZID");
 parameter_builder!(Value, "VALUE");
@@ -27,6 +27,7 @@ parameter_builder!(Value, "VALUE");
 def_param_consts!(
     /// [Format definitions of calender user types](https://tools.ietf.org/html/rfc5545#section-3.2.3)"
     CUType,
+    /// Default Value
     INDIVIDUAL, "INDIVIDUAL";
     GROUP, "GROUP";
     RESOURCE, "RESOURCE";
@@ -34,121 +35,83 @@ def_param_consts!(
     UNKNOWN, "UNKNOWN"
 );
 
+impl<'a> Default for CUType<'a> {
+    fn default() -> Self {
+        Self::INDIVIDUAL
+    }
+}
+
 def_param_consts!(
     /// Format definitions of free/busy time types](https://tools.ietf.org/html/rfc5545#section-3.2.9)
     FBType,
     FREE, "FREE";
+    /// Default Value
     BUSY, "BUSY";
     BUSY_UNAVAILABLE, "BUSY-UNAVAILABLE";
     BUSY_TENTATIVE, "BUSY-TENTATIVE"
 );
 
-impl<'a> PartStat<'a> {
-    const NEEDS_ACTION: Self = Self {
-        value: Cow::Borrowed("NEEDS-ACTION")
-    };
-
-    const ACCEPTED: Self = Self {
-        value: Cow::Borrowed("ACCEPTED")
-    };
-
-    const DECLINED: Self = Self {
-        value: Cow::Borrowed("DECLINED")
-    };
-
-    const TENTATIVE: Self = Self {
-        value: Cow::Borrowed("TENTATIVE")
-    };
-
-    const DELEGATED: Self = Self {
-        value: Cow::Borrowed("DELEGATED")
-    };
-
-    const COMPLETED: Self = Self {
-        value: Cow::Borrowed("COMPLETED")
-    };
-
-    const IN_PROCESS: Self = Self {
-        value: Cow::Borrowed("IN-PROCESS")
-    };
+impl<'a> Default for FBType<'a> {
+    fn default() -> Self {
+        Self::BUSY
+    }
 }
 
-/// [Format definitions of participation statuses of calendar users for a VEVENT](https://tools.ietf.org/html/rfc5545#section-3.2.12)
-pub struct PartStatEvent;
+def_param_consts!(
+    /// [Format definitions of participation statuses of calendar users](https://tools.ietf.org/html/rfc5545#section-3.2.12)
+    PartStat,
+    /// `PartStat` for an Event, To-Do or Journal that needs action (Default Value)
+    NEEDS_ACTION, "NEEDS-ACTION";
+    /// `PartStat` for an accepted Event, To-Do or Journal
+    ACCEPTED, "ACCEPTED";
+    /// `PartStat` for a declined Event, To-Do or Journal
+    DECLINED, "DECLINED";
+    /// `PartStat` for a tentatively accepted Event or To-Do
+    TENTATIVE, "TENTATIVE";
+    /// `PartStat` for a delegated Event or To-Do
+    DELEGATED, "DELEGATED";
+    /// `PartStat` for a completed To-Do
+    COMPLETED, "COMPLETED";
+    /// `PartStat` for an in-process To-Do
+    IN_PROCESS, "IN-PROCESS"
+);
 
-impl<'a> PartStatEvent {
-    /// Returns a `PartStat` for an Event that needs action
-    pub const NEEDS_ACTION: PartStat<'a> = PartStat::NEEDS_ACTION;
-
-    /// Returns a `PartStat` for an accepted Event
-    pub const ACCEPTED: PartStat<'a> = PartStat::ACCEPTED;
-
-    /// Returns a `PartStat` for a declined Event
-    pub const DECLINED: PartStat<'a> = PartStat::DECLINED;
-
-    /// Returns a `PartStat` for a tentatively accepted Event
-    pub const TENTATIVE: PartStat<'a> = PartStat::TENTATIVE;
-
-    /// Returns a `PartStat` for a delegated Event
-    pub const DELEGATED: PartStat<'a> = PartStat::DELEGATED;
-}
-
-/// [Format definitions of participation statuses of calendar users for a VTODO](https://tools.ietf.org/html/rfc5545#section-3.2.12)
-pub struct PartStatToDo;
-
-impl<'a> PartStatToDo {
-    /// Returns a `PartStat` for a To-Do that needs action
-    pub const NEEDS_ACTION: PartStat<'a> = PartStat::NEEDS_ACTION;
-
-    /// Returns a `PartStat` for an accepted To-Do
-    pub const ACCEPTED: PartStat<'a> = PartStat::ACCEPTED;
-
-    /// Returns a `PartStat` for a declined To-Do
-    pub const DECLINED: PartStat<'a> = PartStat::DECLINED;
-
-    /// Returns a `PartStat` for a tentatively accepted To-Do
-    pub const TENTATIVE: PartStat<'a> = PartStat::TENTATIVE;
-
-    /// Returns a `PartStat` for a delegated To-Do
-    pub const DELEGATED: PartStat<'a> = PartStat::DELEGATED;
-
-    /// Returns a `PartStat` for a completed To-Do
-    pub const COMPLETED: PartStat<'a> = PartStat::COMPLETED;
-
-    /// Returns a `PartStat` for an in-process To-Do
-    pub const IN_PROCESS: PartStat<'a> = PartStat::IN_PROCESS;
-}
-
-/// [Format definitions of participation statuses of calendar users for a VJOURNAL](https://tools.ietf.org/html/rfc5545#section-3.2.12)
-pub struct PartStatJournal;
-
-impl<'a> PartStatJournal {
-    /// Returns a `PartStat` for a Journal that needs action
-    pub const NEEDS_ACTION: PartStat<'a> = PartStat::NEEDS_ACTION;
-
-    /// Returns a `PartStat` for an accepted Journal
-    pub const ACCEPTED: PartStat<'a> = PartStat::ACCEPTED;
-
-    /// Returns a `PartStat` for a declined Journal
-    pub const DECLINED: PartStat<'a> = PartStat::DECLINED;
+impl<'a> Default for PartStat<'a> {
+    fn default() -> Self {
+        PartStat::NEEDS_ACTION
+    }
 }
 
 def_param_consts!(
     /// Format definitions of hierarchical relationship types associated with the calendar component](https://tools.ietf.org/html/rfc5545#section-3.2.15)
     RelType,
+    /// Default Value
     PARENT, "PARENT";
     CHILD, "CHILD";
     SILBLING, "SILBLING"
 );
 
+impl<'a> Default for RelType<'a> {
+    fn default() -> Self {
+        Self::PARENT
+    }
+}
+
 def_param_consts!(
     /// Format definitions of participation roles for calendar users](https://tools.ietf.org/html/rfc5545#section-3.2.16)
     Role,
     CHAIR, "CHAIR";
+    /// Default Value
     REQ_PARTICIPANT, "REQ-PARTICIPANT";
     OPT_PARTICIPANT, "OPT-PARTICIPANT";
     NON_PARTICIPANT, "NON-PARTICIPANT"
 );
+
+impl<'a> Default for Role<'a> {
+    fn default() -> Self {
+        Self::REQ_PARTICIPANT
+    }
+}
 
 def_param_consts!(
     /// Format definitions of value type format for a property value](https://tools.ietf.org/html/rfc5545#section-3.2.20)
@@ -157,7 +120,7 @@ def_param_consts!(
     BOOLEAN, "BOOLEAN";
     CAL_ADDRESS, "CAL-ADDRESS";
     DATE, "DATE";
-    DATE_TIME, "DATE_TIME";
+    DATE_TIME, "DATE-TIME";
     DURATION, "DURATION";
     FLOAT, "FLOAT";
     INTEGER, "INTEGER";
@@ -205,7 +168,7 @@ impl Default for Encoding {
 /// RANGE Parameter
 #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub enum Range {
-    /// "THISANDFUTURE" (default value)
+    /// "THISANDFUTURE" (Default Value)
     ThisAndFuture
 }
 
@@ -268,7 +231,7 @@ impl Default for Related {
 pub enum RSVP {
     /// "TRUE"
     True,
-    /// "FALSE" (default value)
+    /// "FALSE" (Default Value)
     False
 }
 
@@ -303,7 +266,7 @@ pub use self::rfc7986::*;
 mod rfc7986 {
     use components::Parameter;
     use std::borrow::Cow;
-    parameter_builder!(Display, "DISPLAY", "BADGE");
+    parameter_builder!(Display, "DISPLAY");
     parameter_builder!(Email, "EMAIL");
     parameter_builder!(Feature, "FEATURE");
     parameter_builder!(Label, "LABEL");
@@ -311,11 +274,18 @@ mod rfc7986 {
     def_param_consts!(
         /// Format definitions of displaying images](https://tools.ietf.org/html/rfc7986#section-6.1)
         Display,
+        /// Default Value
         BADGE, "BADGE";
         GRAPHIC, "GRAPHIC";
         FULLSIZE, "FULLSIZE";
         THUMBNAIL, "THUMBNAIL"
     );
+
+    impl<'a> Default for Display<'a> {
+        fn default() -> Self {
+            Self::BADGE
+        }
+    }
 
     def_param_consts!(
         /// Format definitions of features of of a conference or broadcast system](https://tools.ietf.org/html/rfc7986#section-6.3)

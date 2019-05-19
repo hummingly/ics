@@ -6,6 +6,7 @@
 
 - Changed `parameters!` input syntax from `,` to `=>` to separate key and value
 - Properties aren't ordered anymore but shown in the order they were added. This change was made to reduce the unnecessary complexity to store properties but mainly also because it is very annoying to compare the input code with the generated iCalendar file. The previous implementation would prevent duplicated properties but this won't generate erroneous files.
+- `Parameter`s are now formatted without a semicolon: "KEY=VALUE".
 
 ### API
 
@@ -17,7 +18,7 @@
   - `Value`
   - `Display`
   - `Feature`
-  - `PartStat` is a little bit more unique given that some definitions are only defined in some components (VEVENT, VTODO and VJOURNAL) which is why 3 structs were added: `PartStatEvent`, `PartStatToDo` and `PartStatJournal`. They define constants that return `PartStat` instances which means `PartStatEvent::NEEDS_ACTION` and `PartStatToDo::NEEDS_ACTION` return the same, for example, but that way there is no need to look up which participation status is available for which component.
+  - `PartStat`
 
 ### Misc
 
