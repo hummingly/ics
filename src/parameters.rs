@@ -21,26 +21,11 @@
 use components::Parameter;
 use std::borrow::Cow;
 
-parameter_builder!(AltRep, "ALTREP");
-parameter_builder!(CN, "CN");
-parameter_builder!(CUType, "CUTYPE");
-parameter_builder!(DelegatedFrom, "DELEGATED-FROM");
-parameter_builder!(DelegatedTo, "DELEGATED-TO");
-parameter_builder!(Dir, "DIR");
-parameter_builder!(FmtType, "FMTTYPE");
-parameter_builder!(FBType, "FBTYPE");
-parameter_builder!(Language, "LANGUAGE");
-parameter_builder!(Member, "MEMBER");
-parameter_builder!(PartStat, "PARTSTAT");
-parameter_builder!(RelType, "RELTYPE");
-parameter_builder!(Role, "ROLE");
-parameter_builder!(SentBy, "SENT-BY");
-parameter_builder!(TzIDParam, "TZID");
-parameter_builder!(Value, "VALUE");
-
-def_param_consts!(
-    /// [Format definitions of calender user types](https://tools.ietf.org/html/rfc5545#section-3.2.3)
-    CUType,
+parameter!(AltRep, "ALTREP");
+parameter!(CN, "CN");
+parameter_with_const!(
+    /// [Format definitions of calender user types.](https://tools.ietf.org/html/rfc5545#section-3.2.3)
+    CUType, "CUTYPE",
     /// Default Value
     INDIVIDUAL, "INDIVIDUAL";
     GROUP, "GROUP";
@@ -48,32 +33,24 @@ def_param_consts!(
     ROOM, "ROOM";
     UNKNOWN, "UNKNOWN"
 );
-
-impl<'a> Default for CUType<'a> {
-    fn default() -> Self {
-        Self::INDIVIDUAL
-    }
-}
-
-def_param_consts!(
-    /// Format definitions of free/busy time types](https://tools.ietf.org/html/rfc5545#section-3.2.9)
-    FBType,
+parameter!(DelegatedFrom, "DELEGATED-FROM");
+parameter!(DelegatedTo, "DELEGATED-TO");
+parameter!(Dir, "DIR");
+parameter!(FmtType, "FMTTYPE");
+parameter_with_const!(
+    /// [Format definitions of free/busy time types](https://tools.ietf.org/html/rfc5545#section-3.2.9)
+    FBType, "FBTYPE",
     FREE, "FREE";
     /// Default Value
     BUSY, "BUSY";
     BUSY_UNAVAILABLE, "BUSY-UNAVAILABLE";
     BUSY_TENTATIVE, "BUSY-TENTATIVE"
 );
-
-impl<'a> Default for FBType<'a> {
-    fn default() -> Self {
-        Self::BUSY
-    }
-}
-
-def_param_consts!(
+parameter!(Language, "LANGUAGE");
+parameter!(Member, "MEMBER");
+parameter_with_const!(
     /// [Format definitions of participation statuses of calendar users](https://tools.ietf.org/html/rfc5545#section-3.2.12)
-    PartStat,
+    PartStat, "PARTSTAT",
     /// `PartStat` for an Event, To-Do or Journal that needs action (Default Value)
     NEEDS_ACTION, "NEEDS-ACTION";
     /// `PartStat` for an accepted Event, To-Do or Journal
@@ -89,47 +66,28 @@ def_param_consts!(
     /// `PartStat` for an in-process To-Do
     IN_PROCESS, "IN-PROCESS"
 );
-
-impl<'a> Default for PartStat<'a> {
-    fn default() -> Self {
-        PartStat::NEEDS_ACTION
-    }
-}
-
-def_param_consts!(
-    /// Format definitions of hierarchical relationship types associated with the calendar component](https://tools.ietf.org/html/rfc5545#section-3.2.15)
-    RelType,
+parameter_with_const!(
+    /// [Format definitions of hierarchical relationship types associated with the calendar component](https://tools.ietf.org/html/rfc5545#section-3.2.15)
+    RelType, "RELTYPE",
     /// Default Value
     PARENT, "PARENT";
     CHILD, "CHILD";
     SILBLING, "SILBLING"
 );
-
-impl<'a> Default for RelType<'a> {
-    fn default() -> Self {
-        Self::PARENT
-    }
-}
-
-def_param_consts!(
-    /// Format definitions of participation roles for calendar users](https://tools.ietf.org/html/rfc5545#section-3.2.16)
-    Role,
+parameter_with_const!(
+    /// [Format definitions of participation roles for calendar users](https://tools.ietf.org/html/rfc5545#section-3.2.16)
+    Role, "ROLE",
     CHAIR, "CHAIR";
     /// Default Value
     REQ_PARTICIPANT, "REQ-PARTICIPANT";
     OPT_PARTICIPANT, "OPT-PARTICIPANT";
     NON_PARTICIPANT, "NON-PARTICIPANT"
 );
-
-impl<'a> Default for Role<'a> {
-    fn default() -> Self {
-        Self::REQ_PARTICIPANT
-    }
-}
-
-def_param_consts!(
-    /// Format definitions of value type format for a property value](https://tools.ietf.org/html/rfc5545#section-3.2.20)
-    Value,
+parameter!(SentBy, "SENT-BY");
+parameter!(TzIDParam, "TZID");
+parameter_with_const!(
+    /// [Format definitions of value type format for a property value](https://tools.ietf.org/html/rfc5545#section-3.2.20)
+    Value, "VALUE",
     BINARY, "BINARY";
     BOOLEAN, "BOOLEAN";
     CAL_ADDRESS, "CAL-ADDRESS";
@@ -145,6 +103,36 @@ def_param_consts!(
     URI, "URI";
     UTC_OFFSET, "UTC-OFFSET"
 );
+
+impl<'a> Default for CUType<'a> {
+    fn default() -> Self {
+        Self::INDIVIDUAL
+    }
+}
+
+impl<'a> Default for FBType<'a> {
+    fn default() -> Self {
+        Self::BUSY
+    }
+}
+
+impl<'a> Default for PartStat<'a> {
+    fn default() -> Self {
+        PartStat::NEEDS_ACTION
+    }
+}
+
+impl<'a> Default for RelType<'a> {
+    fn default() -> Self {
+        Self::PARENT
+    }
+}
+
+impl<'a> Default for Role<'a> {
+    fn default() -> Self {
+        Self::REQ_PARTICIPANT
+    }
+}
 
 /// ENCODING Parameter
 #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
@@ -280,30 +268,19 @@ pub use self::rfc7986::*;
 mod rfc7986 {
     use components::Parameter;
     use std::borrow::Cow;
-    parameter_builder!(Display, "DISPLAY");
-    parameter_builder!(Email, "EMAIL");
-    parameter_builder!(Feature, "FEATURE");
-    parameter_builder!(Label, "LABEL");
-
-    def_param_consts!(
-        /// Format definitions of displaying images](https://tools.ietf.org/html/rfc7986#section-6.1)
-        Display,
+    parameter_with_const!(
+        /// [Format definitions of displaying images](https://tools.ietf.org/html/rfc7986#section-6.1)
+        Display, "DISPLAY",
         /// Default Value
         BADGE, "BADGE";
         GRAPHIC, "GRAPHIC";
         FULLSIZE, "FULLSIZE";
         THUMBNAIL, "THUMBNAIL"
     );
-
-    impl<'a> Default for Display<'a> {
-        fn default() -> Self {
-            Self::BADGE
-        }
-    }
-
-    def_param_consts!(
-        /// Format definitions of features of of a conference or broadcast system](https://tools.ietf.org/html/rfc7986#section-6.3)
-        Feature,
+    parameter!(Email, "EMAIL");
+    parameter_with_const!(
+        /// [Format definitions of features of of a conference or broadcast system](https://tools.ietf.org/html/rfc7986#section-6.3)
+        Feature, "FEATURE",
         AUDIO, "AUDIO";
         CHAT, "CHAT";
         FEED, "FEED";
@@ -312,4 +289,11 @@ mod rfc7986 {
         SCREEN, "SCREEN";
         VIDEO, "VIDEO"
     );
+    parameter!(Label, "LABEL");
+
+    impl<'a> Default for Display<'a> {
+        fn default() -> Self {
+            Self::BADGE
+        }
+    }
 }

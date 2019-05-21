@@ -10,65 +10,30 @@ use components::{Parameter, Parameters, Property};
 use std::borrow::Cow;
 use std::collections::BTreeMap;
 
-property_builder!(CalScale, "CALSCALE");
-property_builder!(Method, "METHOD");
-property_builder!(ProdID, "PRODID");
-property_builder!(Version, "VERSION");
-property_builder!(Attach, "ATTACH");
-property_builder!(Categories, "CATEGORIES");
-property_builder!(Class, "CLASS");
-property_builder!(Comment, "COMMENT");
-property_builder!(Description, "DESCRIPTION");
-property_builder!(Geo, "GEO");
-property_builder!(Location, "LOCATION");
-property_builder!(PercentComplete, "PERCENT-COMPLETE");
-property_builder!(Priority, "PRIORITY");
-property_builder!(Resources, "RESOURCES");
-property_builder!(Status, "STATUS");
-property_builder!(Summary, "SUMMARY");
-property_builder!(Completed, "COMPLETED");
-property_builder!(DtEnd, "DTEND");
-property_builder!(Due, "DUE");
-property_builder!(DtStart, "DTSTART");
-property_builder!(Duration, "DURATION");
-property_builder!(FreeBusyTime, "FREEBUSY");
-property_builder!(Transp, "TRANSP");
-property_builder!(TzID, "TZID");
-property_builder!(TzName, "TZNAME");
-property_builder!(TzOffsetFrom, "TZOFFSETFROM");
-property_builder!(TzOffsetTo, "TZOFFSETTO");
-property_builder!(TzURL, "TZURL");
-property_builder!(Attendee, "ATTENDEE");
-property_builder!(Contact, "CONTACT");
-property_builder!(Organizer, "ORGANIZER");
-property_builder!(RecurrenceID, "RECURRENCE-ID");
-property_builder!(RelatedTo, "RELATED-TO");
-property_builder!(URL, "URL");
-property_builder!(UID, "UID");
-property_builder!(ExDate, "EXDATE");
-property_builder!(RDate, "RDATE");
-property_builder!(RRule, "RRULE");
-property_builder!(Action, "ACTION");
-property_builder!(Repeat, "REPEAT");
-property_builder!(Trigger, "TRIGGER");
-property_builder!(Created, "CREATED");
-property_builder!(DtStamp, "DTSTAMP");
-property_builder!(LastModified, "LAST-MODIFIED");
-property_builder!(Sequence, "SEQUENCE");
-property_builder!(RequestStatus, "REQUEST-STATUS");
-
-def_prop_consts!(
+property!(CalScale, "CALSCALE");
+property!(Method, "METHOD");
+property!(ProdID, "PRODID");
+property!(Version, "VERSION");
+property!(Attach, "ATTACH");
+property!(Categories, "CATEGORIES");
+property_with_constructor!(
     /// [Format definitions of classifications](https://tools.ietf.org/html/rfc5545#section-3.8.1.3)
-    Class,
+    Class, "CLASS",
     // Default Value
     public, "PUBLIC";
     private, "PRIVATE";
     confidential, "CONFIDENTIAL"
 );
-
-def_prop_consts!(
+property!(Comment, "COMMENT");
+property!(Description, "DESCRIPTION");
+property!(Geo, "GEO");
+property!(Location, "LOCATION");
+property!(PercentComplete, "PERCENT-COMPLETE");
+property!(Priority, "PRIORITY");
+property!(Resources, "RESOURCES");
+property_with_constructor!(
     /// [Format definitions of statuses](https://tools.ietf.org/html/rfc5545#section-3.8.1.11)
-    Status,
+    Status, "STATUS",
     /// `Status` for a tentative event
     tentative, "TENTATIVE";
     /// `Status` for a definite event
@@ -84,24 +49,51 @@ def_prop_consts!(
     /// `Status` for a draft Journal
     draft, "DRAFT";
     /// `Status` for a final Journal
-    final_status, "FINAL"
+    final_, "FINAL"
 );
-
-def_prop_consts!(
+property!(Summary, "SUMMARY");
+property!(Completed, "COMPLETED");
+property!(DtEnd, "DTEND");
+property!(Due, "DUE");
+property!(DtStart, "DTSTART");
+property!(Duration, "DURATION");
+property!(FreeBusyTime, "FREEBUSY");
+property_with_constructor!(
     /// [Format definitions of time transparency](https://tools.ietf.org/html/rfc5545#section-3.8.2.7)
-    Transp,
+    Transp, "TRANSP",
     // Default Value
     opaque, "OPAQUE";
     transparent, "TRANSPARENT"
 );
-
-def_prop_consts!(
+property!(TzID, "TZID");
+property!(TzName, "TZNAME");
+property!(TzOffsetFrom, "TZOFFSETFROM");
+property!(TzOffsetTo, "TZOFFSETTO");
+property!(TzURL, "TZURL");
+property!(Attendee, "ATTENDEE");
+property!(Contact, "CONTACT");
+property!(Organizer, "ORGANIZER");
+property!(RecurrenceID, "RECURRENCE-ID");
+property!(RelatedTo, "RELATED-TO");
+property!(URL, "URL");
+property!(UID, "UID");
+property!(ExDate, "EXDATE");
+property!(RDate, "RDATE");
+property!(RRule, "RRULE");
+property_with_constructor!(
     /// [Format definitions of alarm actions](https://tools.ietf.org/html/rfc5545#section-3.8.6.1)
-    Action,
+    Action, "ACTION",
     audio, "AUDIO";
     display, "DISPLAY";
     email, "EMAIL"
 );
+property!(Repeat, "REPEAT");
+property!(Trigger, "TRIGGER");
+property!(Created, "CREATED");
+property!(DtStamp, "DTSTAMP");
+property!(LastModified, "LAST-MODIFIED");
+property!(Sequence, "SEQUENCE");
+property!(RequestStatus, "REQUEST-STATUS");
 
 impl<'a> Default for Class<'a> {
     fn default() -> Self {
@@ -128,11 +120,11 @@ mod rfc7986 {
     use components::{Parameter, Parameters, Property};
     use std::borrow::Cow;
     use std::collections::BTreeMap;
-    property_builder!(Name, "NAME");
-    property_builder_with_parameter!(RefreshInterval, "REFRESH-INTERVAL", "DURATION");
-    property_builder_with_parameter!(Source, "SOURCE", "URI");
-    property_builder!(Color, "COLOR");
-    property_builder_with_parameter!(Conference, "CONFERENCE", "URI");
+    property!(Name, "NAME");
+    property_with_parameter!(RefreshInterval, "REFRESH-INTERVAL", "DURATION");
+    property_with_parameter!(Source, "SOURCE", "URI");
+    property!(Color, "COLOR");
+    property_with_parameter!(Conference, "CONFERENCE", "URI");
 
     /// IMAGE Property
     ///

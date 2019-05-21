@@ -58,10 +58,11 @@ macro_rules! write_crlf {
 }
 
 // Creation and conversion from builder types to Property
-macro_rules! property_builder {
-    ($builder:ident, $name:expr) => {
-        #[doc=$name]
-        #[doc = " Property"]
+macro_rules! property {
+    ($(#[$outer:meta])* $builder:ident, $name:expr) => {
+        #[doc=$name]#[doc = " Property"]
+        ///
+        $(#[$outer])*
         #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
         pub struct $builder<'a> {
             value: Cow<'a, str>,
@@ -111,11 +112,75 @@ macro_rules! property_builder {
     };
 }
 
+macro_rules! property_with_constructor {
+    ($(#[$outer:meta])* $builder:ident, $name:expr, $($(#[$inner:meta])* $const_ident:ident, $value:expr);*) => {
+        #[doc=$name]#[doc = " Property"]
+        ///
+        $(#[$outer])*
+        #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
+        pub struct $builder<'a> {
+            value: Cow<'a, str>,
+            parameters: Parameters<'a>
+        }
+
+        impl<'a> $builder<'a> {
+            #[doc = "Creates a new "]
+            #[doc=$name]
+            #[doc = " Property with the given value."]
+            pub fn new<S>(value: S) -> Self
+            where
+                S: Into<Cow<'a, str>>
+            {
+                $builder {
+                    value: value.into(),
+                    parameters: BTreeMap::new()
+                }
+            }
+
+            $(
+                $(#[$inner])*
+                ///
+                #[doc = "Parameter Value: "]#[doc = $value]
+                pub fn $const_ident() -> Self {
+                    Self::new($value)
+                }
+            )*
+
+            /// Adds a parameter to the property.
+            pub fn add<P>(&mut self, parameter: P)
+            where
+                P: Into<Parameter<'a>>
+            {
+                let param = parameter.into();
+                self.parameters.insert(param.key, param.value);
+            }
+
+            /// Adds several parameters at once to the property. For creating
+            /// several parameters at once, consult the documentation of
+            /// the `parameters!` macro.
+            pub fn append(&mut self, mut parameters: Parameters<'a>) {
+                self.parameters.append(&mut parameters);
+            }
+        }
+
+        impl<'a> From<$builder<'a>> for Property<'a> {
+            fn from(builder: $builder<'a>) -> Self {
+                Property {
+                    key: $name.into(),
+                    value: builder.value,
+                    parameters: builder.parameters
+                }
+            }
+        }
+    };
+}
+
 // Creation and conversion from builder types to Parameter
-macro_rules! parameter_builder {
-    ($builder:ident, $name:expr) => {
-        #[doc=$name]
-        #[doc = " Parameter"]
+macro_rules! parameter {
+    ($(#[$outer:meta])* $builder:ident, $name:expr) => {
+        #[doc=$name]#[doc = " Parameter"]
+        ///
+        $(#[$outer])*
         #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
         pub struct $builder<'a> {
             value: Cow<'a, str>
@@ -145,12 +210,55 @@ macro_rules! parameter_builder {
         }
     };
 }
+macro_rules! parameter_with_const {
+    ($(#[$outer:meta])* $builder:ident, $name:expr, $($(#[$inner:meta])* $const_ident:ident, $value:expr);*) => {
+        #[doc=$name]#[doc = " Parameter"]
+        ///
+        $(#[$outer])*
+        #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
+        pub struct $builder<'a> {
+            value: Cow<'a, str>
+        }
+
+        impl<'a> $builder<'a> {
+            #[doc = "Creates a new "]
+            #[doc=$name]
+            #[doc = " Parameter with the given value."]
+            pub fn new<S>(value: S) -> Self
+            where
+                S: Into<Cow<'a, str>>
+            {
+                $builder {
+                    value: value.into()
+                }
+            }
+
+            $(
+                $(#[$inner])*
+                ///
+                #[doc = "Parameter Value: "]#[doc = $value]
+                pub const $const_ident: Self = Self {
+                    value: Cow::Borrowed($value)
+                };
+            )*
+        }
+
+        impl<'a> From<$builder<'a>> for Parameter<'a> {
+            fn from(builder: $builder<'a>) -> Self {
+                Parameter {
+                    key: $name.into(),
+                    value: builder.value
+                }
+            }
+        }
+    };
+}
 
 // Creation and conversion from builder types to Property with default value
 // types as parameter
 // This matters right now only for the newer properties from RFC7986.
 #[cfg(feature = "rfc7986")]
-macro_rules! property_builder_with_parameter {
+macro_rules! property_with_parameter {
     ($builder:ident, $name:expr, $value:expr) => {
         #[doc=$name]#[doc = " Property\n\n"]
         #[doc = "Newer properties that have a different value type than TEXT have to include the \"VALUE\" parameter. This property already contains \"VALUE:"]
@@ -216,38 +324,6 @@ macro_rules! impl_component {
             fn from(component: $component<'a>) -> Self {
                 component.0
             }
-        }
-    };
-}
-
-macro_rules! def_param_consts {
-    ($(#[$outer:meta])* $type:ident, $($(#[$inner:meta])* $const_ident:ident, $value:expr);*) => {
-        $(#[$outer])*
-        impl<'a> $type<'a> {
-            $(
-                $(#[$inner])*
-                ///
-                #[doc = "Parameter Value: "]#[doc = $value]
-                pub const $const_ident: Self = Self {
-                    value: Cow::Borrowed($value)
-                };
-            )*
-        }
-    };
-}
-
-macro_rules! def_prop_consts {
-    ($(#[$outer:meta])* $type:ident, $($(#[$inner:meta])* $const_ident:ident, $value:expr);*) => {
-        $(#[$outer])*
-        impl<'a> $type<'a> {
-            $(
-                $(#[$inner])*
-                ///
-                #[doc = "Parameter Value: "]#[doc = $value]
-                pub fn $const_ident() -> Self {
-                    Self::new($value)
-                }
-            )*
         }
     };
 }
