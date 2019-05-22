@@ -22,7 +22,6 @@ use contentline;
 use std::borrow::Cow;
 use std::collections::BTreeMap;
 use std::fmt;
-use std::fmt::Write;
 
 /// A `Component` contains properties and sometimes sub-components.
 ///
@@ -67,14 +66,14 @@ impl<'a> Component<'a> {
 
 impl<'a> fmt::Display for Component<'a> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write_crlf!(f, "BEGIN:{}", self.name)?;
+        write!(f, "BEGIN:{}\r\n", self.name)?;
         for property in &self.properties {
             write!(f, "{}", property)?;
         }
         for component in &self.subcomponents {
             write!(f, "{}", component)?;
         }
-        write_crlf!(f, "END:{}", self.name)
+        write!(f, "END:{}\r\n", self.name)
     }
 }
 
@@ -121,7 +120,7 @@ impl<'a> Property<'a> {
         self.parameters.append(&mut parameters);
     }
 
-    fn len(&self) -> usize {
+    fn content_len(&self) -> usize {
         // + 1 for the : in the property
         // + 2 for the ; and = in the parameter
         self.parameters
@@ -131,7 +130,7 @@ impl<'a> Property<'a> {
             })
     }
 
-    fn write_content<W: Write>(&self, writer: &mut W) -> fmt::Result {
+    fn format<W: fmt::Write>(&self, writer: &mut W) -> fmt::Result {
         write!(writer, "{}", self.key)?;
         for (key, value) in &self.parameters {
             write!(writer, ";{}={}", key, value)?;
@@ -142,16 +141,15 @@ impl<'a> Property<'a> {
 
 impl<'a> fmt::Display for Property<'a> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let len = self.len();
+        let len = self.content_len();
         if len <= contentline::LIMIT {
-            self.write_content(f)?;
-            write_crlf!(f)
+            self.format(f)?;
         } else {
-            let mut line = String::with_capacity(contentline::size(len));
-            self.write_content(&mut line)?;
-            contentline::fold(&mut line);
-            write_crlf!(f, "{}", line)
+            let mut content = String::with_capacity(contentline::size(len));
+            self.format(&mut content)?;
+            contentline::fold(f, &content)?;
         }
+        write!(f, "\r\n")
     }
 }
 
@@ -198,7 +196,7 @@ mod tests {
     fn simple() {
         let property = Property::new("SUMMARY", "Simple");
         let expected = 14;
-        assert_eq!(property.len(), expected);
+        assert_eq!(property.content_len(), expected);
     }
 
     #[test]
@@ -206,6 +204,6 @@ mod tests {
         let mut property = Property::new("SUMMARY", "Simple");
         property.add(Parameter::new("VALUE", "TEXT"));
         let expected = 25;
-        assert_eq!(property.len(), expected);
+        assert_eq!(property.content_len(), expected);
     }
 }

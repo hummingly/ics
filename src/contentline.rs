@@ -1,23 +1,27 @@
-// Content lines must be folded after 75 bytes
+use std::fmt;
+
+// Content lines must be folded after around 75 bytes by inserting a carriage
+// return and line feed followed by whitespace. This crate uses a space
+// character as white space but it could also be a horizontal tab.
 pub const LIMIT: usize = 75;
+const LINE_BREAK: &'static str = "\r\n ";
 
-pub fn fold(content: &mut String) {
-    // drain until the first char boundary closest to the limit
-    if let Some(first_boundary) = next_boundary(&content, LIMIT) {
-        let input = content.split_off(first_boundary);
-        let len = input.len();
+pub fn fold<W: fmt::Write>(writer: &mut W, content: &str) -> fmt::Result {
+    let len = content.len();
+    let first_boundary = next_boundary(&content, LIMIT).unwrap_or(len);
+    write!(writer, "{}", &content[0..first_boundary])?;
+    let mut boundary = first_boundary;
 
-        let mut boundary = 0;
-        while boundary < len {
-            content.push_str("\r\n ");
-            boundary = {
-                let next_boundary = next_boundary(&input, boundary + LIMIT).unwrap_or(len);
-                content.push_str(&input[boundary..next_boundary]);
-                next_boundary
-            };
-        }
+    while boundary < len {
+        write!(writer, "{}", LINE_BREAK)?;
+        let next_boundary = next_boundary(&content, boundary + LIMIT).unwrap_or(len);
+        write!(writer, "{}", &content[boundary..next_boundary])?;
+        boundary = next_boundary;
     }
+    Ok(())
 }
+
+// TODO: unfold algorithm
 
 fn next_boundary(input: &str, index: usize) -> Option<usize> {
     if index >= input.len() {
@@ -28,7 +32,7 @@ fn next_boundary(input: &str, index: usize) -> Option<usize> {
         .rposition(|&i| i < 128 || i >= 192)
     {
         Some(0) | None => None,
-        Some(i) => Some(i)
+        index => index
     }
 }
 
@@ -47,46 +51,42 @@ mod tests {
 
     #[test]
     fn no_linebreak() {
-        let mut line = String::from("No line break today.");
-        let len = line.len();
-        fold(&mut line);
+        let content = "No line break today.";
+        let mut line = String::with_capacity(size(content.len()));
+        fold(&mut line, content).unwrap();
 
-        let expected = line.clone();
-        assert_eq!(line, expected);
-        assert_eq!(size(len), expected.len());
+        assert_eq!(line, content);
     }
 
     #[test]
     fn over_limit() {
-        let mut line = String::from("Content lines that have a fixed length over 75 bytes should be line folded with CRLF and whitespace.");
-        let len = line.len();
-        fold(&mut line);
-
+        let content = "Content lines that have a fixed length over 75 bytes should be line folded with CRLF and whitespace.";
+        let mut line = String::with_capacity(size(content.len()));
+        fold(&mut line, content).unwrap();
         let expected = "Content lines that have a fixed length over 75 bytes should be line folded \r\n with CRLF and whitespace.";
+
         assert_eq!(line, expected);
-        assert_eq!(size(len), expected.len());
     }
 
     #[test]
     fn multibytes() {
-        let mut line = String::from(
-            "Content lines shouldn't be folded in the middle of a UTF-8 character! 老虎."
-        );
-        fold(&mut line);
-
+        let content =
+            "Content lines shouldn't be folded in the middle of a UTF-8 character! 老虎.";
+        let mut line = String::with_capacity(size(content.len()));
+        fold(&mut line, content).unwrap();
         let expected =
             "Content lines shouldn't be folded in the middle of a UTF-8 character! 老\r\n 虎.";
+
         assert_eq!(line, expected);
     }
 
     #[test]
     fn multi_lines() {
-        let mut line = String::from("The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. ");
-        let len = line.len();
-        fold(&mut line);
-
+        let content = "The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. ";
+        let mut line = String::with_capacity(size(content.len()));
+        fold(&mut line, content).unwrap();
         let expected = "The quick brown fox jumps over the lazy dog. The quick brown fox jumps over\r\n  the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown\r\n  fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. ";
+
         assert_eq!(line, expected);
-        assert_eq!(size(len), expected.len());
     }
 }
