@@ -17,7 +17,7 @@ use std::path::Path;
 /// The ICalendar struct can be thought of as the iCalendar object. This is
 /// where the specified components are added. To save the object as file, it
 /// needs to be written to a file.
-#[derive(Debug, Default, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct ICalendar<'a>(Component<'a>);
 
 impl<'a> ICalendar<'a> {
@@ -101,7 +101,7 @@ impl<'a> ICalendar<'a> {
 /// An `Event` component is a grouping of component properties, possibly
 /// including an Alarm, that represents a scheduled amount of time on a
 /// calendar. (see [RFC5545 3.6.1. Event Component](https://tools.ietf.org/html/rfc5545#section-3.6.1))
-#[derive(Debug, Default, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Event<'a>(Component<'a>);
 
 impl<'a> Event<'a> {
@@ -135,7 +135,7 @@ impl<'a> Event<'a> {
 ///
 /// A ToDo component is a grouping of component properties, possibly including
 /// an Alarm, that represent an action-item or assignment. (see [RFC5545 3.6.2. To-Do Component](https://tools.ietf.org/html/rfc5545#section-3.6.2))
-#[derive(Debug, Default, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct ToDo<'a>(Component<'a>);
 
 impl<'a> ToDo<'a> {
@@ -173,7 +173,7 @@ impl<'a> ToDo<'a> {
 /// A `Journal` component is a grouping of component properties that represent
 /// one or more descriptive text notes associated with a particular calendar
 /// date. (see [RFC5545 3.6.3. Journal Component](https://tools.ietf.org/html/rfc5545#section-3.6.3))
-#[derive(Debug, Default, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Journal<'a>(Component<'a>);
 
 impl<'a> Journal<'a> {
@@ -207,7 +207,7 @@ impl<'a> Journal<'a> {
 /// represents either a request for free or busy time information, a reply to a
 /// request for free or busy time information, or a published set of busy time
 /// information. (see [RFC5545 3.6.4. Free/Busy Component Component](https://tools.ietf.org/html/rfc5545#section-3.6.4))
-#[derive(Debug, Default, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct FreeBusy<'a>(Component<'a>);
 
 impl<'a> FreeBusy<'a> {
@@ -240,7 +240,7 @@ impl<'a> FreeBusy<'a> {
 ///  A `TimeZone` component is unambiguously defined by the set of time
 /// measurement rules (`ZoneTime`) determined by the governing body for a given
 /// geographic area. (see [RFC5545 3.6.5. Time Zone Component Component](https://tools.ietf.org/html/rfc5545#section-3.6.5))
-#[derive(Debug, Default, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct TimeZone<'a>(Component<'a>);
 
 impl<'a> TimeZone<'a> {
@@ -278,7 +278,7 @@ impl<'a> TimeZone<'a> {
 ///  Each "VTIMEZONE" calendar component consists of a collection of one or more
 /// sub-components that describe the rule for a particular observance (either a
 /// Standard Time or a Daylight Saving Time observance). (see [RFC5545 3.6.5. Time Zone Component Component](https://tools.ietf.org/html/rfc5545#page-63))
-#[derive(Debug, Default, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct ZoneTime<'a>(Component<'a>);
 
 impl<'a> ZoneTime<'a> {
@@ -330,7 +330,7 @@ impl<'a> ZoneTime<'a> {
 /// An `Alarm` component is a grouping of component properties that is a
 /// reminder or alarm for an event or a to-do. For example, it may be used to
 /// define a reminder for a pending event or an overdue to-do. (see [RFC5545 3.6.6. Alarm Component](https://tools.ietf.org/html/rfc5545#section-3.6.6))
-#[derive(Debug, Default, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Alarm<'a>(Component<'a>);
 
 // The specific constructors use the specific property builder types since the

@@ -28,7 +28,7 @@ use std::fmt::Write;
 ///
 /// This can be used to create a new calendar component by either creating a
 /// wrapper type or just use it as it is.
-#[derive(Debug, Default, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Component<'a> {
     pub(crate) name: Cow<'a, str>,
     pub(crate) properties: Vec<Property<'a>>,
@@ -43,7 +43,8 @@ impl<'a> Component<'a> {
     {
         Component {
             name: name.into(),
-            ..Default::default()
+            properties: Vec::new(),
+            subcomponents: Vec::new()
         }
     }
 
@@ -84,7 +85,7 @@ impl<'a> fmt::Display for Component<'a> {
 /// They are part of a component and define it. This can be used to create a
 /// new calendar property by either creating a wrapper type or just use it as
 /// it is.
-#[derive(Debug, Default, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Property<'a> {
     pub(crate) key: Cow<'a, str>,
     pub(crate) value: Cow<'a, str>,
@@ -101,7 +102,7 @@ impl<'a> Property<'a> {
         Property {
             key: key.into(),
             value: value.into(),
-            ..Default::default()
+            parameters: BTreeMap::new()
         }
     }
 
@@ -160,7 +161,7 @@ impl<'a> fmt::Display for Property<'a> {
 ///
 /// This can be used to create a new calendar parameter by either creating a
 /// wrapper type or just use it as it is.
-#[derive(Debug, Default, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Parameter<'a> {
     pub(crate) key: Cow<'a, str>,
     pub(crate) value: Cow<'a, str>
