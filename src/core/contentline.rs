@@ -1,3 +1,5 @@
+//! Algorithms for content lines.
+
 // Content lines must be folded after 75 bytes
 pub const LIMIT: usize = 75;
 
