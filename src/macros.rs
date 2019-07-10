@@ -113,7 +113,10 @@ macro_rules! property {
 }
 
 macro_rules! property_with_constructor {
-    ($(#[$outer:meta])* $builder:ident, $name:expr, $($(#[$inner:meta])* $const_ident:ident, $value:expr);*) => {
+    (
+        $(#[$outer:meta])* $builder:ident, $name:expr,
+        $($(#[$inner:meta])* fn $const_ident:ident() { $value:expr });*
+    ) => {
         #[doc=$name]#[doc = " Property"]
         ///
         $(#[$outer])*
@@ -211,7 +214,10 @@ macro_rules! parameter {
     };
 }
 macro_rules! parameter_with_const {
-    ($(#[$outer:meta])* $builder:ident, $name:expr, $($(#[$inner:meta])* $const_ident:ident, $value:expr);*) => {
+    (
+        $(#[$outer:meta])* $builder:ident, $name:expr,
+        $($(#[$inner:meta])* const $const_ident:ident = $value:expr);*
+    ) => {
         #[doc=$name]#[doc = " Parameter"]
         ///
         $(#[$outer])*

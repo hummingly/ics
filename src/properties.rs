@@ -20,9 +20,9 @@ property_with_constructor!(
     /// [Format definitions of classifications](https://tools.ietf.org/html/rfc5545#section-3.8.1.3)
     Class, "CLASS",
     // Default Value
-    public, "PUBLIC";
-    private, "PRIVATE";
-    confidential, "CONFIDENTIAL"
+    fn public() { "PUBLIC" };
+    fn private() { "PRIVATE" };
+    fn confidential() { "CONFIDENTIAL" }
 );
 property!(Comment, "COMMENT");
 property!(Description, "DESCRIPTION");
@@ -35,21 +35,21 @@ property_with_constructor!(
     /// [Format definitions of statuses](https://tools.ietf.org/html/rfc5545#section-3.8.1.11)
     Status, "STATUS",
     /// `Status` for a tentative event
-    tentative, "TENTATIVE";
+    fn tentative() { "TENTATIVE" };
     /// `Status` for a definite event
-    confirmed, "CONFIRMED";
+    fn confirmed() { "CONFIRMED" };
     /// `Status` for a cancelled Event, To-Do or Journal
-    cancelled, "CANCELLED";
+    fn cancelled() { "CANCELLED" };
     /// `Status` for a To-Do that needs action
-    needs_action, "NEEDS-ACTION";
+    fn needs_action() { "NEEDS-ACTION" };
     /// `Status` for a completed To-Do
-    completed, "COMPLETED";
+    fn completed() { "COMPLETED" };
     /// `Status` for an in-process To-Do
-    in_process, "IN-PROCESS";
+    fn in_process() { "IN-PROCESS" };
     /// `Status` for a draft Journal
-    draft, "DRAFT";
+    fn draft() { "DRAFT" };
     /// `Status` for a final Journal
-    final_, "FINAL"
+    fn final_() { "FINAL" }
 );
 property!(Summary, "SUMMARY");
 property!(Completed, "COMPLETED");
@@ -62,8 +62,8 @@ property_with_constructor!(
     /// [Format definitions of time transparency](https://tools.ietf.org/html/rfc5545#section-3.8.2.7)
     Transp, "TRANSP",
     // Default Value
-    opaque, "OPAQUE";
-    transparent, "TRANSPARENT"
+    fn opaque() { "OPAQUE" };
+    fn transparent() { "TRANSPARENT" }
 );
 property!(TzID, "TZID");
 property!(TzName, "TZNAME");
@@ -83,9 +83,9 @@ property!(RRule, "RRULE");
 property_with_constructor!(
     /// [Format definitions of alarm actions](https://tools.ietf.org/html/rfc5545#section-3.8.6.1)
     Action, "ACTION",
-    audio, "AUDIO";
-    display, "DISPLAY";
-    email, "EMAIL"
+    fn audio() { "AUDIO" };
+    fn display() { "DISPLAY" };
+    fn email() { "EMAIL" }
 );
 property!(Repeat, "REPEAT");
 property!(Trigger, "TRIGGER");

@@ -27,11 +27,11 @@ parameter_with_const!(
     /// [Format definitions of calender user types.](https://tools.ietf.org/html/rfc5545#section-3.2.3)
     CUType, "CUTYPE",
     /// Default Value
-    INDIVIDUAL, "INDIVIDUAL";
-    GROUP, "GROUP";
-    RESOURCE, "RESOURCE";
-    ROOM, "ROOM";
-    UNKNOWN, "UNKNOWN"
+    const INDIVIDUAL = "INDIVIDUAL";
+    const GROUP = "GROUP";
+    const RESOURCE = "RESOURCE";
+    const ROOM = "ROOM";
+    const UNKNOWN = "UNKNOWN"
 );
 parameter!(DelegatedFrom, "DELEGATED-FROM");
 parameter!(DelegatedTo, "DELEGATED-TO");
@@ -40,11 +40,11 @@ parameter!(FmtType, "FMTTYPE");
 parameter_with_const!(
     /// [Format definitions of free/busy time types](https://tools.ietf.org/html/rfc5545#section-3.2.9)
     FBType, "FBTYPE",
-    FREE, "FREE";
+    const FREE = "FREE";
     /// Default Value
-    BUSY, "BUSY";
-    BUSY_UNAVAILABLE, "BUSY-UNAVAILABLE";
-    BUSY_TENTATIVE, "BUSY-TENTATIVE"
+    const BUSY = "BUSY";
+    const BUSY_UNAVAILABLE = "BUSY-UNAVAILABLE";
+    const BUSY_TENTATIVE = "BUSY-TENTATIVE"
 );
 parameter!(Language, "LANGUAGE");
 parameter!(Member, "MEMBER");
@@ -52,56 +52,56 @@ parameter_with_const!(
     /// [Format definitions of participation statuses of calendar users](https://tools.ietf.org/html/rfc5545#section-3.2.12)
     PartStat, "PARTSTAT",
     /// `PartStat` for an Event, To-Do or Journal that needs action (Default Value)
-    NEEDS_ACTION, "NEEDS-ACTION";
+    const NEEDS_ACTION = "NEEDS-ACTION";
     /// `PartStat` for an accepted Event, To-Do or Journal
-    ACCEPTED, "ACCEPTED";
+    const ACCEPTED = "ACCEPTED";
     /// `PartStat` for a declined Event, To-Do or Journal
-    DECLINED, "DECLINED";
+    const DECLINED = "DECLINED";
     /// `PartStat` for a tentatively accepted Event or To-Do
-    TENTATIVE, "TENTATIVE";
+    const TENTATIVE = "TENTATIVE";
     /// `PartStat` for a delegated Event or To-Do
-    DELEGATED, "DELEGATED";
+    const DELEGATED = "DELEGATED";
     /// `PartStat` for a completed To-Do
-    COMPLETED, "COMPLETED";
+    const COMPLETED = "COMPLETED";
     /// `PartStat` for an in-process To-Do
-    IN_PROCESS, "IN-PROCESS"
+    const IN_PROCESS = "IN-PROCESS"
 );
 parameter_with_const!(
     /// [Format definitions of hierarchical relationship types associated with the calendar component](https://tools.ietf.org/html/rfc5545#section-3.2.15)
     RelType, "RELTYPE",
     /// Default Value
-    PARENT, "PARENT";
-    CHILD, "CHILD";
-    SILBLING, "SILBLING"
+    const PARENT = "PARENT";
+    const CHILD = "CHILD";
+    const SILBLING = "SILBLING"
 );
 parameter_with_const!(
     /// [Format definitions of participation roles for calendar users](https://tools.ietf.org/html/rfc5545#section-3.2.16)
     Role, "ROLE",
-    CHAIR, "CHAIR";
+    const CHAIR = "CHAIR";
     /// Default Value
-    REQ_PARTICIPANT, "REQ-PARTICIPANT";
-    OPT_PARTICIPANT, "OPT-PARTICIPANT";
-    NON_PARTICIPANT, "NON-PARTICIPANT"
+    const REQ_PARTICIPANT = "REQ-PARTICIPANT";
+    const OPT_PARTICIPANT = "OPT-PARTICIPANT";
+    const NON_PARTICIPANT = "NON-PARTICIPANT"
 );
 parameter!(SentBy, "SENT-BY");
 parameter!(TzIDParam, "TZID");
 parameter_with_const!(
     /// [Format definitions of value type format for a property value](https://tools.ietf.org/html/rfc5545#section-3.2.20)
     Value, "VALUE",
-    BINARY, "BINARY";
-    BOOLEAN, "BOOLEAN";
-    CAL_ADDRESS, "CAL-ADDRESS";
-    DATE, "DATE";
-    DATE_TIME, "DATE-TIME";
-    DURATION, "DURATION";
-    FLOAT, "FLOAT";
-    INTEGER, "INTEGER";
-    PERIOD, "PERIOD";
-    RECUR, "RECUR";
-    TEXT, "TEXT";
-    TIME, "TIME";
-    URI, "URI";
-    UTC_OFFSET, "UTC-OFFSET"
+    const BINARY = "BINARY";
+    const BOOLEAN = "BOOLEAN";
+    const CAL_ADDRESS = "CAL-ADDRESS";
+    const DATE = "DATE";
+    const DATE_TIME = "DATE-TIME";
+    const DURATION = "DURATION";
+    const FLOAT = "FLOAT";
+    const INTEGER = "INTEGER";
+    const PERIOD = "PERIOD";
+    const RECUR = "RECUR";
+    const TEXT = "TEXT";
+    const TIME = "TIME";
+    const URI = "URI";
+    const UTC_OFFSET = "UTC-OFFSET"
 );
 
 impl<'a> Default for CUType<'a> {
@@ -272,22 +272,22 @@ mod rfc7986 {
         /// [Format definitions of displaying images](https://tools.ietf.org/html/rfc7986#section-6.1)
         Display, "DISPLAY",
         /// Default Value
-        BADGE, "BADGE";
-        GRAPHIC, "GRAPHIC";
-        FULLSIZE, "FULLSIZE";
-        THUMBNAIL, "THUMBNAIL"
+        const BADGE = "BADGE";
+        const GRAPHIC = "GRAPHIC";
+        const FULLSIZE = "FULLSIZE";
+        const THUMBNAIL = "THUMBNAIL"
     );
     parameter!(Email, "EMAIL");
     parameter_with_const!(
         /// [Format definitions of features of of a conference or broadcast system](https://tools.ietf.org/html/rfc7986#section-6.3)
         Feature, "FEATURE",
-        AUDIO, "AUDIO";
-        CHAT, "CHAT";
-        FEED, "FEED";
-        MODERATOR, "MODERATOR";
-        PHONE, "PHONE";
-        SCREEN, "SCREEN";
-        VIDEO, "VIDEO"
+        const AUDIO = "AUDIO";
+        const CHAT = "CHAT";
+        const FEED = "FEED";
+        const MODERATOR = "MODERATOR";
+        const PHONE = "PHONE";
+        const SCREEN = "SCREEN";
+        const VIDEO = "VIDEO"
     );
     parameter!(Label, "LABEL");
 
