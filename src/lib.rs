@@ -6,14 +6,14 @@
 //! To use this library add the library as a dependency in your `Cargo.toml`:
 //! ```toml
 //! [dependencies]
-//! ics = "0.3"
+//! ics = "0.4"
 //! ```
 //!
 //! By default some features are enabled. If you wish to disable them, specify
 //! in your `Cargo.toml`:
 //! ```toml
 //! [dependencies.ics]
-//! version = "0.3"
+//! version = "0.4"
 //! default-features = false
 //! ```
 //!
@@ -37,7 +37,7 @@
 //!     let mut todo = ToDo::new("d4092ed9-1667-4518-a7c0-bcfaac4f1fc6", "20181021T190000");
 //!     todo.push(Summary::new("Katarina's Birthday Present"));
 //!     todo.push(Comment::new("Buy her Imagine Dragons tickets!"));
-//!     todo.push(Status::new("NEEDS-ACTION"));
+//!     todo.push(Status::needs_action());
 //!
 //!     calendar.add_todo(todo);
 //!
