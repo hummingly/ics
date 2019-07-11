@@ -123,7 +123,7 @@ macro_rules! property_with_constructor {
             $(
                 $(#[$inner])*
                 ///
-                #[doc = "Parameter Value: "]#[doc = $value]
+                #[doc = "Property Value: "]#[doc = $value]
                 pub fn $const_ident() -> Self {
                     Self::new($value)
                 }
