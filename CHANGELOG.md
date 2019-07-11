@@ -1,5 +1,11 @@
 # Changelog
 
+## Version 0.4.1
+
+### Misc
+
+- Package crate only contains needed source files and license.
+
 ## Version 0.4.0
 
 ### Breaking Changes
