@@ -51,12 +51,13 @@
 
 #[macro_use]
 mod macros;
-pub mod components;
-mod contentline;
+mod core;
 mod ical;
-pub mod parameters;
-pub mod properties;
 mod util;
+
+pub use core::components;
+pub use core::parameters;
+pub use core::properties;
 
 pub use ical::Alarm;
 pub use ical::Event;
@@ -67,4 +68,5 @@ pub use ical::TimeZone;
 pub use ical::ToDo;
 pub use ical::ZoneTime;
 
+// TODO: Move to core::contentline module
 pub use util::escape_text;

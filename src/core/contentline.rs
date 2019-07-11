@@ -1,3 +1,4 @@
+//! Algorithms for content lines.
 use std::fmt;
 
 // Content lines must be folded after around 75 bytes by inserting a carriage

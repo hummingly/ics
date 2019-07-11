@@ -4,7 +4,7 @@ use std::borrow::Cow;
 ///
 /// This method is only necessary for properties with the value type "TEXT".
 ///
-/// #Example
+/// # Example
 /// ```
 /// use ics::escape_text;
 ///

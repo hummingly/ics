@@ -93,7 +93,10 @@ macro_rules! property {
 }
 
 macro_rules! property_with_constructor {
-    ($(#[$outer:meta])* $type:ident, $name:expr, $($(#[$inner:meta])* $constant:ident, $value:expr);*) => {
+    (
+        $(#[$outer:meta])* $type:ident, $name:expr,
+        $($(#[$inner:meta])* fn $const_ident:ident() { $value:expr });*
+    ) => {
         #[doc=$name]#[doc = " Property"]
         ///
         $(#[$outer])*
@@ -121,7 +124,7 @@ macro_rules! property_with_constructor {
                 $(#[$inner])*
                 ///
                 #[doc = "Parameter Value: "]#[doc = $value]
-                pub fn $constant() -> Self {
+                pub fn $const_ident() -> Self {
                     Self::new($value)
                 }
             )*
@@ -227,7 +230,10 @@ macro_rules! parameter {
 }
 
 macro_rules! parameter_with_const {
-    ($(#[$outer:meta])* $type:ident, $name:expr, $($(#[$inner:meta])* $constant:ident, $value:expr);*) => {
+    (
+        $(#[$outer:meta])* $type:ident, $name:expr,
+        $($(#[$inner:meta])* const $const_ident:ident = $value:expr);*
+    ) => {
         #[doc=$name]#[doc = " Parameter"]
         ///
         $(#[$outer])*
@@ -253,7 +259,7 @@ macro_rules! parameter_with_const {
                 $(#[$inner])*
                 ///
                 #[doc = "Parameter Value: "]#[doc = $value]
-                pub const $constant: Self = Self {
+                pub const $const_ident: Self = Self {
                     value: Cow::Borrowed($value)
                 };
             )*

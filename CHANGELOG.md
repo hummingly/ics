@@ -5,18 +5,18 @@
 ### Breaking Changes
 
 - Changed `parameters!` input syntax from `,` to `=>` to separate key and value
-- Properties aren't ordered anymore but shown in the order they were added. This change was made to reduce the unnecessary complexity to store properties but mainly also because it is very annoying to compare the input code with the generated iCalendar file. The previous implementation would prevent duplicated properties but this won't generate erroneous files.
-- `Parameter`s are now formatted without a semicolon: "KEY=VALUE".
-- Derived `Default` implementations were removed on properties and parameters because it does not make sense to have an empty value, resulting in only the key being displayed.
+- Properties are now written in the order they were added.
+- `Parameter`s are now formatted without a semicolon: `KEY=VALUE`.
+- Derived `Default` implementations were removed from properties, parameters and components because the key or value would be empty which makes sematically no sense.
 
 ### API
 
-- Format defintions (associated functions) for the following properties were added:
+- Format definitions (constructors) for the following properties were added:
   - `Class`
   - `Status`
   - `Transp`
   - `Action`
-- Format defintions (constants) for the following parameters were added:
+- Format definitions (constants) for the following parameters were added:
   - `CUType`
   - `FBType`
   - `RelType`
@@ -28,7 +28,7 @@
 
 ### Misc
 
-- `BTreeMap` was changed to `Vec` in `Property` to remove overhead/complexity
+- `BTreeMap` was changed to `Vec` in `Property` to remove unnecessary overhead/complexity. Additionally, it did not actually prevent duplicates due to mutliple content lines with the same property being allowed.
 
 ## Version 0.3.2
 
