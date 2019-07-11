@@ -1,7 +1,7 @@
 language: rust
 cache: cargo
 before_script:
-- cargo update || true
+  - cargo update || true
 rust:
   - stable
   - beta
@@ -9,14 +9,11 @@ rust:
   - 1.26.0
 matrix:
   include:
-   - rust: nightly
-     before_script:
-      - rustup component add rustfmt --toolchain nightly
-     script:
-      - cargo +nightly fmt -- --check
-      - cargo test --no-default-features --verbose
+    - rust: nightly
+      before_script:
+        - rustup component add rustfmt --toolchain nightly
+      script:
+        - cargo +nightly fmt -- --check
+        - cargo test --no-default-features --verbose
   allow_failures:
     - rust: nightly
-os:
-  - linux
-  - osx
