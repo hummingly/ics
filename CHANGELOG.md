@@ -29,6 +29,7 @@
 ### Misc
 
 - `BTreeMap` was changed to `Vec` in `Property` to remove unnecessary overhead/complexity. Additionally, it did not actually prevent duplicates due to mutliple content lines with the same property being allowed.
+- Tests are now only on linux. The crate does only use the std library, so it does not require platform specific features.
 
 ## Version 0.3.2
 
