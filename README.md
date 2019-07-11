@@ -14,13 +14,13 @@ This version is officially supported and tested in CI. Changes to the minimum su
 To use this library add the library as a dependency in your `Cargo.toml`:
 ```toml
 [dependencies]
-ics = "0.3"
+ics = "0.4"
 ```
 
 Optionally you can disable default features.
 ```toml
 [dependencies.ics]
-version = "0.3"
+version = "0.4"
 default-features = false
  ```
 ## Features
