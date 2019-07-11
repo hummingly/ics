@@ -5,7 +5,7 @@ use std::fmt;
 // return and line feed followed by whitespace. This crate uses a space
 // character as white space but it could also be a horizontal tab.
 pub const LIMIT: usize = 75;
-const LINE_BREAK: &'static str = "\r\n ";
+const LINE_BREAK: & str = "\r\n ";
 
 pub fn fold<W: fmt::Write>(writer: &mut W, content: &str) -> fmt::Result {
     let len = content.len();

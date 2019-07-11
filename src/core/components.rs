@@ -67,14 +67,14 @@ impl<'a> Component<'a> {
 
 impl<'a> fmt::Display for Component<'a> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "BEGIN:{}\r\n", self.name)?;
+        writeln!(f, "BEGIN:{}\r", self.name)?;
         for property in &self.properties {
             write!(f, "{}", property)?;
         }
         for component in &self.subcomponents {
             write!(f, "{}", component)?;
         }
-        write!(f, "END:{}\r\n", self.name)
+        writeln!(f, "END:{}\r", self.name)
     }
 }
 
@@ -150,7 +150,7 @@ impl<'a> fmt::Display for Property<'a> {
             self.format(&mut content)?;
             contentline::fold(f, &content)?;
         }
-        write!(f, "\r\n")
+        writeln!(f, "\r")
     }
 }
 

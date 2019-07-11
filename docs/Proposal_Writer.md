@@ -2,7 +2,7 @@
 
 ## Motivation
 
-Before anything is written, the user creates an instance `ICalendar` and adds properties and components. However, this comes with a cost at runtime. Depending on how many properties and components an iCalendar object contains, memory grows linearly until the object is dropped. This might or might not be a problem depending on the type of application and requirements of the environment but with Rust it should be possible to build abstractions that are memory efficient and also performant.
+Before anything is written, the user creates an `ICalendar` instance and adds properties and components. However, this comes with a cost at runtime. Depending on how many properties and components an iCalendar object contains, memory grows linearly until the object is dropped. This might or might not be a problem depending on the type of application and requirements of the environment but with Rust it should be possible to build abstractions that are memory efficient and also performant.
 
 Furthermore, it is actually possible to write several iCalendar objects into one stream, e.g. a file. The current design does not actively support that and makes it more cumbersome if needed.
 
@@ -62,9 +62,10 @@ fn main() -> std::io::Result<()> {
 
     writer.write_icalendar(|icalendar| {
         icalendar.write_todo("b68378cf-872d-44f1-9703-5e3725c56e71", "19980130T134500Z", |t| {
-            t.write(Organizer::mailto("unclesam@example.com"))?;             let mut
-            attendee = Attendee::mailto("jqpublic@example.com");
-            attendee.add(PartStat::ACCEPTED);             t.write(attendee)?;
+            t.write(Organizer::mailto("unclesam@example.com"))?;
+            let mut attendee = Attendee::mailto("jqpublic@example.com");
+            attendee.add(PartStat::ACCEPTED);
+            t.write(attendee)?;
             t.write(Due::ymd(1998, 4, 15).hms(0, 0, 0))?;
             t.write(Status::needs_action())?;
             t.write(Summary::new("Submit Income Taxes"))?;
