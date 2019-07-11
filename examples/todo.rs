@@ -33,7 +33,7 @@ fn main() -> std::io::Result<()> {
     calendar.add_todo(todo);
 
     // write calendar to file
-    calendar.save_file("icalendar.ics")?;
+    calendar.save_file("todo.ics")?;
     Ok(())
 
     /* inside icalendar.ics

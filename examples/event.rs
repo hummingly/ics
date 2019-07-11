@@ -27,7 +27,7 @@ fn main() -> std::io::Result<()> {
     calendar.add_event(event);
 
     // write calendar to file
-    calendar.save_file("icalendar.ics")?;
+    calendar.save_file("event.ics")?;
     Ok(())
 
     /* inside icalendar.ics
