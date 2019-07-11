@@ -6,27 +6,34 @@
 A library for creating iCalendar files as specified in [RFC5545](https://tools.ietf.org/html/rfc5545) and [RFC7986](https://tools.ietf.org/html/rfc7986).
 
 ## Minimum supported rustc
+
 **1.26.0+**
 
 This version is officially supported and tested in CI. Changes to the minimum supported version will be noted in the Changelog.
 
 ## Installation
+
 To use this library add the library as a dependency in your `Cargo.toml`:
+
 ```toml
 [dependencies]
 ics = "0.4"
 ```
 
 Optionally you can disable default features.
+
 ```toml
 [dependencies.ics]
 version = "0.4"
 default-features = false
- ```
+```
+
 ## Features
+
 - `rfc7986` (enabled by default): adds properties from the newer specification
 
 ## Usage
+
 ```rust
 extern crate ics;
 
@@ -57,26 +64,26 @@ fn main() -> std::io::Result<()> {
     calendar.add_event(event);
 
     // write calendar to file
-    calendar.save_file("icalendar.ics")?;
+    calendar.save_file("event.ics")?;
     Ok(())
 
-    /* inside icalendar.ics
+    /* inside event.ics
     BEGIN:VCALENDAR
-    PRODID:-//xyz Corp//NONSGML PDA Calendar Version 1.0//EN
     VERSION:2.0
+    PRODID:-//xyz Corp//NONSGML PDA Calendar Version 1.0//EN
     BEGIN:VEVENT
+    UID:b68378cf-872d-44f1-9703-5e3725c56e71
+    DTSTAMP:19960704T120000Z
+    ORGANIZER:mailto:jsmith@example.com
+    DTSTART:19960918T143000Z
+    DTEND:19960920T220000Z
+    STATUS:CONFIRMED
     CATEGORIES:CONFERENCE
+    SUMMARY:Networld+Interop Conference
     DESCRIPTION:Networld+Interop Conference and Exhibit
-    Atlanta World Congress 
+    Atlanta World Congress
      Center
     Atlanta\, Georgia
-    DTEND:19960920T220000Z
-    DTSTAMP:19960704T120000Z
-    DTSTART:19960918T143000Z
-    ORGANIZER:mailto:jsmith@example.com
-    STATUS:CONFIRMED
-    SUMMARY:Networld+Interop Conference
-    UID:b68378cf-872d-44f1-9703-5e3725c56e71
     END:VEVENT
     END:VCALENDAR
     */
@@ -87,10 +94,10 @@ fn main() -> std::io::Result<()> {
 
 Licensed under either of
 
- * Apache License, Version 2.0
-   ([LICENSE-APACHE](LICENSE-APACHE) or http://www.apache.org/licenses/LICENSE-2.0)
- * MIT license
-   ([LICENSE-MIT](LICENSE-MIT) or http://opensource.org/licenses/MIT)
+- Apache License, Version 2.0
+  ([LICENSE-APACHE](LICENSE-APACHE) or http://www.apache.org/licenses/LICENSE-2.0)
+- MIT license
+  ([LICENSE-MIT](LICENSE-MIT) or http://opensource.org/licenses/MIT)
 
 at your option.
 

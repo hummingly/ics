@@ -36,7 +36,7 @@ fn main() -> std::io::Result<()> {
     calendar.save_file("todo.ics")?;
     Ok(())
 
-    /* inside icalendar.ics
+    /* inside todo.ics
     BEGIN:VCALENDAR
     VERSION:2.0
     PRODID:-//ABC Corporation//NONSGML My Product//EN
@@ -57,6 +57,6 @@ fn main() -> std::io::Result<()> {
     DURATION:PT1H
     END:VALARM
     END:VTODO
-    END:VCALENDAR\r\n"
+    END:VCALENDAR
     */
 }
