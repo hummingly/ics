@@ -3,8 +3,23 @@
 //!
 //! Properties are key-value pairs which can have optionally several
 //! parameters. A property forms a content line which is line folded (CRLF +
-//! whitespace) after 75 bytes.
+//! whitespace) after 75 bytes automatically for you.
 //!
+//! Additionally, some of them also specify format definitions or defined
+//! values. Those are associated functions or constructors.
+//!
+//! # Example
+//! ```
+//! use ics::components::Property;
+//! use ics::properties::Class;
+//!
+//! // Using associated functions should be preferred over using the generic
+//! // constructors whenever possible
+//! let confidential = Class::confidential();
+//!
+//! assert_eq!(Class::new("CONFIDENTIAL"), confidential);
+//! assert_eq!(Property::new("CLASS", "CONFIDENTIAL"), confidential.into());
+//! ```
 //! For more information on properties, please refer to the specification [RFC5545 3.7. Calendar Properties](https://tools.ietf.org/html/rfc5545#section-3.7) and [RFC7986 5. Properties](https://tools.ietf.org/html/rfc7986#section-5).
 use components::{Parameter, Parameters, Property};
 use std::borrow::Cow;
