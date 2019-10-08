@@ -50,7 +50,7 @@ fn todo() {
     todo.push(Completed::new("20070707T100000Z"));
     todo.push(DtStart::new("20070514T110000Z"));
     todo.push(Due::new("20070709T130000Z"));
-    todo.push(Priority::new("1"));
+    todo.push(Priority::new(1));
     todo.push(Summary::new("Submit Revised Internet-Draft"));
     todo.push(Status::needs_action());
 

@@ -41,10 +41,140 @@ property_with_constructor!(
 );
 property!(Comment, "COMMENT");
 property!(Description, "DESCRIPTION");
-property!(Geo, "GEO");
+
+/// GEO Property
+#[derive(Debug, Clone, PartialEq, PartialOrd)]
+pub struct Geo<'a> {
+    latitude: f32,
+    longitude: f32,
+    parameters: Parameters<'a>
+}
+
+impl<'a> Geo<'a> {
+    /// Creates a new GEO Property with the given values.
+    pub fn new(latitude: f32, longitude: f32) -> Self {
+        Self {
+            latitude,
+            longitude,
+            parameters: BTreeMap::new()
+        }
+    }
+
+    /// Adds a parameter to the property.
+    pub fn add<P>(&mut self, parameter: P)
+    where
+        P: Into<Parameter<'a>>
+    {
+        let param = parameter.into();
+        self.parameters.insert(param.key, param.value);
+    }
+
+    /// Adds several parameters at once to the property. For creating
+    /// several parameters at once, consult the documentation of
+    /// the `parameters!` macro.
+    pub fn append(&mut self, mut parameters: Parameters<'a>) {
+        self.parameters.append(&mut parameters);
+    }
+}
+
+impl<'a> From<Geo<'a>> for Property<'a> {
+    fn from(builder: Geo<'a>) -> Self {
+        Property {
+            key: "GEO".into(),
+            value: Cow::Owned(format!("{:02};{}", builder.latitude, builder.longitude)),
+            parameters: builder.parameters
+        }
+    }
+}
+
 property!(Location, "LOCATION");
-property!(PercentComplete, "PERCENT-COMPLETE");
-property!(Priority, "PRIORITY");
+
+/// PERCENT-COMPLETE Property
+#[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
+pub struct PercentComplete<'a> {
+    value: i32,
+    parameters: Parameters<'a>
+}
+
+impl<'a> PercentComplete<'a> {
+    /// Creates a new PERCENT-COMPLETE Property with the given value.
+    pub fn new(value: i32) -> Self {
+        Self {
+            value,
+            parameters: BTreeMap::new()
+        }
+    }
+
+    /// Adds a parameter to the property.
+    pub fn add<P>(&mut self, parameter: P)
+    where
+        P: Into<Parameter<'a>>
+    {
+        let param = parameter.into();
+        self.parameters.insert(param.key, param.value);
+    }
+
+    /// Adds several parameters at once to the property. For creating
+    /// several parameters at once, consult the documentation of
+    /// the `parameters!` macro.
+    pub fn append(&mut self, mut parameters: Parameters<'a>) {
+        self.parameters.append(&mut parameters);
+    }
+}
+
+impl<'a> From<PercentComplete<'a>> for Property<'a> {
+    fn from(builder: PercentComplete<'a>) -> Self {
+        Property {
+            key: "PERCENT-COMPLETE".into(),
+            value: Cow::Owned(builder.value.to_string()),
+            parameters: builder.parameters
+        }
+    }
+}
+
+/// PRIORITY Property
+#[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
+pub struct Priority<'a> {
+    value: i32,
+    parameters: Parameters<'a>
+}
+
+impl<'a> Priority<'a> {
+    /// Creates a new PRIORITY Property with the given value.
+    pub fn new(value: i32) -> Self {
+        Self {
+            value,
+            parameters: BTreeMap::new()
+        }
+    }
+
+    /// Adds a parameter to the property.
+    pub fn add<P>(&mut self, parameter: P)
+    where
+        P: Into<Parameter<'a>>
+    {
+        let param = parameter.into();
+        self.parameters.insert(param.key, param.value);
+    }
+
+    /// Adds several parameters at once to the property. For creating
+    /// several parameters at once, consult the documentation of
+    /// the `parameters!` macro.
+    pub fn append(&mut self, mut parameters: Parameters<'a>) {
+        self.parameters.append(&mut parameters);
+    }
+}
+
+impl<'a> From<Priority<'a>> for Property<'a> {
+    fn from(builder: Priority<'a>) -> Self {
+        Property {
+            key: "PRIORITY".into(),
+            value: Cow::Owned(builder.value.to_string()),
+            parameters: builder.parameters
+        }
+    }
+}
+
 property!(Resources, "RESOURCES");
 property_with_constructor!(
     /// [Format definitions of statuses](https://tools.ietf.org/html/rfc5545#section-3.8.1.11)
@@ -102,13 +232,126 @@ property_with_constructor!(
     fn display() { "DISPLAY" };
     fn email() { "EMAIL" }
 );
-property!(Repeat, "REPEAT");
+
+/// REPEAT Property
+#[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
+pub struct Repeat<'a> {
+    value: i32,
+    parameters: Parameters<'a>
+}
+
+impl<'a> Repeat<'a> {
+    /// Creates a new REPEAT Property with the given value.
+    pub fn new(value: i32) -> Self {
+        Self {
+            value,
+            parameters: BTreeMap::new()
+        }
+    }
+
+    /// Adds a parameter to the property.
+    pub fn add<P>(&mut self, parameter: P)
+    where
+        P: Into<Parameter<'a>>
+    {
+        let param = parameter.into();
+        self.parameters.insert(param.key, param.value);
+    }
+
+    /// Adds several parameters at once to the property. For creating
+    /// several parameters at once, consult the documentation of
+    /// the `parameters!` macro.
+    pub fn append(&mut self, mut parameters: Parameters<'a>) {
+        self.parameters.append(&mut parameters);
+    }
+}
+
+impl<'a> From<Repeat<'a>> for Property<'a> {
+    fn from(builder: Repeat<'a>) -> Self {
+        Property {
+            key: "REPEAT".into(),
+            value: Cow::Owned(builder.value.to_string()),
+            parameters: builder.parameters
+        }
+    }
+}
+
 property!(Trigger, "TRIGGER");
 property!(Created, "CREATED");
 property!(DtStamp, "DTSTAMP");
 property!(LastModified, "LAST-MODIFIED");
-property!(Sequence, "SEQUENCE");
+
+/// SEQUENCE Property
+#[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
+pub struct Sequence<'a> {
+    value: i32,
+    parameters: Parameters<'a>
+}
+
+impl<'a> Sequence<'a> {
+    /// Creates a new SEQUENCE Property with the given value.
+    pub fn new(value: i32) -> Self {
+        Self {
+            value,
+            parameters: BTreeMap::new()
+        }
+    }
+
+    /// Adds a parameter to the property.
+    pub fn add<P>(&mut self, parameter: P)
+    where
+        P: Into<Parameter<'a>>
+    {
+        let param = parameter.into();
+        self.parameters.insert(param.key, param.value);
+    }
+
+    /// Adds several parameters at once to the property. For creating
+    /// several parameters at once, consult the documentation of
+    /// the `parameters!` macro.
+    pub fn append(&mut self, mut parameters: Parameters<'a>) {
+        self.parameters.append(&mut parameters);
+    }
+}
+
+impl<'a> From<Sequence<'a>> for Property<'a> {
+    fn from(builder: Sequence<'a>) -> Self {
+        Property {
+            key: "SEQUENCE".into(),
+            value: Cow::Owned(builder.value.to_string()),
+            parameters: builder.parameters
+        }
+    }
+}
+
 property!(RequestStatus, "REQUEST-STATUS");
+
+impl<'a> Default for Priority<'a> {
+    fn default() -> Self {
+        Self {
+            value: 0,
+            parameters: BTreeMap::new()
+        }
+    }
+}
+
+impl<'a> Default for Repeat<'a> {
+    fn default() -> Self {
+        Self {
+            value: 0,
+            parameters: BTreeMap::new()
+        }
+    }
+}
+
+impl<'a> Default for Sequence<'a> {
+    fn default() -> Self {
+        Self {
+            value: 0,
+            parameters: BTreeMap::new()
+        }
+    }
+}
 
 impl<'a> Default for Class<'a> {
     fn default() -> Self {
@@ -123,9 +366,6 @@ impl<'a> Default for Transp<'a> {
 }
 
 impl_default_prop!(CalScale, "GREGORIAN");
-impl_default_prop!(Priority, "0");
-impl_default_prop!(Repeat, "0");
-impl_default_prop!(Sequence, "0");
 
 #[cfg(feature = "rfc7986")]
 pub use self::rfc7986::*;

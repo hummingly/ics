@@ -20,13 +20,13 @@ fn main() -> std::io::Result<()> {
     todo.push(Due::new("19980415T000000"));
     todo.push(Status::needs_action());
     todo.push(Summary::new("Submit Income Taxes"));
-    todo.push(Sequence::new("2"));
+    todo.push(Sequence::new(2));
     // add alarm to todo
     let mut alarm = Alarm::audio(Trigger::new("19980403T120000Z"));
     let mut attach = Attach::new("http://example.com/pub/audio-files/ssbanner.aud");
     attach.add(FmtType::new("audio/basic"));
     alarm.push(attach);
-    alarm.push(Repeat::new("4"));
+    alarm.push(Repeat::new(4));
     alarm.push(Duration::new("PT1H"));
     todo.add_alarm(alarm);
     // add todo to calendar
