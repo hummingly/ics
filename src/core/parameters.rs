@@ -138,7 +138,7 @@ impl<'a> Default for Role<'a> {
 #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub enum Encoding {
     /// Text Encoding defined in RFC2045
-    Bit8,
+    Byte,
     /// Binary Encoding Format defined in RFC4648
     Base64
 }
@@ -146,7 +146,7 @@ pub enum Encoding {
 impl Encoding {
     fn into_value<'a>(self) -> Cow<'a, str> {
         match self {
-            Encoding::Bit8 => Cow::Borrowed("8BIT"),
+            Encoding::Byte => Cow::Borrowed("8BIT"),
             Encoding::Base64 => Cow::Borrowed("BASE64")
         }
     }
@@ -163,7 +163,7 @@ impl<'a> From<Encoding> for Parameter<'a> {
 
 impl Default for Encoding {
     fn default() -> Self {
-        Encoding::Bit8
+        Encoding::Byte
     }
 }
 
