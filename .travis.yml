@@ -13,10 +13,5 @@ matrix:
       script:
         - cargo test --examples
         - cargo test --no-default-features --verbose
-    - rust: nightly
-      before_script:
-        - rustup component add rustfmt --toolchain nightly
-      script:
-        - cargo +nightly fmt -- --check
   allow_failures:
     - rust: nightly

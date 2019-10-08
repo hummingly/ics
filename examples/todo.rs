@@ -23,7 +23,7 @@ fn main() -> std::io::Result<()> {
     todo.push(Sequence::new(2));
     // add alarm to todo
     let mut alarm = Alarm::audio(Trigger::new("19980403T120000Z"));
-    let mut attach = Attach::new("http://example.com/pub/audio-files/ssbanner.aud");
+    let mut attach = Attach::uri("http://example.com/pub/audio-files/ssbanner.aud");
     attach.add(FmtType::new("audio/basic"));
     alarm.push(attach);
     alarm.push(Repeat::new(4));

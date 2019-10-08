@@ -54,6 +54,7 @@ mod macros;
 mod core;
 mod ical;
 mod util;
+pub mod value;
 
 pub use core::components;
 pub use core::parameters;

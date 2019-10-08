@@ -24,12 +24,69 @@
 use components::{Parameter, Parameters, Property};
 use std::borrow::Cow;
 use std::collections::BTreeMap;
+use value::{Binary, Resource};
 
 property!(CalScale, "CALSCALE");
 property!(Method, "METHOD");
 property!(ProdID, "PRODID");
 property!(Version, "VERSION");
-property!(Attach, "ATTACH");
+
+/// ATTACH Property
+#[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
+pub struct Attach<'a> {
+    value: Resource<'a>,
+    parameters: Parameters<'a>
+}
+
+impl<'a> Attach<'a> {
+    /// Creates a new ATTACH Property with the given values..
+    pub fn uri<S>(value: S) -> Self
+    where
+        S: Into<Cow<'a, str>>
+    {
+        Self {
+            value: Resource::Link(value.into()),
+            parameters: BTreeMap::new()
+        }
+    }
+
+    /// Creates a new ATTACH Property with the given value. The value type is
+    /// "BINARY" which is why the "ENCODING" parameter with the value
+    /// "BASE64" is also added.
+    pub fn binary(value: Binary) -> Self {
+        Self {
+            value: Resource::Data(value),
+            parameters: parameters!("ENCODING" => "BASE64"; "VALUE" => "BINARY")
+        }
+    }
+
+    /// Adds a parameter to the property.
+    pub fn add<P>(&mut self, parameter: P)
+    where
+        P: Into<Parameter<'a>>
+    {
+        let param = parameter.into();
+        self.parameters.insert(param.key, param.value);
+    }
+
+    /// Adds several parameters at once to the property. For creating
+    /// several parameters at once, consult the documentation of
+    /// the `parameters!` macro.
+    pub fn append(&mut self, mut parameters: Parameters<'a>) {
+        self.parameters.append(&mut parameters);
+    }
+}
+
+impl<'a> From<Attach<'a>> for Property<'a> {
+    fn from(builder: Attach<'a>) -> Self {
+        Property {
+            key: "ATTACH".into(),
+            value: builder.value.into_value(),
+            parameters: builder.parameters
+        }
+    }
+}
+
 property!(Categories, "CATEGORIES");
 property_with_constructor!(
     /// [Format definitions of classifications](https://tools.ietf.org/html/rfc5545#section-3.8.1.3)
@@ -375,6 +432,8 @@ mod rfc7986 {
     use components::{Parameter, Parameters, Property};
     use std::borrow::Cow;
     use std::collections::BTreeMap;
+    use value::{Binary, Resource};
+
     property!(Name, "NAME");
     property_with_parameter!(RefreshInterval, "REFRESH-INTERVAL", "DURATION");
     property_with_parameter!(Source, "SOURCE", "URI");
@@ -389,7 +448,7 @@ mod rfc7986 {
     /// the constructor the value can be either "URI" or "BINARY".
     #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
     pub struct Image<'a> {
-        value: Cow<'a, str>,
+        value: Resource<'a>,
         parameters: Parameters<'a>
     }
 
@@ -401,7 +460,7 @@ mod rfc7986 {
             S: Into<Cow<'a, str>>
         {
             Image {
-                value: value.into(),
+                value: Resource::Link(value.into()),
                 parameters: parameters!("VALUE" => "URI")
             }
         }
@@ -409,12 +468,9 @@ mod rfc7986 {
         /// Creates a new IMAGE Property with the given value. The value type is
         /// "BINARY" which is why the "ENCODING" parameter with the value
         /// "BASE64" is also added.
-        pub fn binary<S>(value: S) -> Self
-        where
-            S: Into<Cow<'a, str>>
-        {
+        pub fn binary(value: Binary) -> Self {
             Image {
-                value: value.into(),
+                value: Resource::Data(value),
                 parameters: parameters!("ENCODING" => "BASE64"; "VALUE" => "BINARY")
             }
         }
@@ -440,7 +496,7 @@ mod rfc7986 {
         fn from(builder: Image<'a>) -> Self {
             Property {
                 key: "IMAGE".into(),
-                value: builder.value,
+                value: builder.value.into_value(),
                 parameters: builder.parameters
             }
         }

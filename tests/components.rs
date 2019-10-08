@@ -155,7 +155,7 @@ fn alarm() {
     trigger.add(Related::End);
     let mut alarm = Alarm::email(trigger, Description::new("A draft agenda needs to be sent out to the attendees to the weekly managers meeting (MGR-LIST). Attached is a pointer the document template for the agenda file."), Summary::new("*** REMINDER: SEND AGENDA FOR WEEKLY STAFF MEETING ***"));
     alarm.push(Attendee::new("mailto:john_doe@example.com"));
-    let mut attach = Attach::new("http://example.com/templates/agenda.doc");
+    let mut attach = Attach::uri("http://example.com/templates/agenda.doc");
     attach.add(FmtType::new("application/msword"));
     alarm.push(attach);
 
