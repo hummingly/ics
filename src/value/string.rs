@@ -30,8 +30,8 @@ impl fmt::Display for Binary {
     }
 }
 
-impl From<&str> for Binary {
-    fn from(value: &str) -> Self {
+impl<'a> From<&'a str> for Binary {
+    fn from(value: &'a str) -> Self {
         Binary::encode(value.as_bytes())
     }
 }
