@@ -81,7 +81,7 @@ impl<'a> From<Attach<'a>> for Property<'a> {
     fn from(builder: Attach<'a>) -> Self {
         Property {
             key: "ATTACH".into(),
-            value: builder.value.into_value(),
+            value: builder.value.into(),
             parameters: builder.parameters
         }
     }
@@ -496,7 +496,7 @@ mod rfc7986 {
         fn from(builder: Image<'a>) -> Self {
             Property {
                 key: "IMAGE".into(),
-                value: builder.value.into_value(),
+                value: builder.value.into(),
                 parameters: builder.parameters
             }
         }

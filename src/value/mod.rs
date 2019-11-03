@@ -9,7 +9,7 @@ use std::fmt;
 use std::str::FromStr;
 use value::error::ParseBoolError;
 
-/// ICalendar Boolean value type
+/// ICalendar Boolean
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Boolean(bool);
 
@@ -53,9 +53,9 @@ pub(crate) enum Resource<'a> {
     Data(Binary)
 }
 
-impl<'a> Resource<'a> {
-    pub(crate) fn into_value(self) -> Cow<'a, str> {
-        match self {
+impl<'a> From<Resource<'a>> for Cow<'a, str> {
+    fn from(value: Resource<'a>) -> Self {
+        match value {
             Resource::Link(uri) => uri,
             Resource::Data(binary) => Cow::Owned(binary.to_string())
         }

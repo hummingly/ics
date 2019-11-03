@@ -7,14 +7,14 @@ use std::str::FromStr;
 use value::encoding::{encode_base64, escape_text};
 
 // INFO: https://tools.ietf.org/html/rfc2045#section-2.8
-/// ICalendar Binary value type
+/// ICalendar Binary
 ///
-/// Bytes encoded with standard Base64 encoding.
+/// Bytes are encoded with standard Base64 encoding.
 #[derive(Debug, Default, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Binary(String);
 
 impl Binary {
-    /// Creates binary data from bytes.
+    /// Creates binary data by encoding bytes with standard Base64 encoding.
     pub fn encode(data: &[u8]) -> Self {
         Binary(encode_base64(data))
     }
@@ -30,17 +30,17 @@ impl fmt::Display for Binary {
     }
 }
 
-impl<'a> From<&'a str> for Binary {
-    fn from(value: &'a str) -> Self {
-        Binary::encode(value.as_bytes())
-    }
-}
+// impl<'a> From<&'a str> for Binary {
+//     fn from(value: &'a str) -> Self {
+//         Binary::encode(value.as_bytes())
+//     }
+// }
 
-impl From<String> for Binary {
-    fn from(value: String) -> Self {
-        Binary::encode(value.as_bytes())
-    }
-}
+// impl From<String> for Binary {
+//     fn from(value: String) -> Self {
+//         Binary::encode(value.as_bytes())
+//     }
+// }
 
 impl FromStr for Binary {
     type Err = ParseBinaryError;
