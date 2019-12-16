@@ -1,6 +1,6 @@
 use super::error::ParseBinaryError;
 use std::borrow::Cow;
-use std::collections::HashMap;
+// use std::collections::HashMap;
 use std::fmt;
 use std::str::FromStr;
 
@@ -72,17 +72,23 @@ impl FromStr for Binary {
 
 // pub type CalAdress = Uri;
 
-// #[derive(Debug, Default, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
-// pub struct Text<'t>(Cow<'t, str>);
+/// ICalendar Text Value Type
+///
+/// Text characters like comma, semicolon and backlash must be escaped by
+/// prepending a backlash before the escaped chracters.
+#[derive(Debug, Default, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
+pub struct Text<'t>(Cow<'t, str>);
 
-// impl<'t> Text<'t> {
-//     fn encode<T>(text: T) -> Self
-//     where
-//         T: Into<Cow<'t, str>>
-//     {
-//         Text(escape_text(text.into()))
-//     }
-// }
+impl<'t> Text<'t> {
+    /// Creates new Text by prepending commas, semicolons and backlashes with
+    /// backlash.
+    pub fn encode<T>(text: T) -> Self
+    where
+        T: Into<Cow<'t, str>>
+    {
+        Text(escape_text(text.into()))
+    }
+}
 
 // impl<'t> fmt::Display for Text<'t> {
 //     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -102,11 +108,12 @@ impl FromStr for Binary {
 //     }
 // }
 
+// TODO: Check for correct encoding
 // impl<'t> FromStr for Text<'t> {
 //     // TODO: Replace with Infallible
 //     type Err = ();
 //     fn from_str(s: &str) -> Result<Self, Self::Err> {
-//         Ok(Text::new(s.to_owned()))
+//         Ok(Text::encode(s.to_owned()))
 //     }
 // }
 

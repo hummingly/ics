@@ -34,13 +34,13 @@ pub fn encode_base64(binary: &[u8]) -> String {
             }
             &[first, second] => {
                 output.push(BASE_64[usize::from(first >> 2)]);
-                output.push(BASE_64[usize::from(first << 4 & 0b00111111 | second >> 4)]);
-                output.push(BASE_64[usize::from(second << 2 & 0b00111111)]);
+                output.push(BASE_64[usize::from(first << 4 & 0b0011_1111 | second >> 4)]);
+                output.push(BASE_64[usize::from(second << 2 & 0b0011_1111)]);
                 output.push('=');
             }
             &[first] => {
                 output.push(BASE_64[usize::from(first >> 2)]);
-                output.push(BASE_64[usize::from(first & 0b00000011 << 4)]);
+                output.push(BASE_64[usize::from(first & 0b0000_0011 << 4)]);
                 output.push_str("==");
             }
             _ => unreachable!()
@@ -51,9 +51,9 @@ pub fn encode_base64(binary: &[u8]) -> String {
 
 fn encode_chunk(chunk: &[u8]) -> [char; 4] {
     let first = usize::from(chunk[0] >> 2);
-    let second = usize::from(chunk[0] << 4 & 0b00111111 | chunk[1] >> 4);
-    let third = usize::from(chunk[1] << 2 & 0b00111111 | chunk[2] >> 6);
-    let fourth = usize::from(chunk[2] & 0b00111111);
+    let second = usize::from(chunk[0] << 4 & 0b0011_1111 | chunk[1] >> 4);
+    let third = usize::from(chunk[1] << 2 & 0b0011_1111 | chunk[2] >> 6);
+    let fourth = usize::from(chunk[2] & 0b0011_1111);
     [
         BASE_64[first],
         BASE_64[second],

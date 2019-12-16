@@ -84,6 +84,7 @@ parameter_with_const!(
     const NON_PARTICIPANT = "NON-PARTICIPANT"
 );
 parameter!(SentBy, "SENT-BY");
+// TODO: TzIDRef
 parameter!(TzIDParam, "TZID");
 parameter_with_const!(
     /// [Format definitions of value type format for a property value](https://tools.ietf.org/html/rfc5545#section-3.2.20)
