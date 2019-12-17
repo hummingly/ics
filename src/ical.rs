@@ -252,7 +252,7 @@ impl<'a> Journal<'a> {
         U: Into<Cow<'a, str>>,
         D: Into<Cow<'a, str>>
     {
-        Self(vec![UID::new(uid).into(), DtStamp::new(dtstamp).into()])
+        Journal(vec![UID::new(uid).into(), DtStamp::new(dtstamp).into()])
     }
 
     /// Adds a property to the journal. RFC5545 and RFC7986 specify which
@@ -304,7 +304,7 @@ impl<'a> FreeBusy<'a> {
         U: Into<Cow<'a, str>>,
         D: Into<Cow<'a, str>>
     {
-        Self(vec![UID::new(uid).into(), DtStamp::new(dtstamp).into()])
+        FreeBusy(vec![UID::new(uid).into(), DtStamp::new(dtstamp).into()])
     }
 
     /// Adds a property to the free busy schedule. The RFC5545 specifies which
@@ -521,7 +521,7 @@ impl<'a> Alarm<'a> {
     /// Creates a new "VALARM" calendar component. The "ACTION" and "TRIGGER"
     /// properties are required.
     pub fn new(action: Action<'a>, trigger: Trigger<'a>) -> Self {
-        Self(vec![action.into(), trigger.into()])
+        Alarm(vec![action.into(), trigger.into()])
     }
 
     /// Creates a new audio alarm. The "TRIGGER" property is required.
@@ -532,7 +532,7 @@ impl<'a> Alarm<'a> {
     /// Creates a new display alarm. The "TRIGGER" and "DESCRIPTION" properties
     /// are required.
     pub fn display(trigger: Trigger<'a>, description: Description<'a>) -> Self {
-        Self(vec![
+        Alarm(vec![
             Action::display().into(),
             trigger.into(),
             description.into(),
@@ -542,7 +542,7 @@ impl<'a> Alarm<'a> {
     /// Creates a new email alarm. The "TRIGGER", "DESCRIPTION" and "SUMMARY"
     /// properties are required.
     pub fn email(trigger: Trigger<'a>, description: Description<'a>, summary: Summary<'a>) -> Self {
-        Self(vec![
+        Alarm(vec![
             Action::email().into(),
             trigger.into(),
             description.into(),
