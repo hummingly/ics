@@ -27,8 +27,6 @@ fn icalendar_event() {
                     END:VEVENT\r\n\
                     END:VCALENDAR\r\n";
 
-    let mut calendar = ICalendar::new("2.0", "-//xyz Corp//NONSGML PDA Calendar Version 1.0//EN");
-
     let mut event = Event::new("b68378cf-872d-44f1-9703-5e3725c56e71", "19960704T120000Z");
     event.push(Organizer::new("mailto:jsmith@example.com"));
     event.push(DtStart::new("19960918T143000Z"));
@@ -41,7 +39,7 @@ fn icalendar_event() {
          Atlanta World Congress Center\n\
          Atlanta, Georgia"
     )));
-    calendar.add_event(event);
+    let calendar = ICalendar::new("2.0", "-//xyz Corp//NONSGML PDA Calendar Version 1.0//EN", event);
 
     assert_eq!(calendar.to_string(), expected);
 }
@@ -70,8 +68,6 @@ fn icalendar_todo() {
                     END:VTODO\r\n\
                     END:VCALENDAR\r\n";
 
-    let mut calendar = ICalendar::new("2.0", "-//ABC Corporation//NONSGML My Product//EN");
-
     let mut todo = ToDo::new("b68378cf-872d-44f1-9703-5e3725c56e71", "19980130T134500Z");
     todo.push(Organizer::new("mailto:unclesam@example.com"));
     let mut attendee = Attendee::new("mailto:jqpublic@example.com");
@@ -88,7 +84,7 @@ fn icalendar_todo() {
     alarm.push(Repeat::new("4"));
     alarm.push(Duration::new("PT1H"));
     todo.add_alarm(alarm);
-    calendar.add_todo(todo);
+    let calendar = ICalendar::new("2.0", "-//ABC Corporation//NONSGML My Product//EN", todo);
 
     assert_eq!(calendar.to_string(), expected);
 }

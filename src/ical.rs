@@ -8,6 +8,7 @@ use std::fmt;
 use std::fs::File;
 use std::io::{self, Write};
 use std::path::Path;
+use std::slice::Iter;
 
 /// The iCalendar object specified as VCALENDAR.
 ///
@@ -23,15 +24,17 @@ pub struct ICalendar<'a>(Component<'a>);
 impl<'a> ICalendar<'a> {
     /// Creates a new iCalendar object/"VCALENDAR" calendar component. The
     /// "VERSION" and "PRODID" properties are required.
-    pub fn new<V, P>(version: V, prodid: P) -> Self
+    pub fn new<V, P, C>(version: V, prodid: P, component: C) -> Self
     where
         V: Into<Cow<'a, str>>,
-        P: Into<Cow<'a, str>>
+        P: Into<Cow<'a, str>>,
+        C: Into<Component<'a>>
     {
-        let mut cal = ICalendar(Component::new("VCALENDAR"));
-        cal.push(Version::new(version));
-        cal.push(ProdID::new(prodid));
-        cal
+        ICalendar(Component {
+            name: "VCALENDAR".into(),
+            properties: vec![Version::new(version).into(), ProdID::new(prodid).into()],
+            subcomponents: vec![component.into()]
+        })
     }
 
     /// Adds a property to the iCalendar object. Calendar properties are like
@@ -120,7 +123,6 @@ pub struct Event<'a> {
 }
 
 impl<'a> Event<'a> {
-    const COMPONENT_NAME: &'static str = "VEVENT";
     /// Creates a new "VEVENT" calendar component. The "UID" and "DTSTAMP"
     /// properties are required. A UID should be generated randomly for security
     /// reasons.
@@ -149,14 +151,7 @@ impl<'a> Event<'a> {
 
 impl<'a> fmt::Display for Event<'a> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        writeln!(f, "BEGIN:{}\r", Self::COMPONENT_NAME)?;
-        for property in &self.properties {
-            write!(f, "{}", property)?;
-        }
-        for alarm in &self.alarms {
-            write!(f, "{}", alarm)?;
-        }
-        writeln!(f, "END:{}\r", Self::COMPONENT_NAME)
+        <Self as IcalComponentDisplay>::fmt(self, f)
     }
 }
 
@@ -181,7 +176,6 @@ pub struct ToDo<'a> {
 }
 
 impl<'a> ToDo<'a> {
-    const COMPONENT_NAME: &'static str = "VTODO";
     /// Creates a new "VTODO" calendar component. The "UID" and "DTSTAMP"
     /// properties are required. A UID should be generated randomly for security
     /// reasons.
@@ -213,14 +207,7 @@ impl<'a> ToDo<'a> {
 
 impl<'a> fmt::Display for ToDo<'a> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        writeln!(f, "BEGIN:{}\r", Self::COMPONENT_NAME)?;
-        for property in &self.properties {
-            write!(f, "{}", property)?;
-        }
-        for alarm in &self.alarms {
-            write!(f, "{}", alarm)?;
-        }
-        writeln!(f, "END:{}\r", Self::COMPONENT_NAME)
+        <Self as IcalComponentDisplay>::fmt(self, f)
     }
 }
 
@@ -243,7 +230,6 @@ impl<'a> From<ToDo<'a>> for Component<'a> {
 pub struct Journal<'a>(Vec<Property<'a>>);
 
 impl<'a> Journal<'a> {
-    const COMPONENT_NAME: &'static str = "VJOURNAL";
     /// Creates a new "VJOURNAL" calendar component. The "UID" and "DTSTAMP"
     /// properties are required. A UID should be generated randomly for security
     /// reasons.
@@ -267,11 +253,7 @@ impl<'a> Journal<'a> {
 
 impl<'a> fmt::Display for Journal<'a> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        writeln!(f, "BEGIN:{}\r", Self::COMPONENT_NAME)?;
-        for property in &self.0 {
-            write!(f, "{}", property)?;
-        }
-        writeln!(f, "END:{}\r", Self::COMPONENT_NAME)
+        <Self as IcalComponentDisplay>::fmt(self, f)
     }
 }
 
@@ -295,7 +277,6 @@ impl<'a> From<Journal<'a>> for Component<'a> {
 pub struct FreeBusy<'a>(Vec<Property<'a>>);
 
 impl<'a> FreeBusy<'a> {
-    const COMPONENT_NAME: &'static str = "VFREEBUSY";
     /// Creates a new "VFREEBUSY" calendar component. The "UID" and "DTSTAMP"
     /// properties are required. A UID should be generated randomly for security
     /// reasons.
@@ -319,11 +300,7 @@ impl<'a> FreeBusy<'a> {
 
 impl<'a> fmt::Display for FreeBusy<'a> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        writeln!(f, "BEGIN:{}\r", Self::COMPONENT_NAME)?;
-        for property in &self.0 {
-            write!(f, "{}", property)?;
-        }
-        writeln!(f, "END:{}\r", Self::COMPONENT_NAME)
+        <Self as IcalComponentDisplay>::fmt(self, f)
     }
 }
 
@@ -349,7 +326,6 @@ pub struct TimeZone<'a> {
 }
 
 impl<'a> TimeZone<'a> {
-    const COMPONENT_NAME: &'static str = "VTIMEZONE";
     /// Creates a new "VTIMEZONE" calendar component. The "TZID" property and
     /// at least one zone time component ("STANDARD" or "DAYLIGHT"
     /// sub-component) are required.
@@ -381,14 +357,7 @@ impl<'a> TimeZone<'a> {
 
 impl<'a> fmt::Display for TimeZone<'a> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        writeln!(f, "BEGIN:{}\r", Self::COMPONENT_NAME)?;
-        for property in &self.properties {
-            write!(f, "{}", property)?;
-        }
-        for zone in &self.zone_times {
-            write!(f, "{}", zone)?;
-        }
-        writeln!(f, "END:{}\r", Self::COMPONENT_NAME)
+        <Self as IcalComponentDisplay>::fmt(self, f)
     }
 }
 
@@ -412,9 +381,11 @@ impl<'a> From<TimeZone<'a>> for Component<'a> {
 /// sub-components that describe the rule for a particular observance (either a
 /// Standard Time or a Daylight Saving Time observance). (see [RFC5545 3.6.5. Time Zone Component Component](https://tools.ietf.org/html/rfc5545#page-63))
 #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
-pub struct ZoneTime<'a> {
-    name: ZoneTimeType,
-    properties: Vec<Property<'a>>
+pub enum ZoneTime<'a> {
+    /// Standard Time
+    Standard(Standard<'a>),
+    /// Daylight Saving Time
+    Daylight(Daylight<'a>)
 }
 
 impl<'a> ZoneTime<'a> {
@@ -427,14 +398,7 @@ impl<'a> ZoneTime<'a> {
         F: Into<Cow<'a, str>>,
         T: Into<Cow<'a, str>>
     {
-        Self {
-            name: ZoneTimeType::Standard,
-            properties: vec![
-                DtStart::new(dtstart).into(),
-                TzOffsetFrom::new(tz_offset_from).into(),
-                TzOffsetTo::new(tz_offset_to).into(),
-            ]
-        }
+        ZoneTime::Standard(Standard::new(dtstart, tz_offset_from, tz_offset_to))
     }
 
     /// Creates a new "DAYLIGHT" sub-component. The "DTSTART", "TZOFFSETFROM"
@@ -447,14 +411,7 @@ impl<'a> ZoneTime<'a> {
         F: Into<Cow<'a, str>>,
         T: Into<Cow<'a, str>>
     {
-        Self {
-            name: ZoneTimeType::Daylight,
-            properties: vec![
-                DtStart::new(dtstart).into(),
-                TzOffsetFrom::new(tz_offset_from).into(),
-                TzOffsetTo::new(tz_offset_to).into(),
-            ]
-        }
+        ZoneTime::Daylight(Daylight::new(dtstart, tz_offset_from, tz_offset_to))
     }
 
     /// Adds a property to the zone time. The RFC5545 specifies which
@@ -463,46 +420,123 @@ impl<'a> ZoneTime<'a> {
     where
         P: Into<Property<'a>>
     {
-        self.properties.push(property.into());
+        match self {
+            ZoneTime::Daylight(p) => p.push(property),
+            ZoneTime::Standard(p) => p.push(property)
+        }
     }
 }
 
 impl<'a> fmt::Display for ZoneTime<'a> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        writeln!(f, "BEGIN:{}\r", self.name.as_str())?;
-        for property in &self.properties {
-            write!(f, "{}", property)?;
+        match self {
+            ZoneTime::Daylight(p) => write!(f, "{}", p),
+            ZoneTime::Standard(p) => write!(f, "{}", p)
         }
-        writeln!(f, "END:{}\r", self.name.as_str())
     }
 }
 
 impl<'a> From<ZoneTime<'a>> for Component<'a> {
     fn from(component: ZoneTime<'a>) -> Self {
+        match component {
+            ZoneTime::Daylight(p) => Self::from(p),
+            ZoneTime::Standard(p) => Self::from(p)
+        }
+    }
+}
+
+/// The STANDARD calendar component.
+///
+/// A STANDARD component is a sub-component of the VTIMEZONE component which
+/// describes rules for Standard Time, also known as Winter Time.
+#[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
+pub struct Standard<'a>(Vec<Property<'a>>);
+
+impl<'a> Standard<'a> {
+    pub fn new<S, T, F>(dtstart: S, tz_offset_from: F, tz_offset_to: T) -> Self
+    where
+        S: Into<Cow<'a, str>>,
+        F: Into<Cow<'a, str>>,
+        T: Into<Cow<'a, str>>
+    {
+        Standard(vec![
+            DtStart::new(dtstart).into(),
+            TzOffsetFrom::new(tz_offset_from).into(),
+            TzOffsetTo::new(tz_offset_to).into(),
+        ])
+    }
+
+    /// Adds a property to the zone time. The RFC5545 specifies which
+    /// properties can be added to a zone time.
+    pub fn push<P>(&mut self, property: P)
+    where
+        P: Into<Property<'a>>
+    {
+        self.0.push(property.into());
+    }
+}
+
+impl<'a> fmt::Display for Standard<'a> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        <Self as IcalComponentDisplay>::fmt(self, f)
+    }
+}
+
+impl<'a> From<Standard<'a>> for Component<'a> {
+    fn from(component: Standard<'a>) -> Self {
         Component {
-            name: component.name.as_cow(),
-            properties: component.properties,
+            name: Standard::COMPONENT_NAME.into(),
+            properties: component.0,
             subcomponents: Vec::new()
         }
     }
 }
 
+/// The DAYLIGHT calendar component.
+///
+/// A DAYLIGHT component is a sub-component of the VTIMEZONE component which
+/// describes rules for Daylight Saving Time, also known as Advanced Time,
+/// Summer Time, or Legal Time in certain countries.
 #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
-enum ZoneTimeType {
-    Standard,
-    Daylight
-}
+pub struct Daylight<'a>(Vec<Property<'a>>);
 
-impl ZoneTimeType {
-    pub fn as_str(&self) -> &'static str {
-        match *self {
-            ZoneTimeType::Daylight => "DAYLIGHT",
-            ZoneTimeType::Standard => "STANDARD"
-        }
+impl<'a> Daylight<'a> {
+    pub fn new<S, T, F>(dtstart: S, tz_offset_from: F, tz_offset_to: T) -> Self
+    where
+        S: Into<Cow<'a, str>>,
+        F: Into<Cow<'a, str>>,
+        T: Into<Cow<'a, str>>
+    {
+        Daylight(vec![
+            DtStart::new(dtstart).into(),
+            TzOffsetFrom::new(tz_offset_from).into(),
+            TzOffsetTo::new(tz_offset_to).into(),
+        ])
     }
 
-    pub fn as_cow<'a>(&self) -> Cow<'a, str> {
-        Cow::Borrowed(self.as_str())
+    /// Adds a property to the zone time. The RFC5545 specifies which
+    /// properties can be added to a zone time.
+    pub fn push<P>(&mut self, property: P)
+    where
+        P: Into<Property<'a>>
+    {
+        self.0.push(property.into());
+    }
+}
+
+impl<'a> fmt::Display for Daylight<'a> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        <Self as IcalComponentDisplay>::fmt(self, f)
+    }
+}
+
+impl<'a> From<Daylight<'a>> for Component<'a> {
+    fn from(component: Daylight<'a>) -> Self {
+        Component {
+            name: Daylight::COMPONENT_NAME.into(),
+            properties: component.0,
+            subcomponents: Vec::new()
+        }
     }
 }
 
@@ -517,7 +551,6 @@ pub struct Alarm<'a>(Vec<Property<'a>>);
 // The specific constructors use the specific property builder types since the
 // required properties can have defined parameters.
 impl<'a> Alarm<'a> {
-    const COMPONENT_NAME: &'static str = "VALARM";
     /// Creates a new "VALARM" calendar component. The "ACTION" and "TRIGGER"
     /// properties are required.
     pub fn new(action: Action<'a>, trigger: Trigger<'a>) -> Self {
@@ -562,11 +595,7 @@ impl<'a> Alarm<'a> {
 
 impl<'a> fmt::Display for Alarm<'a> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        writeln!(f, "BEGIN:{}\r", Self::COMPONENT_NAME)?;
-        for property in &self.0 {
-            write!(f, "{}", property)?;
-        }
-        writeln!(f, "END:{}\r", Self::COMPONENT_NAME)
+        <Self as IcalComponentDisplay>::fmt(self, f)
     }
 }
 
@@ -577,5 +606,98 @@ impl<'a> From<Alarm<'a>> for Component<'a> {
             properties: component.0,
             subcomponents: Vec::new()
         }
+    }
+}
+
+pub trait IcalComponentDisplay<'c> {
+    type C: fmt::Display;
+    const COMPONENT_NAME: &'static str;
+    fn properties(&self) -> Iter<Property<'c>>;
+    fn subcomponents(&self) -> Iter<Self::C> {
+        [].iter()
+    }
+
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        writeln!(f, "BEGIN:{}\r", Self::COMPONENT_NAME)?;
+        for property in self.properties() {
+            write!(f, "{}", property)?;
+        }
+        for component in self.subcomponents() {
+            write!(f, "{}", component)?;
+        }
+        writeln!(f, "END:{}\r", Self::COMPONENT_NAME)
+    }
+}
+
+impl<'c> IcalComponentDisplay<'c> for Event<'c> {
+    type C = Alarm<'c>;
+    const COMPONENT_NAME: &'static str = "VEVENT";
+    fn properties(&self) -> Iter<Property<'c>> {
+        self.properties.iter()
+    }
+    fn subcomponents(&self) -> Iter<Self::C> {
+        self.alarms.iter()
+    }
+}
+
+impl<'c> IcalComponentDisplay<'c> for ToDo<'c> {
+    type C = Alarm<'c>;
+    const COMPONENT_NAME: &'static str = "VTODO";
+    fn properties(&self) -> Iter<Property<'c>> {
+        self.properties.iter()
+    }
+    fn subcomponents(&self) -> Iter<Self::C> {
+        self.alarms.iter()
+    }
+}
+
+impl<'c> IcalComponentDisplay<'c> for Journal<'c> {
+    type C = bool;
+    const COMPONENT_NAME: &'static str = "VJOURNAL";
+    fn properties(&self) -> Iter<Property<'c>> {
+        self.0.iter()
+    }
+}
+
+impl<'c> IcalComponentDisplay<'c> for FreeBusy<'c> {
+    type C = bool;
+    const COMPONENT_NAME: &'static str = "VFREEBUSY";
+    fn properties(&self) -> Iter<Property<'c>> {
+        self.0.iter()
+    }
+}
+
+impl<'c> IcalComponentDisplay<'c> for TimeZone<'c> {
+    type C = ZoneTime<'c>;
+    const COMPONENT_NAME: &'static str = "VTIMEZONE";
+    fn properties(&self) -> Iter<Property<'c>> {
+        self.properties.iter()
+    }
+    fn subcomponents(&self) -> Iter<Self::C> {
+        self.zone_times.iter()
+    }
+}
+
+impl<'c> IcalComponentDisplay<'c> for Standard<'c> {
+    type C = bool;
+    const COMPONENT_NAME: &'static str = "STANDARD";
+    fn properties(&self) -> Iter<Property<'c>> {
+        self.0.iter()
+    }
+}
+
+impl<'c> IcalComponentDisplay<'c> for Daylight<'c> {
+    type C = bool;
+    const COMPONENT_NAME: &'static str = "DAYLIGHT";
+    fn properties(&self) -> Iter<Property<'c>> {
+        self.0.iter()
+    }
+}
+
+impl<'c> IcalComponentDisplay<'c> for Alarm<'c> {
+    type C = bool;
+    const COMPONENT_NAME: &'static str = "VALARM";
+    fn properties(&self) -> Iter<Property<'c>> {
+        self.0.iter()
     }
 }

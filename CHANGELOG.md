@@ -1,5 +1,18 @@
 # Changelog
 
+## Version 0.5.0 (Unreleased)
+
+### Breaking Changes
+
+- Changed `ZoneTime` an enum.
+- `ICalendar`'s constructor additionally requires one component. This is important for creating correct icalendar files.
+
+### API
+
+- Added `Standard` and `Daylight` component
+- Added component parameter to `ICalendar::new`
+  - `ICalendar::new(uid, datestamp)` -> `ICalendar::new(uid, datestamp, component)`
+
 ## Version 0.4.2
 
 ### Misc
