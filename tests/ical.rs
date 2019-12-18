@@ -39,7 +39,11 @@ fn icalendar_event() {
          Atlanta World Congress Center\n\
          Atlanta, Georgia"
     )));
-    let calendar = ICalendar::new("2.0", "-//xyz Corp//NONSGML PDA Calendar Version 1.0//EN", event);
+    let calendar = ICalendar::new(
+        "2.0",
+        "-//xyz Corp//NONSGML PDA Calendar Version 1.0//EN",
+        event
+    );
 
     assert_eq!(calendar.to_string(), expected);
 }
