@@ -1,5 +1,8 @@
 use std::borrow::Cow;
 
+// Mask for extracting 6 bits from a byte.
+const BIT_MASK: u8 = 0b0011_1111;
+
 const BASE_64: [char; 64] = [
     'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S',
     'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l',
@@ -20,18 +23,12 @@ pub fn encode_base64(binary: &[u8]) -> String {
 
     for _ in 0..len {
         let values = bytes.next().unwrap();
-        for &c in &encode_chunk(values) {
-            output.push(c);
-        }
+        output.extend(encode_chunk(values).iter())
     }
 
     if let Some(remainder) = bytes.next() {
         match remainder {
-            chunk @ &[_, _, _] => {
-                for &c in &encode_chunk(chunk) {
-                    output.push(c);
-                }
-            }
+            chunk @ &[_, _, _] => output.extend(encode_chunk(chunk).iter()),
             &[first, second] => {
                 output.push(BASE_64[usize::from(first >> 2)]);
                 output.push(BASE_64[usize::from(first << 4 & 0b0011_1111 | second >> 4)]);
@@ -51,15 +48,27 @@ pub fn encode_base64(binary: &[u8]) -> String {
 
 fn encode_chunk(chunk: &[u8]) -> [char; 4] {
     let first = usize::from(chunk[0] >> 2);
-    let second = usize::from(chunk[0] << 4 & 0b0011_1111 | chunk[1] >> 4);
-    let third = usize::from(chunk[1] << 2 & 0b0011_1111 | chunk[2] >> 6);
-    let fourth = usize::from(chunk[2] & 0b0011_1111);
+    let second = usize::from(chunk[0] << 4 & BIT_MASK | chunk[1] >> 4);
+    let third = usize::from(chunk[1] << 2 & BIT_MASK | chunk[2] >> 6);
+    let fourth = usize::from(chunk[2] & BIT_MASK);
     [
         BASE_64[first],
         BASE_64[second],
         BASE_64[third],
         BASE_64[fourth]
     ]
+}
+
+#[cfg(test)]
+mod binary {
+    use super::encode_base64;
+
+    #[test]
+    fn text() {
+        let input = "Polyfon zwitschernd aßen Mäxchens Vögel Rüben, Joghurt und Quark".as_bytes();
+        let expected = "UG9seWZvbiB6d2l0c2NoZXJuZCBhw59lbiBNw6R4Y2hlbnMgVsO2Z2VsIFLDvGJlbiwgSm9naHVydCB1bmQgUXVhcms=";
+        assert_eq!(encode_base64(input), expected);
+    }
 }
 
 /// Escapes comma, semicolon and backlash character by prepending a backlash.
@@ -103,7 +112,7 @@ fn is_escaped_char(c: &char) -> bool {
 }
 
 #[cfg(test)]
-mod escape_text_tests {
+mod text {
     use super::escape_text;
 
     #[test]
