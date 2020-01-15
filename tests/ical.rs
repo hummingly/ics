@@ -39,11 +39,9 @@ fn icalendar_event() {
          Atlanta World Congress Center\n\
          Atlanta, Georgia"
     )));
-    let calendar = ICalendar::new(
-        "2.0",
-        "-//xyz Corp//NONSGML PDA Calendar Version 1.0//EN",
-        event
-    );
+
+    let mut calendar = ICalendar::new("2.0", "-//xyz Corp//NONSGML PDA Calendar Version 1.0//EN");
+    calendar.add_event(event);
 
     assert_eq!(calendar.to_string(), expected);
 }
@@ -88,7 +86,8 @@ fn icalendar_todo() {
     alarm.push(Repeat::new("4"));
     alarm.push(Duration::new("PT1H"));
     todo.add_alarm(alarm);
-    let calendar = ICalendar::new("2.0", "-//ABC Corporation//NONSGML My Product//EN", todo);
+    let mut calendar = ICalendar::new("2.0", "-//ABC Corporation//NONSGML My Product//EN");
+    calendar.add_todo(todo);
 
     assert_eq!(calendar.to_string(), expected);
 }

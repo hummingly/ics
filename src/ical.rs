@@ -24,16 +24,15 @@ pub struct ICalendar<'a>(Component<'a>);
 impl<'a> ICalendar<'a> {
     /// Creates a new iCalendar object/"VCALENDAR" calendar component. The
     /// "VERSION" and "PRODID" properties are required.
-    pub fn new<V, P, C>(version: V, prodid: P, component: C) -> Self
+    pub fn new<V, P>(version: V, prodid: P) -> Self
     where
         V: Into<Cow<'a, str>>,
-        P: Into<Cow<'a, str>>,
-        C: Into<Component<'a>>
+        P: Into<Cow<'a, str>>
     {
         ICalendar(Component {
             name: "VCALENDAR".into(),
             properties: vec![Version::new(version).into(), ProdID::new(prodid).into()],
-            subcomponents: vec![component.into()]
+            subcomponents: Vec::new()
         })
     }
 

@@ -37,7 +37,8 @@
 //!     todo.push(Status::needs_action());
 //!
 //!     // The ICalendar object is what is later written to the file.
-//!     let calendar = ICalendar::new("2.0", "ics-rs", todo);
+//!     let mut calendar = ICalendar::new("2.0", "ics-rs");
+//!     calendar.add_todo(todo);
 //!
 //!     // Write `calendar` to a file.
 //!     calendar.save_file("birthday.ics")?;
