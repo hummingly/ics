@@ -7,7 +7,7 @@ mod string;
 use std::borrow::Cow;
 use std::fmt;
 use std::str::FromStr;
-use value::error::ParseBoolError;
+use values::error::ParseBoolError;
 
 /// ICalendar Boolean
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
@@ -68,7 +68,7 @@ impl<'a> fmt::Display for Resource<'a> {
     }
 }
 
-pub use value::string::Binary;
+pub use values::string::Binary;
 // pub use self::string::CalAdress;
 // pub use self::string::Text;
 // pub use self::string::Uri;

@@ -24,7 +24,7 @@
 use components::{Parameter, Parameters, Property};
 use std::borrow::Cow;
 use std::collections::BTreeMap;
-use value::{Binary, Resource};
+use values::{Binary, Resource};
 
 property!(CalScale, "CALSCALE");
 property!(Method, "METHOD");
@@ -432,7 +432,7 @@ mod rfc7986 {
     use components::{Parameter, Parameters, Property};
     use std::borrow::Cow;
     use std::collections::BTreeMap;
-    use value::{Binary, Resource};
+    use values::{Binary, Resource};
 
     property!(Name, "NAME");
     property_with_parameter!(RefreshInterval, "REFRESH-INTERVAL", "DURATION");

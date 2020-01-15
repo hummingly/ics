@@ -4,7 +4,7 @@ use std::borrow::Cow;
 use std::fmt;
 use std::str::FromStr;
 
-use value::encoding::{encode_base64, escape_text};
+use values::encoding::{encode_base64, escape_text};
 
 // INFO: https://tools.ietf.org/html/rfc2045#section-2.8
 /// ICalendar Binary
