@@ -28,6 +28,7 @@ fn next_boundary(input: &str, index: usize) -> Option<usize> {
     if index >= input.len() {
         return None;
     }
+    // TODO: When updating rustc, use Option::filter
     match input.as_bytes()[..=index]
         .iter()
         .rposition(|&i| i < 128 || i >= 192)

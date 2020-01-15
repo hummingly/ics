@@ -26,7 +26,7 @@
 //! use ics::properties::{Comment, Status, Summary};
 //! use ics::{ICalendar, ToDo};
 //!
-//! fn main() -> std::io::Result<()> {//!
+//! fn main() -> std::io::Result<()> {
 //!     // Anything that can be converted to a Cow<str> is accepted as value which means
 //!     // &str and String can be used freely. For the sake of demonstrating the UID was
 //!     // taken from somewhere. Out of security reasons the UID should always be
@@ -53,7 +53,7 @@ mod macros;
 mod core;
 mod ical;
 mod util;
-pub mod value;
+pub mod values;
 
 pub use core::components;
 pub use core::parameters;
