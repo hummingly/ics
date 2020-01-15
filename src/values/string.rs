@@ -15,13 +15,9 @@ pub struct Binary(String);
 
 impl Binary {
     /// Creates binary data by encoding bytes with standard Base64 encoding.
-    pub fn encode(data: &[u8]) -> Self {
-        Binary(encode_base64(data))
+    pub fn new(bytes: &[u8]) -> Self {
+        Binary(encode_base64(bytes))
     }
-
-    // pub fn decode(&self) -> Vec<u8> {
-    //     unimplemented!()
-    // }
 }
 
 impl fmt::Display for Binary {
@@ -80,9 +76,9 @@ impl FromStr for Binary {
 pub struct Text<'t>(Cow<'t, str>);
 
 impl<'t> Text<'t> {
-    /// Creates new Text by prepending commas, semicolons and backlashes with
+    /// Creates new Text by prepending commas, semicolons and backlashes with a
     /// backlash.
-    pub fn encode<T>(text: T) -> Self
+    pub fn new<T>(text: T) -> Self
     where
         T: Into<Cow<'t, str>>
     {
@@ -90,11 +86,11 @@ impl<'t> Text<'t> {
     }
 }
 
-// impl<'t> fmt::Display for Text<'t> {
-//     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-//         write!(f, "{}", self.0)
-//     }
-// }
+impl<'t> fmt::Display for Text<'t> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
 
 // impl<'t> From<String> for Text<'t> {
 //     fn from(value: String) -> Self {

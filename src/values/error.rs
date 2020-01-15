@@ -1,3 +1,4 @@
+#![allow(bare_trait_objects)]
 //! Error types for parsing types
 use std::error::Error;
 use std::fmt;

@@ -24,7 +24,31 @@
 use components::{Parameter, Parameters, Property};
 use std::borrow::Cow;
 use std::collections::BTreeMap;
-use values::{Binary, Resource};
+use values::{Binary, Float, Integer};
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
+enum Resource<'a> {
+    Link(Cow<'a, str>),
+    Data(Binary)
+}
+
+impl<'a> From<Resource<'a>> for Cow<'a, str> {
+    fn from(value: Resource<'a>) -> Self {
+        match value {
+            Resource::Link(uri) => uri,
+            Resource::Data(binary) => Cow::Owned(binary.to_string())
+        }
+    }
+}
+
+// impl<'a> fmt::Display for Resource<'a> {
+//     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+//         match self {
+//             Resource::Link(uri) => write!(f, "{}", uri),
+//             Resource::Data(binary) => write!(f, "{}", binary)
+//         }
+//     }
+// }
 
 property!(CalScale, "CALSCALE");
 property!(Method, "METHOD");
@@ -102,14 +126,14 @@ property!(Description, "DESCRIPTION");
 /// GEO Property
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
 pub struct Geo<'a> {
-    latitude: f32,
-    longitude: f32,
+    latitude: Float,
+    longitude: Float,
     parameters: Parameters<'a>
 }
 
 impl<'a> Geo<'a> {
     /// Creates a new GEO Property with the given values.
-    pub fn new(latitude: f32, longitude: f32) -> Self {
+    pub fn new(latitude: Float, longitude: Float) -> Self {
         Self {
             latitude,
             longitude,
@@ -149,13 +173,13 @@ property!(Location, "LOCATION");
 /// PERCENT-COMPLETE Property
 #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct PercentComplete<'a> {
-    value: i32,
+    value: Integer,
     parameters: Parameters<'a>
 }
 
 impl<'a> PercentComplete<'a> {
     /// Creates a new PERCENT-COMPLETE Property with the given value.
-    pub fn new(value: i32) -> Self {
+    pub fn new(value: Integer) -> Self {
         Self {
             value,
             parameters: BTreeMap::new()
@@ -192,13 +216,13 @@ impl<'a> From<PercentComplete<'a>> for Property<'a> {
 /// PRIORITY Property
 #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Priority<'a> {
-    value: i32,
+    value: Integer,
     parameters: Parameters<'a>
 }
 
 impl<'a> Priority<'a> {
     /// Creates a new PRIORITY Property with the given value.
-    pub fn new(value: i32) -> Self {
+    pub fn new(value: Integer) -> Self {
         Self {
             value,
             parameters: BTreeMap::new()
@@ -293,13 +317,13 @@ property_with_constructor!(
 /// REPEAT Property
 #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Repeat<'a> {
-    value: i32,
+    value: Integer,
     parameters: Parameters<'a>
 }
 
 impl<'a> Repeat<'a> {
     /// Creates a new REPEAT Property with the given value.
-    pub fn new(value: i32) -> Self {
+    pub fn new(value: Integer) -> Self {
         Self {
             value,
             parameters: BTreeMap::new()
@@ -341,13 +365,13 @@ property!(LastModified, "LAST-MODIFIED");
 /// SEQUENCE Property
 #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Sequence<'a> {
-    value: i32,
+    value: Integer,
     parameters: Parameters<'a>
 }
 
 impl<'a> Sequence<'a> {
     /// Creates a new SEQUENCE Property with the given value.
-    pub fn new(value: i32) -> Self {
+    pub fn new(value: Integer) -> Self {
         Self {
             value,
             parameters: BTreeMap::new()
@@ -429,10 +453,11 @@ pub use self::rfc7986::*;
 
 #[cfg(feature = "rfc7986")]
 mod rfc7986 {
+    use super::Resource;
     use components::{Parameter, Parameters, Property};
     use std::borrow::Cow;
     use std::collections::BTreeMap;
-    use values::{Binary, Resource};
+    use values::Binary;
 
     property!(Name, "NAME");
     property_with_parameter!(RefreshInterval, "REFRESH-INTERVAL", "DURATION");

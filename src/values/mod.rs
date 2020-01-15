@@ -1,10 +1,13 @@
-//! Value Types
+//! Property Value Data Types
+//!
+//! The properties in an iCalendar object are strongly typed. Unless explicitly
+//! specified by the VALUE parameter, the type is the default type for this
+//! property.
 mod encoding;
 pub mod error;
 mod string;
 // mod time;
 
-use std::borrow::Cow;
 use std::fmt;
 use std::str::FromStr;
 use values::error::ParseBoolError;
@@ -47,30 +50,19 @@ impl FromStr for Boolean {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
-pub(crate) enum Resource<'a> {
-    Link(Cow<'a, str>),
-    Data(Binary)
-}
+/// ICalendar Integer
+///
+/// This type maps perfectly to a Rust integer.
+pub type Integer = i32;
 
-impl<'a> From<Resource<'a>> for Cow<'a, str> {
-    fn from(value: Resource<'a>) -> Self {
-        match value {
-            Resource::Link(uri) => uri,
-            Resource::Data(binary) => Cow::Owned(binary.to_string())
-        }
-    }
-}
-
-impl<'a> fmt::Display for Resource<'a> {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "TRUE")
-    }
-}
+/// ICalendar Float
+///
+/// This type maps perfectly to a Rust float point.
+pub type Float = f32;
 
 pub use values::string::Binary;
 // pub use self::string::CalAdress;
-// pub use self::string::Text;
+pub use values::string::Text;
 // pub use self::string::Uri;
 // pub use self::time::Date;
 // pub use self::time::DateTime;
