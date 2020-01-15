@@ -59,10 +59,12 @@ pub use core::parameters;
 pub use core::properties;
 
 pub use ical::Alarm;
+pub use ical::Daylight;
 pub use ical::Event;
 pub use ical::FreeBusy;
 pub use ical::ICalendar;
 pub use ical::Journal;
+pub use ical::Standard;
 pub use ical::TimeZone;
 pub use ical::ToDo;
 pub use ical::ZoneTime;

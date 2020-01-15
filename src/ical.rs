@@ -452,6 +452,8 @@ impl<'a> From<ZoneTime<'a>> for Component<'a> {
 pub struct Standard<'a>(Vec<Property<'a>>);
 
 impl<'a> Standard<'a> {
+    /// Creates a new "STANDARD" sub-component. The properties "DTSTART",
+    /// "TZOFFSETFROM" and "TZOFFSETTO" are required.
     pub fn new<S, T, F>(dtstart: S, tz_offset_from: F, tz_offset_to: T) -> Self
     where
         S: Into<Cow<'a, str>>,
@@ -500,6 +502,8 @@ impl<'a> From<Standard<'a>> for Component<'a> {
 pub struct Daylight<'a>(Vec<Property<'a>>);
 
 impl<'a> Daylight<'a> {
+    /// Creates a new "DAYLIGHT" sub-component. The properties "DTSTART",
+    /// "TZOFFSETFROM" and "TZOFFSETTO" are required.
     pub fn new<S, T, F>(dtstart: S, tz_offset_from: F, tz_offset_to: T) -> Self
     where
         S: Into<Cow<'a, str>>,
