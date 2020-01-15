@@ -269,22 +269,6 @@ macro_rules! parameter_with_const {
     };
 }
 
-// Implements common traits for Components
-macro_rules! impl_component {
-    ($component:ident) => {
-        impl<'a> fmt::Display for $component<'a> {
-            fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-                write!(f, "{}", self.0)
-            }
-        }
-        impl<'a> From<$component<'a>> for Component<'a> {
-            fn from(component: $component<'a>) -> Self {
-                component.0
-            }
-        }
-    };
-}
-
 macro_rules! impl_default_prop {
     ($type:ident, $default:expr) => {
         impl<'a> Default for $type<'a> {

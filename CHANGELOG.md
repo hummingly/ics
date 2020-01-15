@@ -1,5 +1,21 @@
 # Changelog
 
+## Version 0.5.0 (Unreleased)
+
+### Breaking Changes
+
+- Changed `ZoneTime` an enum.
+
+### API
+
+- Added `Standard` and `Daylight` component
+
+## Version 0.4.2
+
+### Misc
+
+- Internal changes only.
+
 ## Version 0.4.1
 
 ### Misc

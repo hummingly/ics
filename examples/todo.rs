@@ -7,12 +7,10 @@ use ics::properties::{
 use ics::{Alarm, ICalendar, ToDo};
 
 fn main() -> std::io::Result<()> {
-    // create new iCalendar object
-    let mut calendar = ICalendar::new("2.0", "-//ABC Corporation//NONSGML My Product//EN");
-
-    // create todo
+    // Create simple todo
+    // The required properties must be a unique identifier which should be random
+    // generated and the date stamp which must be in UTC time.
     let mut todo = ToDo::new("b68378cf-872d-44f1-9703-5e3725c56e71", "19980130T134500Z");
-    // add properties
     todo.push(Organizer::new("mailto:unclesam@example.com"));
     let mut attendee = Attendee::new("mailto:jqpublic@example.com");
     attendee.add(PartStat::ACCEPTED);
@@ -29,10 +27,13 @@ fn main() -> std::io::Result<()> {
     alarm.push(Repeat::new(4));
     alarm.push(Duration::new("PT1H"));
     todo.add_alarm(alarm);
-    // add todo to calendar
-    calendar.add_todo(todo);
 
-    // write calendar to file
+    // Create new iCalendar object
+    // An iCalendar object must at least consist a component and the VERSION and
+    // PRODID property.
+    let mut calendar = ICalendar::new("2.0", "-//ABC Corporation//NONSGML My Product//EN");
+    calendar.add_todo(todo);
+    // Write calendar to file
     calendar.save_file("todo.ics")?;
     Ok(())
 

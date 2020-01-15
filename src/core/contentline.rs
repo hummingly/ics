@@ -71,8 +71,7 @@ mod tests {
 
     #[test]
     fn multibytes() {
-        let content =
-            "Content lines shouldn't be folded in the middle of a UTF-8 character! 老虎.";
+        let content = "Content lines shouldn't be folded in the middle of a UTF-8 character! 老虎.";
         let mut line = String::with_capacity(size(content.len()));
         fold(&mut line, content).unwrap();
         let expected =
