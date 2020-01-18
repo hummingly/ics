@@ -26,8 +26,11 @@ fn main() -> std::io::Result<()> {
     // Create new iCalendar object
     // An iCalendar object must at least consist a component and the VERSION and
     // PRODID property.
-    let mut calendar = ICalendar::new("2.0", "-//xyz Corp//NONSGML PDA Calendar Version 1.0//EN");
-    calendar.add_event(event);
+    let calendar = ICalendar::new(
+        "2.0",
+        "-//xyz Corp//NONSGML PDA Calendar Version 1.0//EN",
+        event
+    );
     // Write calendar to file
     calendar.save_file("event.ics")?;
     Ok(())
