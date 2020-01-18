@@ -96,7 +96,7 @@ impl<'t> Text<'t> {
             text.push_str(&escape_text(t.into()));
             text.push(',');
         }
-        let len = text.len();
+        let len = text.len() - 1;
         text.truncate(len);
         Text(Cow::Owned(text))
     }
