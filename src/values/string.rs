@@ -97,7 +97,7 @@ impl<'t> Text<'t> {
             text.push(',');
         }
         text.truncate(text.len() - 1);
-        Self(Cow::Owned(text))
+        Text(Cow::Owned(text))
     }
 }
 
