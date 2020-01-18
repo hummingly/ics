@@ -42,27 +42,27 @@ impl FromStr for Binary {
     type Err = ParseBinaryError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        fn is_base64_byte(b: u8) -> bool {
-            b.is_ascii_alphanumeric() || b == b'+' || b == b'/'
+        if s.is_empty() {
+            return Ok(Binary(String::new()));
         }
 
-        // One encoded character equals 6 bits and the total must be a multiple
-        // of 8 to make up a byte sequence
-        if s.len() * 6 % 8 > 0 {
+        // 24 bit groups are always encoded as 4 characters. Since shorter byte
+        // sequences are always padded, we can assume the input has been set to a
+        // multiple of 24.
+        if s.len() % 4 > 0 {
             return Err(ParseBinaryError::MissingBytes);
         }
 
-        if s[0..s.len() - 2].bytes().all(is_base64_byte) {
-            let is_valid = match &s[s.len() - 2..].as_bytes() {
-                [b'=', b'='] => true,
-                [b, b'='] => is_base64_byte(*b),
-                slice => slice.iter().all(|&x| is_base64_byte(x))
-            };
-            if is_valid {
-                return Ok(Binary(s.to_owned()));
+        let mut iter = s
+            .bytes()
+            .skip_while(|b| b.is_ascii_alphanumeric() || b == &b'+' || b == &b'/');
+
+        match (iter.next(), iter.next(), iter.next()) {
+            (None, _, _) | (Some(b'='), None, _) | (Some(b'='), Some(b'='), None) => {
+                Ok(Binary(s.to_owned()))
             }
+            _ => Err(ParseBinaryError::InvalidEncoding)
         }
-        Err(ParseBinaryError::InvalidEncoding)
     }
 }
 
@@ -238,3 +238,26 @@ impl<'t> fmt::Display for Text<'t> {
 //         unimplemented!()
 //     }
 // }
+
+#[cfg(test)]
+mod test {
+    use super::Binary;
+
+    // https://tools.ietf.org/html/rfc4648#section-10
+    #[test]
+    fn parse_valid_binary() {
+        assert_eq!(Some(Binary::new(b"")), "".parse().ok());
+        assert_eq!(Some(Binary::new(b"f")), "Zg==".parse().ok());
+        assert_eq!(Some(Binary::new(b"fo")), "Zm8=".parse().ok());
+        assert_eq!(Some(Binary::new(b"foo")), "Zm9v".parse().ok());
+        assert_eq!(Some(Binary::new(b"foob")), "Zm9vYg==".parse().ok());
+        assert_eq!(Some(Binary::new(b"fooba")), "Zm9vYmE=".parse().ok());
+        assert_eq!(Some(Binary::new(b"foobar")), "Zm9vYmFy".parse().ok());
+    }
+
+    #[test]
+    fn parse_invalid_binary() {
+        assert!("ABC".parse::<Binary>().is_err());
+        assert!("Zö==".parse::<Binary>().is_err());
+    }
+}

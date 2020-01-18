@@ -10,7 +10,8 @@ const BASE_64: [char; 64] = [
     '5', '6', '7', '8', '9', '+', '/'
 ];
 
-pub fn encode_base64(binary: &[u8]) -> String {
+/// Encodes bytes into a string using the Base64 standard encoding.
+pub(crate) fn encode_base64(binary: &[u8]) -> String {
     if binary.is_empty() {
         return String::new();
     }
@@ -31,13 +32,13 @@ pub fn encode_base64(binary: &[u8]) -> String {
             chunk @ &[_, _, _] => output.extend(encode_chunk(chunk).iter()),
             &[first, second] => {
                 output.push(BASE_64[usize::from(first >> 2)]);
-                output.push(BASE_64[usize::from(first << 4 & 0b0011_1111 | second >> 4)]);
-                output.push(BASE_64[usize::from(second << 2 & 0b0011_1111)]);
+                output.push(BASE_64[usize::from(first << 4 & BIT_MASK | second >> 4)]);
+                output.push(BASE_64[usize::from(second << 2 & BIT_MASK)]);
                 output.push('=');
             }
             &[first] => {
                 output.push(BASE_64[usize::from(first >> 2)]);
-                output.push(BASE_64[usize::from(first & 0b0000_0011 << 4)]);
+                output.push(BASE_64[usize::from(first << 4 & BIT_MASK)]);
                 output.push_str("==");
             }
             _ => unreachable!()
@@ -47,21 +48,34 @@ pub fn encode_base64(binary: &[u8]) -> String {
 }
 
 fn encode_chunk(chunk: &[u8]) -> [char; 4] {
-    let first = usize::from(chunk[0] >> 2);
-    let second = usize::from(chunk[0] << 4 & BIT_MASK | chunk[1] >> 4);
-    let third = usize::from(chunk[1] << 2 & BIT_MASK | chunk[2] >> 6);
-    let fourth = usize::from(chunk[2] & BIT_MASK);
+    debug_assert!(chunk.len() == 3);
+    let first = chunk[0] >> 2;
+    let second = chunk[0] << 4 & BIT_MASK | chunk[1] >> 4;
+    let third = chunk[1] << 2 & BIT_MASK | chunk[2] >> 6;
+    let fourth = chunk[2] & BIT_MASK;
     [
-        BASE_64[first],
-        BASE_64[second],
-        BASE_64[third],
-        BASE_64[fourth]
+        BASE_64[usize::from(first)],
+        BASE_64[usize::from(second)],
+        BASE_64[usize::from(third)],
+        BASE_64[usize::from(fourth)]
     ]
 }
 
 #[cfg(test)]
 mod binary {
     use super::encode_base64;
+
+    // https://tools.ietf.org/html/rfc4648#section-10
+    #[test]
+    fn rfc4648_test_sample() {
+        assert_eq!(encode_base64(b""), "");
+        assert_eq!(encode_base64(b"f"), "Zg==");
+        assert_eq!(encode_base64(b"fo"), "Zm8=");
+        assert_eq!(encode_base64(b"foo"), "Zm9v");
+        assert_eq!(encode_base64(b"foob"), "Zm9vYg==");
+        assert_eq!(encode_base64(b"fooba"), "Zm9vYmE=");
+        assert_eq!(encode_base64(b"foobar"), "Zm9vYmFy");
+    }
 
     #[test]
     fn text() {
@@ -73,15 +87,8 @@ mod binary {
 
 /// Escapes comma, semicolon and backlash character by prepending a backlash.
 ///
-/// This method is only necessary for properties with the value type "TEXT".
-///
-/// # Example
-/// ```
-/// // TODO
-// let line = "Hello, World! Today is a beautiful day to test: Escape Methods.\n Characters like ; or \\ must be escaped.";
-// let expected = "Hello\\, World! Today is a beautiful day to test: Escape Methods.\n Characters like \\; or \\\\ must be escaped.";
-// assert_eq!(expected, escape_text(line));
-pub fn escape_text<'t>(text: Cow<'t, str>) -> Cow<'t, str> {
+/// This method is used for properties with the value type "TEXT".
+pub(crate) fn escape_text<'t>(text: Cow<'t, str>) -> Cow<'t, str> {
     let matches = |c| c == '\r' || is_escaped_char(&c);
     if text.contains(matches) {
         let text = text.replace("\r\n", "\n");
