@@ -25,6 +25,7 @@
 //! ```
 //! use ics::properties::{Comment, Status, Summary};
 //! use ics::{ICalendar, ToDo};
+//! use ics::values::Text;
 //!
 //! fn main() -> std::io::Result<()> {
 //!     // Anything that can be converted to a Cow<str> is accepted as value which means
@@ -32,8 +33,8 @@
 //!     // taken from somewhere. Out of security reasons the UID should always be
 //!     // randomly generated.
 //!     let mut todo = ToDo::new("d4092ed9-1667-4518-a7c0-bcfaac4f1fc6", "20181021T190000");
-//!     todo.push(Summary::new("Katarina's Birthday Present"));
-//!     todo.push(Comment::new("Buy her Imagine Dragons tickets!"));
+//!     todo.push(Summary::new(Text::new("Katarina's Birthday Present")));
+//!     todo.push(Comment::new(Text::new("Buy her Imagine Dragons tickets!")));
 //!     todo.push(Status::needs_action());
 //!
 //!     // The ICalendar object is what is later written to the file.
@@ -52,7 +53,6 @@
 mod macros;
 mod core;
 mod ical;
-mod util;
 pub mod values;
 
 pub use core::components;
@@ -69,6 +69,3 @@ pub use ical::Standard;
 pub use ical::TimeZone;
 pub use ical::ToDo;
 pub use ical::ZoneTime;
-
-// TODO: Move to core::contentline module
-pub use util::escape_text;

@@ -5,7 +5,8 @@ use ics::properties::{
     Attach, Attendee, Categories, Description, DtEnd, DtStart, Due, Duration, Organizer, Repeat,
     Sequence, Status, Summary, Trigger
 };
-use ics::{escape_text, Alarm, Event, ICalendar, ToDo};
+use ics::values::Text;
+use ics::{Alarm, Event, ICalendar, ToDo};
 
 #[test]
 fn icalendar_event() {
@@ -28,13 +29,13 @@ fn icalendar_event() {
                     END:VCALENDAR\r\n";
 
     let mut event = Event::new("b68378cf-872d-44f1-9703-5e3725c56e71", "19960704T120000Z");
-    event.push(Organizer::new("mailto:jsmith@example.com"));
-    event.push(DtStart::new("19960918T143000Z"));
-    event.push(DtEnd::new("19960920T220000Z"));
+    event.push(Organizer::new(Text::new("mailto:jsmith@example.com")));
+    event.push(DtStart::new(Text::new("19960918T143000Z")));
+    event.push(DtEnd::new(Text::new("19960920T220000Z")));
     event.push(Status::confirmed());
-    event.push(Categories::new("CONFERENCE"));
-    event.push(Summary::new("Networld+Interop Conference"));
-    event.push(Description::new(escape_text(
+    event.push(Categories::new(Text::new("CONFERENCE")));
+    event.push(Summary::new(Text::new("Networld+Interop Conference")));
+    event.push(Description::new(Text::new(
         "Networld+Interop Conference and Exhibit\n\
          Atlanta World Congress Center\n\
          Atlanta, Georgia"
@@ -71,20 +72,20 @@ fn icalendar_todo() {
                     END:VCALENDAR\r\n";
 
     let mut todo = ToDo::new("b68378cf-872d-44f1-9703-5e3725c56e71", "19980130T134500Z");
-    todo.push(Organizer::new("mailto:unclesam@example.com"));
-    let mut attendee = Attendee::new("mailto:jqpublic@example.com");
+    todo.push(Organizer::new(Text::new("mailto:unclesam@example.com")));
+    let mut attendee = Attendee::new(Text::new("mailto:jqpublic@example.com"));
     attendee.add(PartStat::ACCEPTED);
     todo.push(attendee);
-    todo.push(Due::new("19980415T000000"));
+    todo.push(Due::new(Text::new("19980415T000000")));
     todo.push(Status::needs_action());
-    todo.push(Summary::new("Submit Income Taxes"));
+    todo.push(Summary::new(Text::new("Submit Income Taxes")));
     todo.push(Sequence::new(2));
-    let mut alarm = Alarm::audio(Trigger::new("19980403T120000Z"));
+    let mut alarm = Alarm::audio(Trigger::new(Text::new("19980403T120000Z")));
     let mut attach = Attach::uri("http://example.com/pub/audio-files/ssbanner.aud");
     attach.add(FmtType::new("audio/basic"));
     alarm.push(attach);
     alarm.push(Repeat::new(4));
-    alarm.push(Duration::new("PT1H"));
+    alarm.push(Duration::new(Text::new("PT1H")));
     todo.add_alarm(alarm);
     let mut calendar = ICalendar::new("2.0", "-//ABC Corporation//NONSGML My Product//EN");
     calendar.add_todo(todo);

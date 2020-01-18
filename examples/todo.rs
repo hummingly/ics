@@ -4,6 +4,7 @@ use ics::parameters::{FmtType, PartStat};
 use ics::properties::{
     Attach, Attendee, Due, Duration, Organizer, Repeat, Sequence, Status, Summary, Trigger
 };
+use ics::values::Text;
 use ics::{Alarm, ICalendar, ToDo};
 
 fn main() -> std::io::Result<()> {
@@ -11,21 +12,21 @@ fn main() -> std::io::Result<()> {
     // The required properties must be a unique identifier which should be random
     // generated and the date stamp which must be in UTC time.
     let mut todo = ToDo::new("b68378cf-872d-44f1-9703-5e3725c56e71", "19980130T134500Z");
-    todo.push(Organizer::new("mailto:unclesam@example.com"));
-    let mut attendee = Attendee::new("mailto:jqpublic@example.com");
+    todo.push(Organizer::new(Text::new("mailto:unclesam@example.com")));
+    let mut attendee = Attendee::new(Text::new("mailto:jqpublic@example.com"));
     attendee.add(PartStat::ACCEPTED);
     todo.push(attendee);
-    todo.push(Due::new("19980415T000000"));
+    todo.push(Due::new(Text::new("19980415T000000")));
     todo.push(Status::needs_action());
-    todo.push(Summary::new("Submit Income Taxes"));
+    todo.push(Summary::new(Text::new("Submit Income Taxes")));
     todo.push(Sequence::new(2));
     // add alarm to todo
-    let mut alarm = Alarm::audio(Trigger::new("19980403T120000Z"));
+    let mut alarm = Alarm::audio(Trigger::new(Text::new("19980403T120000Z")));
     let mut attach = Attach::uri("http://example.com/pub/audio-files/ssbanner.aud");
     attach.add(FmtType::new("audio/basic"));
     alarm.push(attach);
     alarm.push(Repeat::new(4));
-    alarm.push(Duration::new("PT1H"));
+    alarm.push(Duration::new(Text::new("PT1H")));
     todo.add_alarm(alarm);
 
     // Create new iCalendar object

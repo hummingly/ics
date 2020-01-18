@@ -1,23 +1,24 @@
 extern crate ics;
 
 use ics::properties::{Categories, Description, DtEnd, DtStart, Organizer, Status, Summary};
-use ics::{escape_text, Event, ICalendar};
+use ics::values::Text;
+use ics::{Event, ICalendar};
 
 fn main() -> std::io::Result<()> {
     // Create event which contains the information regarding the conference
     // The required properties must be a unique identifier which should be random
     // generated and the date stamp which must be in UTC time.
     let mut event = Event::new("b68378cf-872d-44f1-9703-5e3725c56e71", "19960704T120000Z");
-    event.push(Organizer::new("mailto:jsmith@example.com"));
-    event.push(DtStart::new("19960918T143000Z"));
-    event.push(DtEnd::new("19960920T220000Z"));
+    event.push(Organizer::new(Text::new("mailto:jsmith@example.com")));
+    event.push(DtStart::new(Text::new("19960918T143000Z")));
+    event.push(DtEnd::new(Text::new("19960920T220000Z")));
     event.push(Status::confirmed());
-    event.push(Categories::new("CONFERENCE"));
-    event.push(Summary::new("Networld+Interop Conference"));
+    event.push(Categories::new(Text::new("CONFERENCE")));
+    event.push(Summary::new(Text::new("Networld+Interop Conference")));
 
     // Values that are "TEXT" must be escaped (only if the text contains a comma,
     // semicolon or backlash).
-    event.push(Description::new(escape_text(
+    event.push(Description::new(Text::new(
         "Networld+Interop Conference and Exhibit\n\
          Atlanta World Congress Center\n\
          Atlanta, Georgia"

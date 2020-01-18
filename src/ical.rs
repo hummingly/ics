@@ -9,6 +9,7 @@ use std::fs::File;
 use std::io::{self, Write};
 use std::path::Path;
 use std::slice::Iter;
+use values::Text;
 
 /// The iCalendar object specified as VCALENDAR.
 ///
@@ -31,7 +32,10 @@ impl<'a> ICalendar<'a> {
     {
         ICalendar(Component {
             name: "VCALENDAR".into(),
-            properties: vec![Version::new(version).into(), ProdID::new(prodid).into()],
+            properties: vec![
+                Version::new(Text::new(version)).into(),
+                ProdID::new(Text::new(prodid)).into(),
+            ],
             subcomponents: Vec::new()
         })
     }
@@ -131,7 +135,10 @@ impl<'a> Event<'a> {
         D: Into<Cow<'a, str>>
     {
         Self {
-            properties: vec![UID::new(uid).into(), DtStamp::new(dtstamp).into()],
+            properties: vec![
+                UID::new(Text::new(uid)).into(),
+                DtStamp::new(Text::new(dtstamp)).into(),
+            ],
             alarms: Vec::new()
         }
     }
@@ -184,7 +191,10 @@ impl<'a> ToDo<'a> {
         D: Into<Cow<'a, str>>
     {
         Self {
-            properties: vec![UID::new(uid).into(), DtStamp::new(dtstamp).into()],
+            properties: vec![
+                UID::new(Text::new(uid)).into(),
+                DtStamp::new(Text::new(dtstamp)).into(),
+            ],
             alarms: Vec::new()
         }
     }
@@ -237,7 +247,10 @@ impl<'a> Journal<'a> {
         U: Into<Cow<'a, str>>,
         D: Into<Cow<'a, str>>
     {
-        Journal(vec![UID::new(uid).into(), DtStamp::new(dtstamp).into()])
+        Journal(vec![
+            UID::new(Text::new(uid)).into(),
+            DtStamp::new(Text::new(dtstamp)).into(),
+        ])
     }
 
     /// Adds a property to the journal. RFC5545 and RFC7986 specify which
@@ -284,7 +297,10 @@ impl<'a> FreeBusy<'a> {
         U: Into<Cow<'a, str>>,
         D: Into<Cow<'a, str>>
     {
-        FreeBusy(vec![UID::new(uid).into(), DtStamp::new(dtstamp).into()])
+        FreeBusy(vec![
+            UID::new(Text::new(uid)).into(),
+            DtStamp::new(Text::new(dtstamp)).into(),
+        ])
     }
 
     /// Adds a property to the free busy schedule. The RFC5545 specifies which
@@ -333,7 +349,7 @@ impl<'a> TimeZone<'a> {
         S: Into<Cow<'a, str>>
     {
         Self {
-            properties: vec![TzID::new(tzid).into()],
+            properties: vec![TzID::new(Text::new(tzid)).into()],
             zone_times: vec![definition]
         }
     }
@@ -461,9 +477,9 @@ impl<'a> Standard<'a> {
         T: Into<Cow<'a, str>>
     {
         Standard(vec![
-            DtStart::new(dtstart).into(),
-            TzOffsetFrom::new(tz_offset_from).into(),
-            TzOffsetTo::new(tz_offset_to).into(),
+            DtStart::new(Text::new(dtstart)).into(),
+            TzOffsetFrom::new(Text::new(tz_offset_from)).into(),
+            TzOffsetTo::new(Text::new(tz_offset_to)).into(),
         ])
     }
 
@@ -511,9 +527,9 @@ impl<'a> Daylight<'a> {
         T: Into<Cow<'a, str>>
     {
         Daylight(vec![
-            DtStart::new(dtstart).into(),
-            TzOffsetFrom::new(tz_offset_from).into(),
-            TzOffsetTo::new(tz_offset_to).into(),
+            DtStart::new(Text::new(dtstart)).into(),
+            TzOffsetFrom::new(Text::new(tz_offset_from)).into(),
+            TzOffsetTo::new(Text::new(tz_offset_to)).into(),
         ])
     }
 

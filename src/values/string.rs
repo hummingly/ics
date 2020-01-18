@@ -11,7 +11,7 @@ use values::encoding::{encode_base64, escape_text};
 ///
 /// Bytes are encoded with standard Base64 encoding.
 #[derive(Debug, Default, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
-pub struct Binary(String);
+pub struct Binary(pub(crate) String);
 
 impl Binary {
     /// Creates binary data by encoding bytes with standard Base64 encoding.
@@ -70,10 +70,10 @@ impl FromStr for Binary {
 
 /// ICalendar Text Value Type
 ///
-/// Text characters like comma, semicolon and backlash must be escaped by
-/// prepending a backlash before the escaped chracters.
+/// Text characters like comma, semicolon and backlash are automatically escaped
+/// by prepending a backlash before the escaped chracters.
 #[derive(Debug, Default, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
-pub struct Text<'t>(Cow<'t, str>);
+pub struct Text<'t>(pub(crate) Cow<'t, str>);
 
 impl<'t> Text<'t> {
     /// Creates new Text by prepending commas, semicolons and backlashes with a
@@ -83,6 +83,21 @@ impl<'t> Text<'t> {
         T: Into<Cow<'t, str>>
     {
         Text(escape_text(text.into()))
+    }
+
+    /// TODO: This is an internal function! Each property that supports lists
+    /// should instead have this on their API
+    pub fn from_list<T>(list: Vec<T>) -> Self
+    where
+        T: Into<Cow<'t, str>>
+    {
+        let mut text = String::with_capacity(list.len());
+        for t in list {
+            text.push_str(&escape_text(t.into()));
+            text.push(',');
+        }
+        text.truncate(text.len() - 1);
+        Self(Cow::Owned(text))
     }
 }
 

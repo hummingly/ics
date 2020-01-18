@@ -5,9 +5,10 @@
 /// # #[macro_use] extern crate ics;
 /// use ics::components::Property;
 /// use ics::properties::DtStart;
+/// use ics::values::Text;
 ///
 /// # fn main() {
-/// let mut date = DtStart::new("20180906");
+/// let mut date = DtStart::new(Text::new("20180906"));
 /// date.append(parameters!("TZID" => "America/New_York"; "VALUE" => "DATE"));
 /// assert_eq!(
 ///     Property::from(date).to_string(),
@@ -53,7 +54,7 @@ macro_rules! property {
         $(#[$outer])*
         #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
         pub struct $type<'a> {
-            value: Cow<'a, str>,
+            value: Text<'a>,
             parameters: Parameters<'a>
         }
 
@@ -61,12 +62,9 @@ macro_rules! property {
             #[doc = "Creates a new "]
             #[doc=$name]
             #[doc = " Property with the given value."]
-            pub fn new<S>(value: S) -> Self
-            where
-                S: Into<Cow<'a, str>>
-            {
+            pub fn new(value: Text<'a>) -> Self {
                 Self {
-                    value: value.into(),
+                    value,
                     parameters: BTreeMap::new()
                 }
             }
@@ -102,7 +100,7 @@ macro_rules! property_with_constructor {
         $(#[$outer])*
         #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
         pub struct $type<'a> {
-            value: Cow<'a, str>,
+            value: Text<'a>,
             parameters: Parameters<'a>
         }
 
@@ -110,12 +108,9 @@ macro_rules! property_with_constructor {
             #[doc = "Creates a new "]
             #[doc=$name]
             #[doc = " Property with the given value."]
-            pub fn new<S>(value: S) -> Self
-            where
-                S: Into<Cow<'a, str>>
-            {
+            pub fn new(value: Text<'a>) -> Self {
                 Self {
-                    value: value.into(),
+                    value,
                     parameters: BTreeMap::new()
                 }
             }
@@ -125,7 +120,10 @@ macro_rules! property_with_constructor {
                 ///
                 #[doc = "Property Value: "]#[doc = $value]
                 pub fn $const_ident() -> Self {
-                    Self::new($value)
+                    Self {
+                        value: Text($value.into()),
+                        parameters: BTreeMap::new()
+                    }
                 }
             )*
 
@@ -161,7 +159,7 @@ macro_rules! property_with_parameter {
         #[doc=$value]#[doc=", do not add this parameter manually."]
         #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
         pub struct $type<'a> {
-            value: Cow<'a, str>,
+            value: Text<'a>,
             parameters: Parameters<'a>
         }
 
@@ -169,12 +167,9 @@ macro_rules! property_with_parameter {
             #[doc = "Creates a new "]
             #[doc=$name]
             #[doc = " Property with the given value."]
-            pub fn new<S>(value: S) -> Self
-            where
-                S: Into<Cow<'a, str>>
-            {
+            pub fn new(value: Text<'a>) -> Self {
                 Self {
-                    value: value.into(),
+                    value,
                     parameters: parameters!("VALUE" => $value)
                 }
             }
@@ -274,7 +269,7 @@ macro_rules! impl_default_prop {
         impl<'a> Default for $type<'a> {
             fn default() -> Self {
                 Self {
-                    value: $default.into(),
+                    value: Text($default.into()),
                     parameters: BTreeMap::new()
                 }
             }
@@ -288,7 +283,7 @@ macro_rules! impl_from_prop {
             fn from(builder: $type<'a>) -> Self {
                 Property {
                     key: $name.into(),
-                    value: builder.value,
+                    value: builder.value.0,
                     parameters: builder.parameters
                 }
             }

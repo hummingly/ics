@@ -12,19 +12,20 @@
 //! ```
 //! use ics::components::Property;
 //! use ics::properties::Class;
+//! use ics::values::Text;
 //!
 //! // Using associated functions should be preferred over using the generic
 //! // constructors whenever possible
 //! let confidential = Class::confidential();
 //!
-//! assert_eq!(Class::new("CONFIDENTIAL"), confidential);
+//! assert_eq!(Class::new(Text::new("CONFIDENTIAL")), confidential);
 //! assert_eq!(Property::new("CLASS", "CONFIDENTIAL"), confidential.into());
 //! ```
 //! For more information on properties, please refer to the specification [RFC5545 3.7. Calendar Properties](https://tools.ietf.org/html/rfc5545#section-3.7) and [RFC7986 5. Properties](https://tools.ietf.org/html/rfc7986#section-5).
 use components::{Parameter, Parameters, Property};
 use std::borrow::Cow;
 use std::collections::BTreeMap;
-use values::{Binary, Float, Integer};
+use values::{Binary, Float, Integer, Text};
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 enum Resource<'a> {
@@ -36,7 +37,7 @@ impl<'a> From<Resource<'a>> for Cow<'a, str> {
     fn from(value: Resource<'a>) -> Self {
         match value {
             Resource::Link(uri) => uri,
-            Resource::Data(binary) => Cow::Owned(binary.to_string())
+            Resource::Data(binary) => Cow::Owned(binary.0)
         }
     }
 }
@@ -457,7 +458,7 @@ mod rfc7986 {
     use components::{Parameter, Parameters, Property};
     use std::borrow::Cow;
     use std::collections::BTreeMap;
-    use values::Binary;
+    use values::{Binary, Text};
 
     property!(Name, "NAME");
     property_with_parameter!(RefreshInterval, "REFRESH-INTERVAL", "DURATION");
