@@ -25,14 +25,19 @@
 //! ```
 //! use ics::properties::{Comment, Status, Summary};
 //! use ics::{ICalendar, ToDo};
-//! use ics::values::Text;
+//! use ics::values::{DateTime, Month, Text};
 //!
 //! fn main() -> std::io::Result<()> {
 //!     // Anything that can be converted to a Cow<str> is accepted as value which means
 //!     // &str and String can be used freely. For the sake of demonstrating the UID was
 //!     // taken from somewhere. Out of security reasons the UID should always be
 //!     // randomly generated.
-//!     let mut todo = ToDo::new("d4092ed9-1667-4518-a7c0-bcfaac4f1fc6", "20181021T190000");
+//!     let mut todo = ToDo::new(
+//!         "d4092ed9-1667-4518-a7c0-bcfaac4f1fc6",
+//!         DateTime::utc_ymd(2018, Month::October, 21)
+//!             .and_then(|d| d.and_hms(19, 0, 0))
+//!             .unwrap()
+//!     );
 //!     todo.push(Summary::new(Text::new("Katarina's Birthday Present")));
 //!     todo.push(Comment::new(Text::new("Buy her Imagine Dragons tickets!")));
 //!     todo.push(Status::needs_action());

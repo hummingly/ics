@@ -23,9 +23,10 @@
 //! ```
 //! For more information on properties, please refer to the specification [RFC5545 3.7. Calendar Properties](https://tools.ietf.org/html/rfc5545#section-3.7) and [RFC7986 5. Properties](https://tools.ietf.org/html/rfc7986#section-5).
 use components::{Parameter, Parameters, Property};
+use parameters::TzIDParam;
 use std::borrow::Cow;
 use std::collections::BTreeMap;
-use values::{Binary, Float, Integer, Text};
+use values::*;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 enum Resource<'a> {
@@ -51,6 +52,30 @@ impl<'a> From<Resource<'a>> for Cow<'a, str> {
 //     }
 // }
 
+#[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
+enum TimeStamp<T = Local> {
+    Date(Date),
+    DateTime(DateTime<T>)
+}
+
+impl<'a> From<TimeStamp> for Cow<'a, str> {
+    fn from(value: TimeStamp) -> Self {
+        Cow::Owned(match value {
+            TimeStamp::Date(d) => d.to_string(),
+            TimeStamp::DateTime(d) => d.to_string()
+        })
+    }
+}
+
+impl<'a> From<TimeStamp<Utc>> for Cow<'a, str> {
+    fn from(value: TimeStamp<Utc>) -> Self {
+        Cow::Owned(match value {
+            TimeStamp::Date(d) => d.to_string(),
+            TimeStamp::DateTime(d) => d.to_string()
+        })
+    }
+}
+
 property!(CalScale, "CALSCALE");
 property!(Method, "METHOD");
 property!(ProdID, "PRODID");
@@ -64,7 +89,7 @@ pub struct Attach<'a> {
 }
 
 impl<'a> Attach<'a> {
-    /// Creates a new ATTACH Property with the given values..
+    /// Creates a new ATTACH Property from a URI to the attachment.
     pub fn uri<S>(value: S) -> Self
     where
         S: Into<Cow<'a, str>>
@@ -75,7 +100,7 @@ impl<'a> Attach<'a> {
         }
     }
 
-    /// Creates a new ATTACH Property with the given value. The value type is
+    /// Creates a new ATTACH Property from binary content. The value type is
     /// "BINARY" which is why the "ENCODING" parameter with the value
     /// "BASE64" is also added.
     pub fn binary(value: Binary) -> Self {
@@ -279,19 +304,366 @@ property_with_constructor!(
     fn final_() { "FINAL" }
 );
 property!(Summary, "SUMMARY");
-property!(Completed, "COMPLETED");
-property!(DtEnd, "DTEND");
-property!(Due, "DUE");
-property!(DtStart, "DTSTART");
+
+/// COMPLETED Property
+#[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
+pub struct Completed<'a> {
+    value: DateTime<Utc>,
+    parameters: Parameters<'a>
+}
+
+impl<'a> Completed<'a> {
+    /// Creates a new COMPLETED Property from a date time with UTC time.
+    pub fn new(value: DateTime<Utc>) -> Self {
+        Self {
+            value,
+            parameters: BTreeMap::new()
+        }
+    }
+
+    /// Adds a parameter to the property.
+    pub fn add<P>(&mut self, parameter: P)
+    where
+        P: Into<Parameter<'a>>
+    {
+        let param = parameter.into();
+        self.parameters.insert(param.key, param.value);
+    }
+
+    /// Adds several parameters at once to the property. For creating
+    /// several parameters at once, consult the documentation of
+    /// the `parameters!` macro.
+    pub fn append(&mut self, mut parameters: Parameters<'a>) {
+        self.parameters.append(&mut parameters);
+    }
+}
+
+impl<'a> From<Completed<'a>> for Property<'a> {
+    fn from(builder: Completed<'a>) -> Self {
+        Property {
+            key: "COMPLETED".into(),
+            value: Cow::Owned(builder.value.to_string()),
+            parameters: builder.parameters
+        }
+    }
+}
+
+/// DTEND Property
+#[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
+pub struct DtEnd<'a, T = Local> {
+    value: TimeStamp<T>,
+    parameters: Parameters<'a>
+}
+
+impl<'a> DtEnd<'a> {
+    /// Creates a new DTEND Property from a local date time.
+    pub fn local(value: DateTime) -> Self {
+        Self {
+            value: TimeStamp::DateTime(value),
+            parameters: BTreeMap::new()
+        }
+    }
+
+    /// Creates a new DTEND Property from a local date time with a time zone
+    /// reference.
+    pub fn with_tzid(value: DateTime, tzid: TzIDParam<'a>) -> Self {
+        let mut end = Self {
+            value: TimeStamp::DateTime(value),
+            parameters: BTreeMap::new()
+        };
+        end.add(tzid);
+        end
+    }
+}
+
+impl<'a> DtEnd<'a, Utc> {
+    /// Creates a new DTEND Property from a local date time.
+    pub fn utc(value: DateTime<Utc>) -> Self {
+        Self {
+            value: TimeStamp::DateTime(value),
+            parameters: BTreeMap::new()
+        }
+    }
+}
+
+impl<'a, T> DtEnd<'a, T> {
+    /// Creates a new DTEND Property from a date. The VALUE parameter is set to
+    /// DATE.
+    pub fn date(value: Date) -> Self {
+        Self {
+            value: TimeStamp::Date(value),
+            parameters: parameters!("VALUE" => "DATE")
+        }
+    }
+
+    /// Adds a parameter to the property.
+    pub fn add<P>(&mut self, parameter: P)
+    where
+        P: Into<Parameter<'a>>
+    {
+        let param = parameter.into();
+        self.parameters.insert(param.key, param.value);
+    }
+
+    /// Adds several parameters at once to the property. For creating
+    /// several parameters at once, consult the documentation of
+    /// the `parameters!` macro.
+    pub fn append(&mut self, mut parameters: Parameters<'a>) {
+        self.parameters.append(&mut parameters);
+    }
+}
+
+impl<'a> From<DtEnd<'a>> for Property<'a> {
+    fn from(builder: DtEnd<'a>) -> Self {
+        Property {
+            key: "DTEND".into(),
+            value: builder.value.into(),
+            parameters: builder.parameters
+        }
+    }
+}
+
+impl<'a> From<DtEnd<'a, Utc>> for Property<'a> {
+    fn from(builder: DtEnd<'a, Utc>) -> Self {
+        Property {
+            key: "DTEND".into(),
+            value: builder.value.into(),
+            parameters: builder.parameters
+        }
+    }
+}
+
+/// DUE Property
+#[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
+pub struct Due<'a, T = Local> {
+    value: TimeStamp<T>,
+    parameters: Parameters<'a>
+}
+
+impl<'a> Due<'a> {
+    /// Creates a new DUE Property from a local date time.
+    pub fn local(value: DateTime) -> Self {
+        Self {
+            value: TimeStamp::DateTime(value),
+            parameters: BTreeMap::new()
+        }
+    }
+
+    /// Creates a new DUE Property from a local date time with a time zone
+    /// reference.
+    pub fn with_tzid(value: DateTime, tzid: TzIDParam<'a>) -> Self {
+        let mut end = Self {
+            value: TimeStamp::DateTime(value),
+            parameters: BTreeMap::new()
+        };
+        end.add(tzid);
+        end
+    }
+}
+
+impl<'a> Due<'a, Utc> {
+    /// Creates a new DUE Property from a local date time.
+    pub fn utc(value: DateTime<Utc>) -> Self {
+        Self {
+            value: TimeStamp::DateTime(value),
+            parameters: BTreeMap::new()
+        }
+    }
+}
+
+impl<'a, T> Due<'a, T> {
+    /// Creates a new DUE Property from a date. The VALUE parameter is set to
+    /// DATE.
+    pub fn date(value: Date) -> Self {
+        Self {
+            value: TimeStamp::Date(value),
+            parameters: parameters!("VALUE" => "DATE")
+        }
+    }
+
+    /// Adds a parameter to the property.
+    pub fn add<P>(&mut self, parameter: P)
+    where
+        P: Into<Parameter<'a>>
+    {
+        let param = parameter.into();
+        self.parameters.insert(param.key, param.value);
+    }
+
+    /// Adds several parameters at once to the property. For creating
+    /// several parameters at once, consult the documentation of
+    /// the `parameters!` macro.
+    pub fn append(&mut self, mut parameters: Parameters<'a>) {
+        self.parameters.append(&mut parameters);
+    }
+}
+
+impl<'a> From<Due<'a>> for Property<'a> {
+    fn from(builder: Due<'a>) -> Self {
+        Property {
+            key: "DUE".into(),
+            value: builder.value.into(),
+            parameters: builder.parameters
+        }
+    }
+}
+
+impl<'a> From<Due<'a, Utc>> for Property<'a> {
+    fn from(builder: Due<'a, Utc>) -> Self {
+        Property {
+            key: "DUE".into(),
+            value: builder.value.into(),
+            parameters: builder.parameters
+        }
+    }
+}
+
+/// DTSTART Property
+#[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
+pub struct DtStart<'a, T = Local> {
+    value: TimeStamp<T>,
+    parameters: Parameters<'a>
+}
+
+impl<'a> DtStart<'a> {
+    /// Creates a new DTSTART Property from a local date time.
+    pub fn local(value: DateTime) -> Self {
+        Self {
+            value: TimeStamp::DateTime(value),
+            parameters: BTreeMap::new()
+        }
+    }
+
+    /// Creates a new DTSTART Property from a local date time with a time zone
+    /// reference.
+    pub fn with_tzid(value: DateTime, tzid: TzIDParam<'a>) -> Self {
+        let mut end = Self {
+            value: TimeStamp::DateTime(value),
+            parameters: BTreeMap::new()
+        };
+        end.add(tzid);
+        end
+    }
+
+    /// Creates a new DTSTART Property from a date. The VALUE parameter is set
+    /// to DATE.
+    pub fn date(value: Date) -> Self {
+        Self {
+            value: TimeStamp::Date(value),
+            parameters: parameters!("VALUE" => "DATE")
+        }
+    }
+}
+
+impl<'a> DtStart<'a, Utc> {
+    /// Creates a new DTSTART Property from a local date time.
+    pub fn utc(value: DateTime<Utc>) -> Self {
+        Self {
+            value: TimeStamp::DateTime(value),
+            parameters: BTreeMap::new()
+        }
+    }
+}
+
+impl<'a, T> DtStart<'a, T> {
+    /// Adds a parameter to the property.
+    pub fn add<P>(&mut self, parameter: P)
+    where
+        P: Into<Parameter<'a>>
+    {
+        let param = parameter.into();
+        self.parameters.insert(param.key, param.value);
+    }
+
+    /// Adds several parameters at once to the property. For creating
+    /// several parameters at once, consult the documentation of
+    /// the `parameters!` macro.
+    pub fn append(&mut self, mut parameters: Parameters<'a>) {
+        self.parameters.append(&mut parameters);
+    }
+}
+
+impl<'a> From<DtStart<'a>> for Property<'a> {
+    fn from(builder: DtStart<'a>) -> Self {
+        Property {
+            key: "DTSTART".into(),
+            value: builder.value.into(),
+            parameters: builder.parameters
+        }
+    }
+}
+
+impl<'a> From<DtStart<'a, Utc>> for Property<'a> {
+    fn from(builder: DtStart<'a, Utc>) -> Self {
+        Property {
+            key: "DTSTART".into(),
+            value: builder.value.into(),
+            parameters: builder.parameters
+        }
+    }
+}
+
 property!(Duration, "DURATION");
 property!(FreeBusyTime, "FREEBUSY");
-property_with_constructor!(
-    /// [Format definitions of time transparency](https://tools.ietf.org/html/rfc5545#section-3.8.2.7)
-    Transp, "TRANSP",
-    // Default Value
-    fn opaque() { "OPAQUE" };
-    fn transparent() { "TRANSPARENT" }
-);
+
+/// TRANSP Property
+#[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
+pub struct Transp<'a> {
+    value: bool,
+    parameters: Parameters<'a>
+}
+
+impl<'a> Transp<'a> {
+    const OPAQUE: bool = false;
+    const TRANSPARENT: bool = true;
+
+    /// Creates a new TRANSP Property set to OPAQUE.
+    pub fn opaque() -> Self {
+        Self {
+            value: Self::OPAQUE,
+            parameters: BTreeMap::new()
+        }
+    }
+
+    /// Creates a new TRANSP Property set to TRANSPARENT.
+    pub fn transparent() -> Self {
+        Self {
+            value: Self::TRANSPARENT,
+            parameters: BTreeMap::new()
+        }
+    }
+
+    /// Adds a parameter to the property.
+    pub fn add<P>(&mut self, parameter: P)
+    where
+        P: Into<Parameter<'a>>
+    {
+        let param = parameter.into();
+        self.parameters.insert(param.key, param.value);
+    }
+
+    /// Adds several parameters at once to the property. For creating
+    /// several parameters at once, consult the documentation of
+    /// the `parameters!` macro.
+    pub fn append(&mut self, mut parameters: Parameters<'a>) {
+        self.parameters.append(&mut parameters);
+    }
+}
+
+impl<'a> From<Transp<'a>> for Property<'a> {
+    fn from(builder: Transp<'a>) -> Self {
+        Property {
+            key: "TRANSP".into(),
+            value: Cow::Borrowed(if builder.value == Transp::OPAQUE {
+                "OPAQUE"
+            } else {
+                "TRANSPARENT"
+            }),
+            parameters: builder.parameters
+        }
+    }
+}
+
 property!(TzID, "TZID");
 property!(TzName, "TZNAME");
 property!(TzOffsetFrom, "TZOFFSETFROM");
@@ -359,9 +731,135 @@ impl<'a> From<Repeat<'a>> for Property<'a> {
 }
 
 property!(Trigger, "TRIGGER");
-property!(Created, "CREATED");
-property!(DtStamp, "DTSTAMP");
-property!(LastModified, "LAST-MODIFIED");
+
+/// CREATED Property
+#[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
+pub struct Created<'a> {
+    value: DateTime<Utc>,
+    parameters: Parameters<'a>
+}
+
+impl<'a> Created<'a> {
+    /// Creates a new CREATED Property from a date time with UTC time.
+    pub fn new(value: DateTime<Utc>) -> Self {
+        Self {
+            value,
+            parameters: BTreeMap::new()
+        }
+    }
+
+    /// Adds a parameter to the property.
+    pub fn add<P>(&mut self, parameter: P)
+    where
+        P: Into<Parameter<'a>>
+    {
+        let param = parameter.into();
+        self.parameters.insert(param.key, param.value);
+    }
+
+    /// Adds several parameters at once to the property. For creating
+    /// several parameters at once, consult the documentation of
+    /// the `parameters!` macro.
+    pub fn append(&mut self, mut parameters: Parameters<'a>) {
+        self.parameters.append(&mut parameters);
+    }
+}
+
+impl<'a> From<Created<'a>> for Property<'a> {
+    fn from(builder: Created<'a>) -> Self {
+        Property {
+            key: "CREATED".into(),
+            value: Cow::Owned(builder.value.to_string()),
+            parameters: builder.parameters
+        }
+    }
+}
+
+/// DTSTAMP Property
+#[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
+pub struct DtStamp<'a> {
+    value: DateTime<Utc>,
+    parameters: Parameters<'a>
+}
+
+impl<'a> DtStamp<'a> {
+    /// Creates a new DTSTAMP Property from a date time with UTC time.
+    pub fn new(value: DateTime<Utc>) -> Self {
+        Self {
+            value,
+            parameters: BTreeMap::new()
+        }
+    }
+
+    /// Adds a parameter to the property.
+    pub fn add<P>(&mut self, parameter: P)
+    where
+        P: Into<Parameter<'a>>
+    {
+        let param = parameter.into();
+        self.parameters.insert(param.key, param.value);
+    }
+
+    /// Adds several parameters at once to the property. For creating
+    /// several parameters at once, consult the documentation of
+    /// the `parameters!` macro.
+    pub fn append(&mut self, mut parameters: Parameters<'a>) {
+        self.parameters.append(&mut parameters);
+    }
+}
+
+impl<'a> From<DtStamp<'a>> for Property<'a> {
+    fn from(builder: DtStamp<'a>) -> Self {
+        Property {
+            key: "DTSTAMP".into(),
+            value: Cow::Owned(builder.value.to_string()),
+            parameters: builder.parameters
+        }
+    }
+}
+
+/// LAST-MODIFIED Property
+#[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
+pub struct LastModified<'a> {
+    value: DateTime<Utc>,
+    parameters: Parameters<'a>
+}
+
+impl<'a> LastModified<'a> {
+    /// Creates a new LAST-MODIFIED Property from a date time with UTC time.
+    pub fn new(value: DateTime<Utc>) -> Self {
+        Self {
+            value,
+            parameters: BTreeMap::new()
+        }
+    }
+
+    /// Adds a parameter to the property.
+    pub fn add<P>(&mut self, parameter: P)
+    where
+        P: Into<Parameter<'a>>
+    {
+        let param = parameter.into();
+        self.parameters.insert(param.key, param.value);
+    }
+
+    /// Adds several parameters at once to the property. For creating
+    /// several parameters at once, consult the documentation of
+    /// the `parameters!` macro.
+    pub fn append(&mut self, mut parameters: Parameters<'a>) {
+        self.parameters.append(&mut parameters);
+    }
+}
+
+impl<'a> From<LastModified<'a>> for Property<'a> {
+    fn from(builder: LastModified<'a>) -> Self {
+        Property {
+            key: "LAST-MODIFIED".into(),
+            value: Cow::Owned(builder.value.to_string()),
+            parameters: builder.parameters
+        }
+    }
+}
 
 /// SEQUENCE Property
 #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]

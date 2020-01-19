@@ -2,9 +2,12 @@ use super::error::ParseBinaryError;
 use std::borrow::Cow;
 // use std::collections::HashMap;
 use std::fmt;
+use std::iter::FromIterator;
 use std::str::FromStr;
 
 use values::encoding::{encode_base64, escape_text};
+
+// TODO: derived Default
 
 // INFO: https://tools.ietf.org/html/rfc2045#section-2.8
 /// ICalendar Binary
@@ -91,13 +94,15 @@ impl<'t> Text<'t> {
     where
         T: Into<Cow<'t, str>>
     {
-        let mut text = String::with_capacity(list.len());
-        for t in list {
-            text.push_str(&escape_text(t.into()));
-            text.push(',');
+        if list.is_empty() {
+            return Text(Cow::Borrowed(""));
         }
-        let len = text.len() - 1;
-        text.truncate(len);
+
+        let mut text = String::from_iter(
+            list.into_iter()
+                .map(|l| [escape_text(l.into()), Cow::Borrowed(",")].concat())
+        );
+        text.pop();
         Text(Cow::Owned(text))
     }
 }

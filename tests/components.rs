@@ -1,11 +1,11 @@
 extern crate ics;
 
-use ics::parameters::{FmtType, Related, Value};
+use ics::parameters::{FmtType, Related};
 use ics::properties::{
     Attach, Attendee, Categories, Class, Completed, Description, DtEnd, DtStart, Due, FreeBusyTime,
     LastModified, Organizer, Priority, RRule, Status, Summary, Transp, Trigger, TzName, URL
 };
-use ics::values::Text;
+use ics::values::{Date, DateTime, Month, Text};
 use ics::{Alarm, Event, FreeBusy, Journal, TimeZone, ToDo, ZoneTime};
 
 #[test]
@@ -21,16 +21,19 @@ fn event() {
                     TRANSP:TRANSPARENT\r\n\
                     END:VEVENT\r\n";
 
-    let mut event = Event::new("b68378cf-872d-44f1-9703-5e3725c56e71", "19970901T130000Z");
+    let mut event = Event::new(
+        "b68378cf-872d-44f1-9703-5e3725c56e71",
+        DateTime::utc_ymd(1997, Month::September, 1)
+            .and_then(|d| d.and_hms(13, 0, 0))
+            .unwrap()
+    );
     event.push(Categories::new(Text::from_list(vec![
         "ANNIVERSARY",
         "PERSONAL",
         "SPECIAL OCCASION",
     ])));
     event.push(Class::confidential());
-    let mut date = DtStart::new(Text::new("19971102"));
-    date.add(Value::DATE);
-    event.push(date);
+    event.push(DtStart::date(Date::ymd(1997, Month::November, 2).unwrap()));
     event.push(RRule::new(Text::new("FREQ=YEARLY")));
     event.push(Summary::new(Text::new("Our Blissful Anniversary")));
     event.push(Transp::transparent());
@@ -51,10 +54,27 @@ fn todo() {
                     STATUS:NEEDS-ACTION\r\n\
                     END:VTODO\r\n";
 
-    let mut todo = ToDo::new("b68378cf-872d-44f1-9703-5e3725c56e71", "20070514T103211Z");
-    todo.push(Completed::new(Text::new("20070707T100000Z")));
-    todo.push(DtStart::new(Text::new("20070514T110000Z")));
-    todo.push(Due::new(Text::new("20070709T130000Z")));
+    let mut todo = ToDo::new(
+        "b68378cf-872d-44f1-9703-5e3725c56e71",
+        DateTime::utc_ymd(2007, Month::May, 14)
+            .and_then(|d| d.and_hms(10, 32, 11))
+            .unwrap()
+    );
+    todo.push(Completed::new(
+        DateTime::utc_ymd(2007, Month::July, 7)
+            .and_then(|d| d.and_hms(10, 0, 0))
+            .unwrap()
+    ));
+    todo.push(DtStart::utc(
+        DateTime::utc_ymd(2007, Month::May, 14)
+            .and_then(|d| d.and_hms(11, 0, 0))
+            .unwrap()
+    ));
+    todo.push(Due::utc(
+        DateTime::utc_ymd(2007, Month::July, 9)
+            .and_then(|d| d.and_hms(13, 0, 0))
+            .unwrap()
+    ));
     todo.push(Priority::new(1));
     todo.push(Summary::new(Text::new("Submit Revised Internet-Draft")));
     todo.push(Status::needs_action());
@@ -74,10 +94,13 @@ fn journal() {
     3. Henry Miller (Handsoff I\r\n nsurance): Car was totaled by tree. Is looking into a loaner car. 555-2323 \r\n (tel).\r\n\
     END:VJOURNAL\r\n";
 
-    let mut journal = Journal::new("b68378cf-872d-44f1-9703-5e3725c56e71", "19970901T130000Z");
-    let mut date = DtStart::new(Text::new("19970317"));
-    date.add(Value::DATE);
-    journal.push(date);
+    let mut journal = Journal::new(
+        "b68378cf-872d-44f1-9703-5e3725c56e71",
+        DateTime::utc_ymd(1997, Month::September, 1)
+            .and_then(|d| d.and_hms(13, 0, 0))
+            .unwrap()
+    );
+    journal.push(DtStart::date(Date::ymd(1997, Month::March, 17).unwrap()));
     journal.push(Summary::new(Text::new("Staff meeting minutes")));
     journal.push(Description::new(Text::new("1. Staff meeting: Participants include Joe, Lisa, and Bob. Aurora project plans were reviewed. There is currently no budget reserves for this project. Lisa will escalate to management. Next meeting on Tuesday.\n\
     2. Telephone Conference: ABC Corp. sales representative called to discuss new printer. Promised to get us a demo by Friday.\n\
@@ -100,9 +123,22 @@ fn freebusy() {
                     URL:http://www.example.com/calendar/busytime/jsmith.ifb\r\n\
                     END:VFREEBUSY\r\n";
 
-    let mut freebusy = FreeBusy::new("b68378cf-872d-44f1-9703-5e3725c56e71", "19970901T120000Z");
-    freebusy.push(DtStart::new(Text::new("19980313T141711Z")));
-    freebusy.push(DtEnd::new(Text::new("19980410T141711Z")));
+    let mut freebusy = FreeBusy::new(
+        "b68378cf-872d-44f1-9703-5e3725c56e71",
+        DateTime::utc_ymd(1997, Month::September, 1)
+            .and_then(|d| d.and_hms(12, 0, 0))
+            .unwrap()
+    );
+    freebusy.push(DtStart::utc(
+        DateTime::utc_ymd(1998, Month::March, 13)
+            .and_then(|d| d.and_hms(14, 17, 11))
+            .unwrap()
+    ));
+    freebusy.push(DtEnd::utc(
+        DateTime::utc_ymd(1998, Month::April, 10)
+            .and_then(|d| d.and_hms(14, 17, 11))
+            .unwrap()
+    ));
     freebusy.push(FreeBusyTime::new(Text::new(
         "19980314T233000Z/19980315T003000Z"
     )));
@@ -139,13 +175,29 @@ fn time() {
                     END:DAYLIGHT\r\n\
                     END:VTIMEZONE\r\n";
 
-    let mut standard = ZoneTime::standard("20071104T020000", "-0400", "-0500");
+    let mut standard = ZoneTime::standard(
+        DateTime::local_ymd(2007, Month::November, 4)
+            .and_then(|d| d.and_hms(2, 0, 0))
+            .unwrap(),
+        "-0400",
+        "-0500"
+    );
     standard.push(TzName::new(Text::new("EST")));
-    let mut daylight = ZoneTime::daylight("20070311T020000", "-0500", "-0400");
+    let mut daylight = ZoneTime::daylight(
+        DateTime::local_ymd(2007, Month::March, 11)
+            .and_then(|d| d.and_hms(2, 0, 0))
+            .unwrap(),
+        "-0500",
+        "-0400"
+    );
     daylight.push(TzName::new(Text::new("EDT")));
 
     let mut timezone = TimeZone::new("America/New_York", standard);
-    timezone.push(LastModified::new(Text::new("20050809T050000Z")));
+    timezone.push(LastModified::new(
+        DateTime::utc_ymd(2005, Month::August, 9)
+            .and_then(|d| d.and_hms(5, 0, 0))
+            .unwrap()
+    ));
     timezone.add_zonetime(daylight);
 
     assert_eq!(timezone.to_string(), expected);

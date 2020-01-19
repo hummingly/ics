@@ -5,14 +5,14 @@
 /// # #[macro_use] extern crate ics;
 /// use ics::components::Property;
 /// use ics::properties::DtStart;
-/// use ics::values::Text;
+/// use ics::values::{DateTime, Month};
 ///
 /// # fn main() {
-/// let mut date = DtStart::new(Text::new("20180906"));
-/// date.append(parameters!("TZID" => "America/New_York"; "VALUE" => "DATE"));
+/// let mut date = DtStart::utc(DateTime::utc_ymd(2018, Month::September, 6).unwrap());
+/// date.append(parameters!("TZID" => "America/New_York"; "VALUE" => "DATE-TIME"));
 /// assert_eq!(
 ///     Property::from(date).to_string(),
-///     "DTSTART;TZID=America/New_York;VALUE=DATE:20180906\r\n"
+///     "DTSTART;TZID=America/New_York;VALUE=DATE-TIME:20180906T000000Z\r\n"
 /// );
 /// # }
 /// ```

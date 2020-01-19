@@ -5,7 +5,7 @@ use ics::properties::{
     Attach, Attendee, Categories, Description, DtEnd, DtStart, Due, Duration, Organizer, Repeat,
     Sequence, Status, Summary, Trigger
 };
-use ics::values::Text;
+use ics::values::{DateTime, Month, Text};
 use ics::{Alarm, Event, ICalendar, ToDo};
 
 #[test]
@@ -28,10 +28,23 @@ fn icalendar_event() {
                     END:VEVENT\r\n\
                     END:VCALENDAR\r\n";
 
-    let mut event = Event::new("b68378cf-872d-44f1-9703-5e3725c56e71", "19960704T120000Z");
+    let mut event = Event::new(
+        "b68378cf-872d-44f1-9703-5e3725c56e71",
+        DateTime::utc_ymd(1996, Month::July, 4)
+            .and_then(|d| d.and_hms(12, 0, 0))
+            .unwrap()
+    );
     event.push(Organizer::new(Text::new("mailto:jsmith@example.com")));
-    event.push(DtStart::new(Text::new("19960918T143000Z")));
-    event.push(DtEnd::new(Text::new("19960920T220000Z")));
+    event.push(DtStart::utc(
+        DateTime::utc_ymd(1996, Month::September, 18)
+            .and_then(|d| d.and_hms(14, 30, 0))
+            .unwrap()
+    ));
+    event.push(DtEnd::utc(
+        DateTime::utc_ymd(1996, Month::September, 20)
+            .and_then(|d| d.and_hms(22, 0, 0))
+            .unwrap()
+    ));
     event.push(Status::confirmed());
     event.push(Categories::new(Text::new("CONFERENCE")));
     event.push(Summary::new(Text::new("Networld+Interop Conference")));
@@ -73,12 +86,19 @@ fn icalendar_todo() {
                     END:VTODO\r\n\
                     END:VCALENDAR\r\n";
 
-    let mut todo = ToDo::new("b68378cf-872d-44f1-9703-5e3725c56e71", "19980130T134500Z");
+    let mut todo = ToDo::new(
+        "b68378cf-872d-44f1-9703-5e3725c56e71",
+        DateTime::utc_ymd(1998, Month::January, 30)
+            .and_then(|d| d.and_hms(13, 45, 0))
+            .unwrap()
+    );
     todo.push(Organizer::new(Text::new("mailto:unclesam@example.com")));
     let mut attendee = Attendee::new(Text::new("mailto:jqpublic@example.com"));
     attendee.add(PartStat::ACCEPTED);
     todo.push(attendee);
-    todo.push(Due::new(Text::new("19980415T000000")));
+    todo.push(Due::local(
+        DateTime::local_ymd(1998, Month::April, 15).unwrap()
+    ));
     todo.push(Status::needs_action());
     todo.push(Summary::new(Text::new("Submit Income Taxes")));
     todo.push(Sequence::new(2));

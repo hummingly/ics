@@ -6,7 +6,7 @@
 mod encoding;
 pub mod error;
 mod string;
-// mod time;
+mod time;
 
 use std::fmt;
 use std::str::FromStr;
@@ -64,10 +64,13 @@ pub use values::string::Binary;
 // pub use self::string::CalAdress;
 pub use values::string::Text;
 // pub use self::string::Uri;
-// pub use self::time::Date;
-// pub use self::time::DateTime;
+pub use values::time::Date;
+pub use values::time::DateTime;
+pub use values::time::Month;
 // pub use self::time::Duration;
 // pub use self::time::Period;
 // pub use self::time::Recur;
-// pub use self::time::Time;
+pub use values::time::Local;
+pub use values::time::Time;
+pub use values::time::Utc;
 // pub use self::time::UTCOffset;

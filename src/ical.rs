@@ -9,7 +9,7 @@ use std::fs::File;
 use std::io::{self, Write};
 use std::path::Path;
 use std::slice::Iter;
-use values::Text;
+use values::{DateTime, Text, Utc};
 
 /// The iCalendar object specified as VCALENDAR.
 ///
@@ -130,15 +130,14 @@ impl<'a> Event<'a> {
     /// Creates a new "VEVENT" calendar component. The "UID" and "DTSTAMP"
     /// properties are required. A UID should be generated randomly for security
     /// reasons.
-    pub fn new<U, D>(uid: U, dtstamp: D) -> Self
+    pub fn new<U>(uid: U, dtstamp: DateTime<Utc>) -> Self
     where
-        U: Into<Cow<'a, str>>,
-        D: Into<Cow<'a, str>>
+        U: Into<Cow<'a, str>>
     {
         Self {
             properties: vec![
                 UID::new(Text::new(uid)).into(),
-                DtStamp::new(Text::new(dtstamp)).into(),
+                DtStamp::new(dtstamp).into(),
             ],
             alarms: Vec::new()
         }
@@ -186,15 +185,14 @@ impl<'a> ToDo<'a> {
     /// Creates a new "VTODO" calendar component. The "UID" and "DTSTAMP"
     /// properties are required. A UID should be generated randomly for security
     /// reasons.
-    pub fn new<U, D>(uid: U, dtstamp: D) -> Self
+    pub fn new<U>(uid: U, dtstamp: DateTime<Utc>) -> Self
     where
-        U: Into<Cow<'a, str>>,
-        D: Into<Cow<'a, str>>
+        U: Into<Cow<'a, str>>
     {
         Self {
             properties: vec![
                 UID::new(Text::new(uid)).into(),
-                DtStamp::new(Text::new(dtstamp)).into(),
+                DtStamp::new(dtstamp).into(),
             ],
             alarms: Vec::new()
         }
@@ -243,14 +241,13 @@ impl<'a> Journal<'a> {
     /// Creates a new "VJOURNAL" calendar component. The "UID" and "DTSTAMP"
     /// properties are required. A UID should be generated randomly for security
     /// reasons.
-    pub fn new<U, D>(uid: U, dtstamp: D) -> Self
+    pub fn new<U>(uid: U, dtstamp: DateTime<Utc>) -> Self
     where
-        U: Into<Cow<'a, str>>,
-        D: Into<Cow<'a, str>>
+        U: Into<Cow<'a, str>>
     {
         Journal(vec![
             UID::new(Text::new(uid)).into(),
-            DtStamp::new(Text::new(dtstamp)).into(),
+            DtStamp::new(dtstamp).into(),
         ])
     }
 
@@ -293,14 +290,13 @@ impl<'a> FreeBusy<'a> {
     /// Creates a new "VFREEBUSY" calendar component. The "UID" and "DTSTAMP"
     /// properties are required. A UID should be generated randomly for security
     /// reasons.
-    pub fn new<U, D>(uid: U, dtstamp: D) -> Self
+    pub fn new<U>(uid: U, dtstamp: DateTime<Utc>) -> Self
     where
-        U: Into<Cow<'a, str>>,
-        D: Into<Cow<'a, str>>
+        U: Into<Cow<'a, str>>
     {
         FreeBusy(vec![
             UID::new(Text::new(uid)).into(),
-            DtStamp::new(Text::new(dtstamp)).into(),
+            DtStamp::new(dtstamp).into(),
         ])
     }
 
@@ -408,9 +404,8 @@ impl<'a> ZoneTime<'a> {
     /// Creates a new "STANDARD" sub-component. The "DTSTART", "TZOFFSETFROM"
     /// and "TZOFFSETTO" properties are required. The "STANDARD" sub-component
     /// consists of a collection of properties that describe Standard Time.
-    pub fn standard<S, T, F>(dtstart: S, tz_offset_from: F, tz_offset_to: T) -> Self
+    pub fn standard<T, F>(dtstart: DateTime, tz_offset_from: F, tz_offset_to: T) -> Self
     where
-        S: Into<Cow<'a, str>>,
         F: Into<Cow<'a, str>>,
         T: Into<Cow<'a, str>>
     {
@@ -421,9 +416,8 @@ impl<'a> ZoneTime<'a> {
     /// and "TZOFFSETTO" properties are required. The "DAYLIGHT" sub-component
     /// consists of a collection of properties that describe Daylight Saving
     /// Time.
-    pub fn daylight<S, T, F>(dtstart: S, tz_offset_from: F, tz_offset_to: T) -> Self
+    pub fn daylight<T, F>(dtstart: DateTime, tz_offset_from: F, tz_offset_to: T) -> Self
     where
-        S: Into<Cow<'a, str>>,
         F: Into<Cow<'a, str>>,
         T: Into<Cow<'a, str>>
     {
@@ -471,14 +465,13 @@ pub struct Standard<'a>(Vec<Property<'a>>);
 impl<'a> Standard<'a> {
     /// Creates a new "STANDARD" sub-component. The properties "DTSTART",
     /// "TZOFFSETFROM" and "TZOFFSETTO" are required.
-    pub fn new<S, T, F>(dtstart: S, tz_offset_from: F, tz_offset_to: T) -> Self
+    pub fn new<T, F>(dtstart: DateTime, tz_offset_from: F, tz_offset_to: T) -> Self
     where
-        S: Into<Cow<'a, str>>,
         F: Into<Cow<'a, str>>,
         T: Into<Cow<'a, str>>
     {
         Standard(vec![
-            DtStart::new(Text::new(dtstart)).into(),
+            DtStart::local(dtstart).into(),
             TzOffsetFrom::new(Text::new(tz_offset_from)).into(),
             TzOffsetTo::new(Text::new(tz_offset_to)).into(),
         ])
@@ -521,14 +514,13 @@ pub struct Daylight<'a>(Vec<Property<'a>>);
 impl<'a> Daylight<'a> {
     /// Creates a new "DAYLIGHT" sub-component. The properties "DTSTART",
     /// "TZOFFSETFROM" and "TZOFFSETTO" are required.
-    pub fn new<S, T, F>(dtstart: S, tz_offset_from: F, tz_offset_to: T) -> Self
+    pub fn new<T, F>(dtstart: DateTime, tz_offset_from: F, tz_offset_to: T) -> Self
     where
-        S: Into<Cow<'a, str>>,
         F: Into<Cow<'a, str>>,
         T: Into<Cow<'a, str>>
     {
         Daylight(vec![
-            DtStart::new(Text::new(dtstart)).into(),
+            DtStart::local(dtstart).into(),
             TzOffsetFrom::new(Text::new(tz_offset_from)).into(),
             TzOffsetTo::new(Text::new(tz_offset_to)).into(),
         ])

@@ -1,4 +1,5 @@
-// use std::fmt;
+use std::fmt;
+use std::marker::PhantomData;
 // use std::ops::*;
 // use std::str::FromStr;
 
@@ -9,55 +10,98 @@
 // const DAY: i64 = 24 * HOUR;
 // const WEEK: i64 = 7 * DAY;
 
-// fn is_valid_date(year: u16, month: u8, day: u8) -> bool {
-//     const MAX_DAYS_IN_MONTH: [u8; 12] = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+fn is_valid_date(year: u16, month: Month, day: u8) -> bool {
+    if day == 0 || day > 31 || year > 9999 {
+        return false;
+    }
 
-//     if day == 0 {
-//         return false;
-//     }
+    match month {
+        Month::February => {
+            if is_leap_year(year) {
+                day <= month.max_days()
+            } else {
+                day <= month.max_days() - 1
+            }
+        }
+        _ => day <= month.max_days()
+    }
+}
 
-//     match month {
-//         2 => {
-//             if is_leap_year(year) {
-//                 day <= 29
-//             } else {
-//                 day <= 28
-//             }
-//         }
-//         1...12 => day <= MAX_DAYS_IN_MONTH[month as usize],
-//         _ => false
-//     }
-// }
+fn is_leap_year(year: u16) -> bool {
+    year % 400 == 0 || (year % 4 == 0 && year % 100 > 0)
+}
 
-// fn is_leap_year(year: u16) -> bool {
-//     year % 400 == 0 || (year % 4 == 0 && year % 100 > 0)
-// }
+///
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
+pub enum Month {
+    ///
+    January = 1,
+    ///
+    February = 2,
+    ///
+    March = 3,
+    ///
+    April = 4,
+    ///
+    May = 5,
+    ///
+    June = 6,
+    ///
+    July = 7,
+    ///
+    August = 8,
+    ///
+    September = 9,
+    ///
+    October = 10,
+    ///
+    November = 11,
+    ///
+    December = 12
+}
 
-// #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
-// pub struct Date {
-//     year: u16,
-//     month: u8,
-//     day: u8
-// }
+impl Month {
+    fn max_days(&self) -> u8 {
+        match self {
+            Month::January => 31,
+            Month::February => 29,
+            Month::March => 31,
+            Month::April => 30,
+            Month::May => 31,
+            Month::June => 30,
+            Month::July => 31,
+            Month::August => 31,
+            Month::September => 30,
+            Month::October => 31,
+            Month::November => 30,
+            Month::December => 31
+        }
+    }
+}
 
-// impl Date {
-//     pub fn ymd(year: u16, month: u8, day: u8) -> Self {
-//         Date::checked_ymd(year, month, day).unwrap()
-//     }
+///
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
+pub struct Date {
+    year: u16,
+    month: Month,
+    day: u8
+}
 
-//     pub fn checked_ymd(year: u16, month: u8, day: u8) -> Option<Self> {
-//         if year < 10_000 || !is_valid_date(year, month, day) {
-//             return None;
-//         }
-//         Some(Date { year, month, day })
-//     }
-// }
+impl Date {
+    ///
+    pub fn ymd(year: u16, month: Month, day: u8) -> Option<Self> {
+        if !is_valid_date(year, month, day) {
+            return None;
+        }
+        Some(Date { year, month, day })
+    }
+}
 
-// impl fmt::Display for Date {
-//     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-//         write!(f, "{:04}{:02}{:02}", self.year, self.month, self.day)
-//     }
-// }
+impl fmt::Display for Date {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{:04}{:02}{:02}", self.year, self.month as u8, self.day)
+    }
+}
 
 // impl FromStr for Date {
 //     // TODO: Replace placeholder
@@ -76,17 +120,75 @@
 //     }
 // }
 
-// // TODO: impl Ord or PartialOrd (needed for Period check)
-// pub struct DateTime {
-//     date: Date,
-//     time: Time
-// }
+// TODO: Custom PartialOrd and Ord implementation?
+///
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
+pub struct DateTime<T = Local> {
+    date: Date,
+    time: Time<T>
+}
 
-// impl fmt::Display for DateTime {
-//     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-//         write!(f, "{}T{}", self.date, self.time)
-//     }
-// }
+impl DateTime {
+    ///
+    pub fn local(date: Date, time: Time) -> Self {
+        DateTime { date, time }
+    }
+
+    ///
+    pub fn local_ymd(year: u16, month: Month, day: u8) -> Option<Self> {
+        Date::ymd(year, month, day).map(|date| DateTime {
+            date,
+            time: Time {
+                hour: 0,
+                minute: 0,
+                second: 0,
+                _phantom: PhantomData
+            }
+        })
+    }
+
+    ///
+    pub fn and_hms(self, hour: u8, minute: u8, second: u8) -> Option<Self> {
+        Time::local(hour, minute, second).and_then(|time| Some(DateTime { time, ..self }))
+    }
+}
+
+impl DateTime<Utc> {
+    ///
+    pub fn utc(date: Date, time: Time<Utc>) -> Self {
+        DateTime { date, time }
+    }
+
+    ///
+    pub fn utc_ymd(year: u16, month: Month, day: u8) -> Option<Self> {
+        Date::ymd(year, month, day).map(|date| DateTime {
+            date,
+            time: Time {
+                hour: 0,
+                minute: 0,
+                second: 0,
+                _phantom: PhantomData
+            }
+        })
+    }
+
+    ///
+    pub fn and_hms(self, hour: u8, minute: u8, second: u8) -> Option<Self> {
+        Time::utc(hour, minute, second).map(|time| DateTime { time, ..self })
+    }
+}
+
+impl fmt::Display for DateTime {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}T{}", self.date, self.time)
+    }
+}
+
+impl fmt::Display for DateTime<Utc> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}T{}", self.date, self.time)
+    }
+}
 
 // // TODO: Check for std::i64::MIN
 // #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
@@ -273,17 +375,63 @@
 //     }
 // }
 
-// pub struct Time {
-//     hour: u8,
-//     minute: u8,
-//     second: u8
-// }
+/// Marker trait for Time and DateTime
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
+pub enum Local {}
+/// Marker trait for Time and DateTime
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
+pub enum Utc {}
 
-// impl fmt::Display for Time {
-//     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-//         write!(f, "{:02}{:02}{:02}", self.hour, self.minute, self.second)
-//     }
-// }
+///
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
+pub struct Time<T = Local> {
+    hour: u8,
+    minute: u8,
+    second: u8,
+    _phantom: PhantomData<T>
+}
+
+impl Time {
+    ///
+    pub fn local(hour: u8, minute: u8, second: u8) -> Option<Self> {
+        if hour > 23 || minute > 59 || second > 60 {
+            return None;
+        }
+        Some(Time {
+            hour,
+            minute,
+            second,
+            _phantom: PhantomData
+        })
+    }
+}
+
+impl Time<Utc> {
+    ///
+    pub fn utc(hour: u8, minute: u8, second: u8) -> Option<Self> {
+        if hour > 23 || minute > 59 || second > 60 {
+            return None;
+        }
+        Some(Time {
+            hour,
+            minute,
+            second,
+            _phantom: PhantomData
+        })
+    }
+}
+
+impl fmt::Display for Time {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{:02}{:02}{:02}", self.hour, self.minute, self.second)
+    }
+}
+
+impl fmt::Display for Time<Utc> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{:02}{:02}{:02}Z", self.hour, self.minute, self.second)
+    }
+}
 
 // pub struct UTCOffset(i32);
 
@@ -362,3 +510,40 @@
 // }
 
 // pub struct Recur;
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn time_utc() {
+        let expected = "173000Z";
+        let time = Time::utc(17, 30, 0).unwrap();
+        assert_eq!(time.to_string(), expected);
+    }
+
+    #[test]
+    fn time_local() {
+        let expected = "173000";
+        let time = Time::local(17, 30, 0).unwrap();
+        assert_eq!(time.to_string(), expected);
+    }
+
+    #[test]
+    fn datetime_local() {
+        let expected = "19970714T173000";
+        let date = Date::ymd(1997, Month::July, 14).unwrap();
+        let time = Time::local(17, 30, 0).unwrap();
+        let datetime = DateTime::local(date, time);
+        assert_eq!(datetime.to_string(), expected);
+    }
+
+    #[test]
+    fn datetime_utc() {
+        let expected = "19970714T173000Z";
+        let date = Date::ymd(1997, Month::July, 14).unwrap();
+        let time = Time::utc(17, 30, 0).unwrap();
+        let datetime = DateTime::utc(date, time);
+        assert_eq!(datetime.to_string(), expected);
+    }
+}
