@@ -374,6 +374,15 @@ impl<'a> DtEnd<'a> {
         end.add(tzid);
         end
     }
+
+    /// Creates a new DTEND Property from a date. The VALUE parameter is set to
+    /// DATE.
+    pub fn date(value: Date) -> Self {
+        Self {
+            value: TimeStamp::Date(value),
+            parameters: parameters!("VALUE" => "DATE")
+        }
+    }
 }
 
 impl<'a> DtEnd<'a, Utc> {
@@ -387,15 +396,6 @@ impl<'a> DtEnd<'a, Utc> {
 }
 
 impl<'a, T> DtEnd<'a, T> {
-    /// Creates a new DTEND Property from a date. The VALUE parameter is set to
-    /// DATE.
-    pub fn date(value: Date) -> Self {
-        Self {
-            value: TimeStamp::Date(value),
-            parameters: parameters!("VALUE" => "DATE")
-        }
-    }
-
     /// Adds a parameter to the property.
     pub fn add<P>(&mut self, parameter: P)
     where
@@ -459,6 +459,15 @@ impl<'a> Due<'a> {
         end.add(tzid);
         end
     }
+
+    /// Creates a new DUE Property from a date. The VALUE parameter is set to
+    /// DATE.
+    pub fn date(value: Date) -> Self {
+        Self {
+            value: TimeStamp::Date(value),
+            parameters: parameters!("VALUE" => "DATE")
+        }
+    }
 }
 
 impl<'a> Due<'a, Utc> {
@@ -472,15 +481,6 @@ impl<'a> Due<'a, Utc> {
 }
 
 impl<'a, T> Due<'a, T> {
-    /// Creates a new DUE Property from a date. The VALUE parameter is set to
-    /// DATE.
-    pub fn date(value: Date) -> Self {
-        Self {
-            value: TimeStamp::Date(value),
-            parameters: parameters!("VALUE" => "DATE")
-        }
-    }
-
     /// Adds a parameter to the property.
     pub fn add<P>(&mut self, parameter: P)
     where
