@@ -5,7 +5,7 @@ use ics::properties::{
     Attach, Attendee, Categories, Description, DtEnd, DtStart, Due, Duration, Organizer, Repeat,
     Sequence, Status, Summary, Trigger
 };
-use ics::values::{DateTime, Month, Text};
+use ics::values::{Date, DateTime, Month, Text};
 use ics::{Alarm, Event, ICalendar, ToDo};
 
 #[test]
@@ -30,19 +30,19 @@ fn icalendar_event() {
 
     let mut event = Event::new(
         "b68378cf-872d-44f1-9703-5e3725c56e71",
-        DateTime::utc_ymd(1996, Month::July, 4)
-            .and_then(|d| d.and_hms(12, 0, 0))
+        Date::ymd(1996, Month::July, 4)
+            .and_then(|d| d.to_utc(12, 0, 0))
             .unwrap()
     );
     event.push(Organizer::new(Text::new("mailto:jsmith@example.com")));
     event.push(DtStart::utc(
-        DateTime::utc_ymd(1996, Month::September, 18)
-            .and_then(|d| d.and_hms(14, 30, 0))
+        Date::ymd(1996, Month::September, 18)
+            .and_then(|d| d.to_utc(14, 30, 0))
             .unwrap()
     ));
     event.push(DtEnd::utc(
-        DateTime::utc_ymd(1996, Month::September, 20)
-            .and_then(|d| d.and_hms(22, 0, 0))
+        Date::ymd(1996, Month::September, 20)
+            .and_then(|d| d.to_utc(22, 0, 0))
             .unwrap()
     ));
     event.push(Status::confirmed());
@@ -88,8 +88,8 @@ fn icalendar_todo() {
 
     let mut todo = ToDo::new(
         "b68378cf-872d-44f1-9703-5e3725c56e71",
-        DateTime::utc_ymd(1998, Month::January, 30)
-            .and_then(|d| d.and_hms(13, 45, 0))
+        Date::ymd(1998, Month::January, 30)
+            .and_then(|d| d.to_utc(13, 45, 0))
             .unwrap()
     );
     todo.push(Organizer::new(Text::new("mailto:unclesam@example.com")));

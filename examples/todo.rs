@@ -4,7 +4,7 @@ use ics::parameters::{FmtType, PartStat};
 use ics::properties::{
     Attach, Attendee, Due, Duration, Organizer, Repeat, Sequence, Status, Summary, Trigger
 };
-use ics::values::{DateTime, Month, Text};
+use ics::values::{Date, DateTime, Month, Text};
 use ics::{Alarm, ICalendar, ToDo};
 
 fn main() -> std::io::Result<()> {
@@ -13,8 +13,8 @@ fn main() -> std::io::Result<()> {
     // generated and the date stamp which must be in UTC time.
     let mut todo = ToDo::new(
         "b68378cf-872d-44f1-9703-5e3725c56e71",
-        DateTime::utc_ymd(1998, Month::January, 30)
-            .and_then(|d| d.and_hms(13, 45, 0))
+        Date::ymd(1998, Month::January, 30)
+            .and_then(|d| d.to_utc(13, 45, 0))
             .unwrap()
     );
     todo.push(Organizer::new(Text::new("mailto:unclesam@example.com")));

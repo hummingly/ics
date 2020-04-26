@@ -5,7 +5,7 @@ use ics::properties::{
     Attach, Attendee, Categories, Class, Completed, Description, DtEnd, DtStart, Due, FreeBusyTime,
     LastModified, Organizer, Priority, RRule, Status, Summary, Transp, Trigger, TzName, URL
 };
-use ics::values::{Date, DateTime, Month, Text};
+use ics::values::{Date, Month, Text};
 use ics::{Alarm, Event, FreeBusy, Journal, TimeZone, ToDo, ZoneTime};
 
 #[test]
@@ -23,8 +23,8 @@ fn event() {
 
     let mut event = Event::new(
         "b68378cf-872d-44f1-9703-5e3725c56e71",
-        DateTime::utc_ymd(1997, Month::September, 1)
-            .and_then(|d| d.and_hms(13, 0, 0))
+        Date::ymd(1997, Month::September, 1)
+            .and_then(|d| d.to_utc(13, 0, 0))
             .unwrap()
     );
     event.push(Categories::new(Text::from_list(vec![
@@ -56,23 +56,23 @@ fn todo() {
 
     let mut todo = ToDo::new(
         "b68378cf-872d-44f1-9703-5e3725c56e71",
-        DateTime::utc_ymd(2007, Month::May, 14)
-            .and_then(|d| d.and_hms(10, 32, 11))
+        Date::ymd(2007, Month::May, 14)
+            .and_then(|d| d.to_utc(10, 32, 11))
             .unwrap()
     );
     todo.push(Completed::new(
-        DateTime::utc_ymd(2007, Month::July, 7)
-            .and_then(|d| d.and_hms(10, 0, 0))
+        Date::ymd(2007, Month::July, 7)
+            .and_then(|d| d.to_utc(10, 0, 0))
             .unwrap()
     ));
     todo.push(DtStart::utc(
-        DateTime::utc_ymd(2007, Month::May, 14)
-            .and_then(|d| d.and_hms(11, 0, 0))
+        Date::ymd(2007, Month::May, 14)
+            .and_then(|d| d.to_utc(11, 0, 0))
             .unwrap()
     ));
     todo.push(Due::utc(
-        DateTime::utc_ymd(2007, Month::July, 9)
-            .and_then(|d| d.and_hms(13, 0, 0))
+        Date::ymd(2007, Month::July, 9)
+            .and_then(|d| d.to_utc(13, 0, 0))
             .unwrap()
     ));
     todo.push(Priority::new(1));
@@ -96,8 +96,8 @@ fn journal() {
 
     let mut journal = Journal::new(
         "b68378cf-872d-44f1-9703-5e3725c56e71",
-        DateTime::utc_ymd(1997, Month::September, 1)
-            .and_then(|d| d.and_hms(13, 0, 0))
+        Date::ymd(1997, Month::September, 1)
+            .and_then(|d| d.to_utc(13, 0, 0))
             .unwrap()
     );
     journal.push(DtStart::date(Date::ymd(1997, Month::March, 17).unwrap()));
@@ -125,18 +125,18 @@ fn freebusy() {
 
     let mut freebusy = FreeBusy::new(
         "b68378cf-872d-44f1-9703-5e3725c56e71",
-        DateTime::utc_ymd(1997, Month::September, 1)
-            .and_then(|d| d.and_hms(12, 0, 0))
+        Date::ymd(1997, Month::September, 1)
+            .and_then(|d| d.to_utc(12, 0, 0))
             .unwrap()
     );
     freebusy.push(DtStart::utc(
-        DateTime::utc_ymd(1998, Month::March, 13)
-            .and_then(|d| d.and_hms(14, 17, 11))
+        Date::ymd(1998, Month::March, 13)
+            .and_then(|d| d.to_utc(14, 17, 11))
             .unwrap()
     ));
     freebusy.push(DtEnd::utc(
-        DateTime::utc_ymd(1998, Month::April, 10)
-            .and_then(|d| d.and_hms(14, 17, 11))
+        Date::ymd(1998, Month::April, 10)
+            .and_then(|d| d.to_utc(14, 17, 11))
             .unwrap()
     ));
     freebusy.push(FreeBusyTime::new(Text::new(
@@ -176,16 +176,16 @@ fn time() {
                     END:VTIMEZONE\r\n";
 
     let mut standard = ZoneTime::standard(
-        DateTime::local_ymd(2007, Month::November, 4)
-            .and_then(|d| d.and_hms(2, 0, 0))
+        Date::ymd(2007, Month::November, 4)
+            .and_then(|d| d.to_local(2, 0, 0))
             .unwrap(),
         "-0400",
         "-0500"
     );
     standard.push(TzName::new(Text::new("EST")));
     let mut daylight = ZoneTime::daylight(
-        DateTime::local_ymd(2007, Month::March, 11)
-            .and_then(|d| d.and_hms(2, 0, 0))
+        Date::ymd(2007, Month::March, 11)
+            .and_then(|d| d.to_local(2, 0, 0))
             .unwrap(),
         "-0500",
         "-0400"
@@ -194,8 +194,8 @@ fn time() {
 
     let mut timezone = TimeZone::new("America/New_York", standard);
     timezone.push(LastModified::new(
-        DateTime::utc_ymd(2005, Month::August, 9)
-            .and_then(|d| d.and_hms(5, 0, 0))
+        Date::ymd(2005, Month::August, 9)
+            .and_then(|d| d.to_utc(5, 0, 0))
             .unwrap()
     ));
     timezone.add_zonetime(daylight);

@@ -1,7 +1,7 @@
 extern crate ics;
 
 use ics::properties::{Categories, Description, DtEnd, DtStart, Organizer, Status, Summary};
-use ics::values::{DateTime, Month, Text};
+use ics::values::{Date, Month, Text};
 use ics::{Event, ICalendar};
 
 fn main() -> std::io::Result<()> {
@@ -10,19 +10,19 @@ fn main() -> std::io::Result<()> {
     // generated and the date stamp which must be in UTC time.
     let mut event = Event::new(
         "b68378cf-872d-44f1-9703-5e3725c56e71",
-        DateTime::utc_ymd(1996, Month::July, 4)
-            .and_then(|d| d.and_hms(12, 0, 0))
+        Date::ymd(1996, Month::July, 4)
+            .and_then(|d| d.to_utc(12, 0, 0))
             .unwrap()
     );
     event.push(Organizer::new(Text::new("mailto:jsmith@example.com")));
     event.push(DtStart::utc(
-        DateTime::utc_ymd(1996, Month::September, 18)
-            .and_then(|d| d.and_hms(14, 30, 0))
+        Date::ymd(1996, Month::September, 18)
+            .and_then(|d| d.to_utc(14, 30, 0))
             .unwrap()
     ));
     event.push(DtEnd::utc(
-        DateTime::utc_ymd(1996, Month::September, 20)
-            .and_then(|d| d.and_hms(22, 0, 0))
+        Date::ymd(1996, Month::September, 20)
+            .and_then(|d| d.to_utc(22, 0, 0))
             .unwrap()
     ));
     event.push(Status::confirmed());

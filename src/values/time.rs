@@ -95,6 +95,31 @@ impl Date {
         }
         Some(Date { year, month, day })
     }
+
+    ///
+    pub fn to_local(self, hour: u8, minute: u8, second: u8) -> Option<DateTime> {
+        Time::local(hour, minute, second).map(|time| DateTime { date: self, time })
+    }
+
+    ///
+    pub fn to_utc(self, hour: u8, minute: u8, second: u8) -> Option<DateTime<Utc>> {
+        Time::utc(hour, minute, second).map(|time| DateTime { date: self, time })
+    }
+
+    ///
+    pub fn year(&self) -> u16 {
+        self.year
+    }
+
+    ///
+    pub fn month(&self) -> Month {
+        self.month
+    }
+
+    ///
+    pub fn day(&self) -> u8 {
+        self.day
+    }
 }
 
 impl fmt::Display for Date {
