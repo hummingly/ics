@@ -375,7 +375,7 @@ impl fmt::Display for DateTime<Utc> {
 //     }
 // }
 
-/// Marker trait for Time and DateTime
+/// Marker enum for Time and DateTime
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub enum Local {}
 /// Marker enum for Time and DateTime
