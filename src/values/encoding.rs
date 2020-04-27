@@ -1,4 +1,5 @@
 use std::borrow::Cow;
+use std::fmt;
 
 // Mask for extracting 6 bits from a byte.
 const BIT_MASK: u8 = 0b0011_1111;
@@ -11,77 +12,182 @@ const BASE_64: [char; 64] = [
 ];
 
 /// Encodes bytes into a string using the Base64 standard encoding.
-pub(crate) fn encode_base64(binary: &[u8]) -> String {
-    if binary.is_empty() {
-        return String::new();
+pub(crate) fn encode_base64<W: fmt::Write>(output: &mut W, input: &[u8]) -> fmt::Result {
+    if input.is_empty() {
+        return Ok(());
     }
-
-    let mut output = String::with_capacity(binary.len() + binary.len() / 3);
-
     // TODO: Replace with chunks_exact when updating rustc
-    let mut bytes = binary.chunks(3);
+    let mut bytes = input.chunks(3);
     let len = bytes.len() - 1;
-
     for _ in 0..len {
-        let values = bytes.next().unwrap();
-        output.extend(encode_chunk(values).iter())
+        encode_chunk(output, bytes.next().unwrap())?
     }
 
     if let Some(remainder) = bytes.next() {
         match remainder {
-            chunk @ &[_, _, _] => output.extend(encode_chunk(chunk).iter()),
-            &[first, second] => {
-                output.push(BASE_64[usize::from(first >> 2)]);
-                output.push(BASE_64[usize::from(first << 4 & BIT_MASK | second >> 4)]);
-                output.push(BASE_64[usize::from(second << 2 & BIT_MASK)]);
-                output.push('=');
-            }
             &[first] => {
-                output.push(BASE_64[usize::from(first >> 2)]);
-                output.push(BASE_64[usize::from(first << 4 & BIT_MASK)]);
-                output.push_str("==");
+                output.write_char(BASE_64[usize::from(first >> 2)])?;
+                output.write_char(BASE_64[usize::from(first << 4 & BIT_MASK)])?;
+                output.write_str("==")?;
             }
-            _ => unreachable!()
+            &[first, second] => {
+                output.write_char(BASE_64[usize::from(first >> 2)])?;
+                output.write_char(BASE_64[usize::from(first << 4 & BIT_MASK | second >> 4)])?;
+                output.write_char(BASE_64[usize::from(second << 2 & BIT_MASK)])?;
+                output.write_char('=')?;
+            }
+            chunk => encode_chunk(output, chunk)?
         }
-    };
-    output
+    }
+    Ok(())
 }
 
-fn encode_chunk(chunk: &[u8]) -> [char; 4] {
-    debug_assert!(chunk.len() == 3);
-    let first = chunk[0] >> 2;
-    let second = chunk[0] << 4 & BIT_MASK | chunk[1] >> 4;
-    let third = chunk[1] << 2 & BIT_MASK | chunk[2] >> 6;
-    let fourth = chunk[2] & BIT_MASK;
-    [
-        BASE_64[usize::from(first)],
-        BASE_64[usize::from(second)],
-        BASE_64[usize::from(third)],
-        BASE_64[usize::from(fourth)]
-    ]
+fn encode_chunk<W: fmt::Write>(output: &mut W, chunk: &[u8]) -> fmt::Result {
+    // Since we cannot use unsafe and get chunks as arrays, we need to give the
+    // compiler a hint.
+    assert_eq!(chunk.len(), 3);
+    output.write_char(BASE_64[usize::from(chunk[0] >> 2)])?;
+    output.write_char(BASE_64[usize::from(chunk[0] << 4 & BIT_MASK | chunk[1] >> 4)])?;
+    output.write_char(BASE_64[usize::from(chunk[1] << 2 & BIT_MASK | chunk[2] >> 6)])?;
+    output.write_char(BASE_64[usize::from(chunk[2] & BIT_MASK)])
+}
+
+/// Decodes a Base64 encoded string into bytes.
+///
+/// The function assumes that input is an ASCII string containing only
+/// characters that are in the Base64 alphabet. Furthermore, the string must be
+/// properly padded, otherwise data will be lost.
+pub(crate) fn decode_base64<'b>(output: &mut Vec<u8>, input: &str) {
+    if input.is_empty() {
+        return;
+    }
+    let mut bytes = input.as_bytes().chunks(4);
+    let len = bytes.len() - 1;
+    for _ in 0..len {
+        decode_chunk(output, bytes.next().unwrap())
+    }
+    if let Some(remainder) = bytes.next() {
+        match remainder {
+            &[first, second, b'=', b'='] => {
+                output.push(to_binary(first) << 2 | to_binary(second) >> 4);
+            }
+            &[first, second, third, b'='] => {
+                let second = to_binary(second);
+                output.push(to_binary(first) << 2 | second >> 4);
+                output.push(second << 4 | to_binary(third) >> 2);
+            }
+            chunk => decode_chunk(output, chunk)
+        }
+    }
+}
+
+fn decode_chunk(output: &mut Vec<u8>, chunk: &[u8]) {
+    assert_eq!(chunk.len(), 4);
+    let (second, third) = (to_binary(chunk[1]), to_binary(chunk[2]));
+    output.push(to_binary(chunk[0]) << 2 | second >> 4);
+    output.push(second << 4 | third >> 2);
+    output.push(third << 6 | to_binary(chunk[3]));
+}
+
+fn to_binary(c: u8) -> u8 {
+    match c {
+        b'A'..=b'Z' => c - b'A',
+        b'a'..=b'z' => c - b'a' + 26,
+        b'0'..=b'9' => c - b'0' + 52,
+        b'+' => 62,
+        b'/' => 63,
+        _ => unreachable!()
+    }
 }
 
 #[cfg(test)]
 mod binary {
-    use super::encode_base64;
+    use super::{decode_base64, encode_base64};
+    use std::fmt;
 
     // https://tools.ietf.org/html/rfc4648#section-10
     #[test]
-    fn rfc4648_test_sample() {
-        assert_eq!(encode_base64(b""), "");
-        assert_eq!(encode_base64(b"f"), "Zg==");
-        assert_eq!(encode_base64(b"fo"), "Zm8=");
-        assert_eq!(encode_base64(b"foo"), "Zm9v");
-        assert_eq!(encode_base64(b"foob"), "Zm9vYg==");
-        assert_eq!(encode_base64(b"fooba"), "Zm9vYmE=");
-        assert_eq!(encode_base64(b"foobar"), "Zm9vYmFy");
+    fn encode_rfc4648_test_sample() -> fmt::Result {
+        let mut output = String::with_capacity(8);
+        encode_base64(&mut output, b"")?;
+        assert_eq!(output, "");
+        output.clear();
+
+        encode_base64(&mut output, b"f")?;
+        assert_eq!(output, "Zg==");
+        output.clear();
+
+        encode_base64(&mut output, b"fo")?;
+        assert_eq!(output, "Zm8=");
+        output.clear();
+
+        encode_base64(&mut output, b"foo")?;
+        assert_eq!(output, "Zm9v");
+        output.clear();
+
+        encode_base64(&mut output, b"foob")?;
+        assert_eq!(output, "Zm9vYg==");
+        output.clear();
+
+        encode_base64(&mut output, b"fooba")?;
+        assert_eq!(output, "Zm9vYmE=");
+        output.clear();
+
+        encode_base64(&mut output, b"foobar")?;
+        assert_eq!(output, "Zm9vYmFy");
+        Ok(())
     }
 
     #[test]
-    fn text() {
+    fn encode_text() -> fmt::Result {
         let input = "Polyfon zwitschernd aßen Mäxchens Vögel Rüben, Joghurt und Quark".as_bytes();
-        let expected = "UG9seWZvbiB6d2l0c2NoZXJuZCBhw59lbiBNw6R4Y2hlbnMgVsO2Z2VsIFLDvGJlbiwgSm9naHVydCB1bmQgUXVhcms=";
-        assert_eq!(encode_base64(input), expected);
+        let mut output = String::with_capacity(input.len() + input.len() / 3);
+
+        encode_base64(&mut output, input)?;
+        assert_eq!(output, "UG9seWZvbiB6d2l0c2NoZXJuZCBhw59lbiBNw6R4Y2hlbnMgVsO2Z2VsIFLDvGJlbiwgSm9naHVydCB1bmQgUXVhcms=");
+        Ok(())
+    }
+
+    #[test]
+    fn decode_rfc4648_test_sample() {
+        let mut output = Vec::with_capacity(8);
+        decode_base64(&mut output, "");
+        assert_eq!(output, b"");
+        output.clear();
+
+        decode_base64(&mut output, "Zg==");
+        assert_eq!(output, b"f");
+        output.clear();
+
+        decode_base64(&mut output, "Zm8=");
+        assert_eq!(output, b"fo");
+        output.clear();
+
+        decode_base64(&mut output, "Zm9v");
+        assert_eq!(output, b"foo");
+        output.clear();
+
+        decode_base64(&mut output, "Zm9vYg==");
+        assert_eq!(output, b"foob");
+        output.clear();
+
+        decode_base64(&mut output, "Zm9vYmE=");
+        assert_eq!(output, b"fooba");
+        output.clear();
+
+        decode_base64(&mut output, "Zm9vYmFy");
+        assert_eq!(output, b"foobar");
+    }
+
+    #[test]
+    fn decode_text() {
+        let input = "UG9seWZvbiB6d2l0c2NoZXJuZCBhw59lbiBNw6R4Y2hlbnMgVsO2Z2VsIFLDvGJlbiwgSm9naHVydCB1bmQgUXVhcms=";
+        let mut output = Vec::with_capacity(input.len() - input.len() / 3);
+        decode_base64(&mut output, input);
+        assert_eq!(
+            output,
+            "Polyfon zwitschernd aßen Mäxchens Vögel Rüben, Joghurt und Quark".as_bytes()
+        );
     }
 }
 

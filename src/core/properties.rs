@@ -31,14 +31,14 @@ use values::*;
 #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 enum Resource<'a> {
     Link(Cow<'a, str>),
-    Data(Binary)
+    Data(Binary<'a>)
 }
 
 impl<'a> From<Resource<'a>> for Cow<'a, str> {
     fn from(value: Resource<'a>) -> Self {
         match value {
             Resource::Link(uri) => uri,
-            Resource::Data(binary) => Cow::Owned(binary.0)
+            Resource::Data(binary) => Cow::Owned(binary.to_string())
         }
     }
 }
@@ -103,7 +103,7 @@ impl<'a> Attach<'a> {
     /// Creates a new ATTACH Property from binary content. The value type is
     /// "BINARY" which is why the "ENCODING" parameter with the value
     /// "BASE64" is also added.
-    pub fn binary(value: Binary) -> Self {
+    pub fn binary(value: Binary<'a>) -> Self {
         Self {
             value: Resource::Data(value),
             parameters: parameters!("ENCODING" => "BASE64"; "VALUE" => "BINARY")
@@ -992,7 +992,7 @@ mod rfc7986 {
         /// Creates a new IMAGE Property with the given value. The value type is
         /// "BINARY" which is why the "ENCODING" parameter with the value
         /// "BASE64" is also added.
-        pub fn binary(value: Binary) -> Self {
+        pub fn binary(value: Binary<'a>) -> Self {
             Image {
                 value: Resource::Data(value),
                 parameters: parameters!("ENCODING" => "BASE64"; "VALUE" => "BINARY")

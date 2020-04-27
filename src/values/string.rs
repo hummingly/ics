@@ -5,48 +5,42 @@ use std::fmt;
 use std::iter::FromIterator;
 use std::str::FromStr;
 
-use values::encoding::{encode_base64, escape_text};
-
-// TODO: derived Default
+use values::encoding::{decode_base64, encode_base64, escape_text};
 
 // INFO: https://tools.ietf.org/html/rfc2045#section-2.8
 /// ICalendar Binary
 ///
 /// Bytes are encoded with standard Base64 encoding.
 #[derive(Debug, Default, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
-pub struct Binary(pub(crate) String);
+pub struct Binary<'b>(Cow<'b, [u8]>);
 
-impl Binary {
+impl<'b> Binary<'b> {
     /// Creates binary data by encoding bytes with standard Base64 encoding.
-    pub fn new(bytes: &[u8]) -> Self {
-        Binary(encode_base64(bytes))
+    pub fn new<B>(bytes: B) -> Self
+    where
+        B: Into<Cow<'b, [u8]>>
+    {
+        Binary(bytes.into())
+    }
+
+    /// Returns bytes as slice.
+    pub fn get(&self) -> &[u8] {
+        &self.0
     }
 }
 
-impl fmt::Display for Binary {
+impl<'b> fmt::Display for Binary<'b> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.0)
+        encode_base64(f, &self.0)
     }
 }
 
-// impl<'a> From<&'a str> for Binary {
-//     fn from(value: &'a str) -> Self {
-//         Binary::encode(value.as_bytes())
-//     }
-// }
-
-// impl From<String> for Binary {
-//     fn from(value: String) -> Self {
-//         Binary::encode(value.as_bytes())
-//     }
-// }
-
-impl FromStr for Binary {
+impl<'b> FromStr for Binary<'b> {
     type Err = ParseBinaryError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         if s.is_empty() {
-            return Ok(Binary(String::new()));
+            return Ok(Binary::new([].as_ref()));
         }
 
         // 24 bit groups are always encoded as 4 characters. Since shorter byte
@@ -56,13 +50,15 @@ impl FromStr for Binary {
             return Err(ParseBinaryError::MissingBytes);
         }
 
-        let mut iter = s
+        let mut iter = s[..s.len() - 2]
             .bytes()
             .skip_while(|b| b.is_ascii_alphanumeric() || b == &b'+' || b == &b'/');
 
         match (iter.next(), iter.next(), iter.next()) {
             (None, _, _) | (Some(b'='), None, _) | (Some(b'='), Some(b'='), None) => {
-                Ok(Binary(s.to_owned()))
+                let mut output = Vec::with_capacity(s.len() - s.len() / 3);
+                decode_base64(&mut output, s);
+                Ok(Binary::new(output))
             }
             _ => Err(ParseBinaryError::InvalidEncoding)
         }
@@ -85,6 +81,7 @@ impl<'t> Text<'t> {
     where
         T: Into<Cow<'t, str>>
     {
+        // TODO: Escape in toString
         Text(escape_text(text.into()))
     }
 
@@ -113,31 +110,12 @@ impl<'t> fmt::Display for Text<'t> {
     }
 }
 
-// impl<'t> From<String> for Text<'t> {
-//     fn from(value: String) -> Self {
-//         Text::encode(value)
-//     }
-// }
-
-// impl<'t> From<&'t str> for Text<'t> {
-//     fn from(value: &'t str) -> Self {
-//         Text::encode(value)
-//     }
-// }
-
 // TODO: Check for correct encoding
 // impl<'t> FromStr for Text<'t> {
 //     // TODO: Replace with Infallible
 //     type Err = ();
 //     fn from_str(s: &str) -> Result<Self, Self::Err> {
 //         Ok(Text::encode(s.to_owned()))
-//     }
-// }
-
-// TODO: Decoding
-// impl<'t> From<Text<'t>> for String {
-//     fn from(value: Text) -> Self {
-//         value.0.into_owned()
 //     }
 // }
 
@@ -252,13 +230,19 @@ mod test {
     // https://tools.ietf.org/html/rfc4648#section-10
     #[test]
     fn parse_valid_binary() {
-        assert_eq!(Some(Binary::new(b"")), "".parse().ok());
-        assert_eq!(Some(Binary::new(b"f")), "Zg==".parse().ok());
-        assert_eq!(Some(Binary::new(b"fo")), "Zm8=".parse().ok());
-        assert_eq!(Some(Binary::new(b"foo")), "Zm9v".parse().ok());
-        assert_eq!(Some(Binary::new(b"foob")), "Zm9vYg==".parse().ok());
-        assert_eq!(Some(Binary::new(b"fooba")), "Zm9vYmE=".parse().ok());
-        assert_eq!(Some(Binary::new(b"foobar")), "Zm9vYmFy".parse().ok());
+        assert_eq!(Some(Binary::new(b"".as_ref())), "".parse().ok());
+        assert_eq!(Some(Binary::new(b"f".as_ref())), "Zg==".parse().ok());
+        assert_eq!(Some(Binary::new(b"fo".as_ref())), "Zm8=".parse().ok());
+        assert_eq!(Some(Binary::new(b"foo".as_ref())), "Zm9v".parse().ok());
+        assert_eq!(Some(Binary::new(b"foob".as_ref())), "Zm9vYg==".parse().ok());
+        assert_eq!(
+            Some(Binary::new(b"fooba".as_ref())),
+            "Zm9vYmE=".parse().ok()
+        );
+        assert_eq!(
+            Some(Binary::new(b"foobar".as_ref())),
+            "Zm9vYmFy".parse().ok()
+        );
     }
 
     #[test]
