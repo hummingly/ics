@@ -31,32 +31,32 @@ fn is_leap_year(year: u16) -> bool {
     year % 400 == 0 || (year % 4 == 0 && year % 100 > 0)
 }
 
-///
+/// Month value for Date and DateTime
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub enum Month {
-    ///
+    /// Month Value 1
     January = 1,
-    ///
+    /// Month Value 2
     February = 2,
-    ///
+    /// Month Value 3
     March = 3,
-    ///
+    /// Month Value 4
     April = 4,
-    ///
+    /// Month Value 5
     May = 5,
-    ///
+    /// Month Value 6
     June = 6,
-    ///
+    /// Month Value 7
     July = 7,
-    ///
+    /// Month Value 8
     August = 8,
-    ///
+    /// Month Value 9
     September = 9,
-    ///
+    /// Month Value 10
     October = 10,
-    ///
+    /// Month Value 11
     November = 11,
-    ///
+    /// Month Value 12
     December = 12
 }
 
@@ -79,7 +79,7 @@ impl Month {
     }
 }
 
-///
+/// ICalendar Date
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Date {
     year: u16,
@@ -149,7 +149,7 @@ impl fmt::Display for Date {
 //     }
 // }
 
-///
+/// ICalendar Date Time
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct DateTime<T = Local> {
     date: Date,
@@ -435,14 +435,14 @@ impl fmt::Display for DateTime<Utc> {
 //     }
 // }
 
-/// Marker enum for Time and DateTime
+/// Local/Floating Time Marker
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub enum Local {}
-/// Marker enum for Time and DateTime
+/// Utc Time Marker
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub enum Utc {}
 
-///
+/// ICalendar Time
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Time<T = Local> {
     hour: u8,

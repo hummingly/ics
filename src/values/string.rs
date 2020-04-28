@@ -23,7 +23,7 @@ impl<'b> Binary<'b> {
         Binary(bytes.into())
     }
 
-    /// Returns bytes as slice.
+    /// Returns binary data as slice of bytes.
     pub fn get(&self) -> &[u8] {
         &self.0
     }
@@ -67,7 +67,7 @@ impl<'b> FromStr for Binary<'b> {
 
 // pub type CalAdress = Uri;
 
-/// ICalendar Text Value Type
+/// ICalendar Text
 ///
 /// Text characters like comma, semicolon and backlash are automatically escaped
 /// by prepending a backlash before the escaped chracters.

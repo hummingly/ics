@@ -51,13 +51,9 @@ impl FromStr for Boolean {
 }
 
 /// ICalendar Integer
-///
-/// This type maps perfectly to a Rust integer.
 pub type Integer = i32;
 
 /// ICalendar Float
-///
-/// This type maps perfectly to a Rust float point.
 pub type Float = f32;
 
 pub use values::string::Binary;
