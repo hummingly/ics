@@ -6,6 +6,8 @@
 mod encoding;
 pub mod error;
 mod string;
+#[cfg(test)]
+mod tests;
 mod time;
 
 use std::fmt;

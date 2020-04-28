@@ -7,7 +7,16 @@ license = "MIT OR Apache-2.0"
 repository = "https://github.com/hummingly/ics"
 readme = "README.md"
 keywords = ["iCalendar", "ical", "ics", "calendar"]
-include = ["src/**", "Cargo.toml", "LICENSE"]
+exclude = [
+    "/docs",
+    "/examples",
+    "tests/",
+    ".gitignore",
+    ".travis.yml",
+    "CHANGELOG.md",
+    "README.md",
+    "rustfmt.toml"
+]
 
 [features]
 default =  ["rfc7986"]

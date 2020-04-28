@@ -188,23 +188,3 @@ impl<'a> fmt::Display for Parameter<'a> {
 /// `Parameters` is a collection of `Parameter`s. It can be created with the
 /// `parameters!` macro.
 pub type Parameters<'a> = BTreeMap<Cow<'a, str>, Cow<'a, str>>;
-
-#[cfg(test)]
-mod tests {
-    use super::{Parameter, Property};
-
-    #[test]
-    fn simple() {
-        let property = Property::new("SUMMARY", "Simple");
-        let expected = 14;
-        assert_eq!(property.content_len(), expected);
-    }
-
-    #[test]
-    fn with_parameter() {
-        let mut property = Property::new("SUMMARY", "Simple");
-        property.add(Parameter::new("VALUE", "TEXT"));
-        let expected = 25;
-        assert_eq!(property.content_len(), expected);
-    }
-}
