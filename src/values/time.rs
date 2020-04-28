@@ -20,7 +20,7 @@ fn is_valid_date(year: u16, month: Month, day: u8) -> bool {
             if is_leap_year(year) {
                 day <= month.max_days()
             } else {
-                day <= month.max_days() - 1
+                day < month.max_days()
             }
         }
         _ => day <= month.max_days()
@@ -61,7 +61,7 @@ pub enum Month {
 }
 
 impl Month {
-    fn max_days(&self) -> u8 {
+    fn max_days(self) -> u8 {
         match self {
             Month::January => 31,
             Month::February => 29,
@@ -88,7 +88,7 @@ pub struct Date {
 }
 
 impl Date {
-    ///
+    /// Creates a new date.
     pub fn ymd(year: u16, month: Month, day: u8) -> Option<Self> {
         if !is_valid_date(year, month, day) {
             return None;
@@ -96,28 +96,32 @@ impl Date {
         Some(Date { year, month, day })
     }
 
-    ///
+    /// Creates a new local date time with the current date and given time
+    /// values.
     pub fn to_local(self, hour: u8, minute: u8, second: u8) -> Option<DateTime> {
         Time::local(hour, minute, second).map(|time| DateTime { date: self, time })
     }
 
-    ///
+    /// Creates a new date time with the current date and given time values in
+    /// UTC.
     pub fn to_utc(self, hour: u8, minute: u8, second: u8) -> Option<DateTime<Utc>> {
         Time::utc(hour, minute, second).map(|time| DateTime { date: self, time })
     }
 
-    ///
-    pub fn year(&self) -> u16 {
+    /// Returns the year value which is a value in the range of 0 to 9999
+    /// (inclusive).
+    pub fn year(self) -> u16 {
         self.year
     }
 
-    ///
-    pub fn month(&self) -> Month {
+    /// Returns the month value.
+    pub fn month(self) -> Month {
         self.month
     }
 
-    ///
-    pub fn day(&self) -> u8 {
+    /// Returns the day value which is value in the range of 1 to 31
+    /// (inclusive).
+    pub fn day(self) -> u8 {
         self.day
     }
 }
@@ -145,7 +149,6 @@ impl fmt::Display for Date {
 //     }
 // }
 
-// TODO: Custom PartialOrd and Ord implementation?
 ///
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct DateTime<T = Local> {
@@ -154,52 +157,47 @@ pub struct DateTime<T = Local> {
 }
 
 impl DateTime {
-    ///
+    /// Creates a new local date time.
     pub fn local(date: Date, time: Time) -> Self {
-        DateTime { date, time }
+        DateTime::new(date, time)
     }
 
     ///
     pub fn local_ymd(year: u16, month: Month, day: u8) -> Option<Self> {
-        Date::ymd(year, month, day).map(|date| DateTime {
-            date,
-            time: Time {
-                hour: 0,
-                minute: 0,
-                second: 0,
-                _phantom: PhantomData
-            }
-        })
-    }
-
-    ///
-    pub fn and_hms(self, hour: u8, minute: u8, second: u8) -> Option<Self> {
-        Time::local(hour, minute, second).and_then(|time| Some(DateTime { time, ..self }))
+        Date::ymd(year, month, day).map(|date| DateTime::new(date, Time::zero()))
     }
 }
 
 impl DateTime<Utc> {
-    ///
+    /// Creates a new date time with UTC time.
     pub fn utc(date: Date, time: Time<Utc>) -> Self {
-        DateTime { date, time }
+        DateTime::new(date, time)
     }
 
     ///
     pub fn utc_ymd(year: u16, month: Month, day: u8) -> Option<Self> {
-        Date::ymd(year, month, day).map(|date| DateTime {
-            date,
-            time: Time {
-                hour: 0,
-                minute: 0,
-                second: 0,
-                _phantom: PhantomData
-            }
-        })
+        Date::ymd(year, month, day).map(|date| DateTime::new(date, Time::zero()))
+    }
+}
+
+impl<T> DateTime<T> {
+    fn new(date: Date, time: Time<T>) -> Self {
+        DateTime { date, time }
     }
 
-    ///
+    /// Creates a new date time from the current value with the new time.
     pub fn and_hms(self, hour: u8, minute: u8, second: u8) -> Option<Self> {
-        Time::utc(hour, minute, second).map(|time| DateTime { time, ..self })
+        Time::new(hour, minute, second).map(|time| DateTime::new(self.date, time))
+    }
+
+    /// Return a reference to the date.
+    pub fn date(&self) -> &Date {
+        &self.date
+    }
+
+    /// Return a reference to the time.
+    pub fn time(&self) -> &Time<T> {
+        &self.time
     }
 }
 
@@ -367,34 +365,71 @@ impl fmt::Display for DateTime<Utc> {
 //     }
 // }
 
-// // #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
-// pub struct Period<T> {
-//     start: DateTime,
-//     end: T
+// #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
+// enum PeriodEnd<T = Local> {
+//     DateTime(DateTime<T>),
+//     Duration(Duration),
 // }
 
-// impl Period<DateTime> {
-//     pub fn date(start: DateTime, end: DateTime) -> Self {
-//         Period { start, end }
-//     }
-// }
-
-// impl Period<Duration> {
-//     pub fn duration(start: DateTime, duration: Duration) -> Self {
-//         Period {
-//             start,
-//             end: duration
+// impl fmt::Display for PeriodEnd {
+//     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+//         match self {
+//             PeriodEnd::DateTime(d) => write!(f, "{}", d),
+//             PeriodEnd::Duration(d) => write!(f, "{}", d),
 //         }
 //     }
 // }
 
-// impl fmt::Display for Period<DateTime> {
+// impl fmt::Display for PeriodEnd<Utc> {
+//     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+//         match self {
+//             PeriodEnd::DateTime(d) => write!(f, "{}", d),
+//             PeriodEnd::Duration(d) => write!(f, "{}", d),
+//         }
+//     }
+// }
+
+// #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
+// pub struct Period<T = Local> {
+//     start: DateTime<T>,
+//     end: PeriodEnd<T>,
+// }
+
+// impl Period {
+//     pub fn local(start: DateTime, end: DateTime) -> Option<Self> {
+//         if start >= end {
+//             return None;
+//         }
+//         Some(Period { start, end: PeriodEnd::DateTime(end) })
+//     }
+
+//     pub fn duration(start: DateTime, duration: Duration) -> Option<Self> {
+//         if duration.0 <= 0 {
+//             return None;
+//         }
+//         Some(Period {
+//             start,
+//             end: PeriodEnd::Duration(duration)
+//         })
+//     }
+// }
+
+// impl Period<Utc> {
+//     pub fn utc(start: DateTime<Utc>, end: DateTime<Utc>) -> Option<Self> {
+//         if start >= end {
+//             return None;
+//         }
+//         Some(Period { start, end: PeriodEnd::DateTime(end) })
+//     }
+// }
+
+// impl fmt::Display for Period {
 //     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
 //         write!(f, "{}/{}", self.start, self.end)
 //     }
 // }
 
-// impl fmt::Display for Period<Duration> {
+// impl fmt::Display for Period<Utc> {
 //     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
 //         write!(f, "{}/{}", self.start, self.end)
 //     }
@@ -417,8 +452,21 @@ pub struct Time<T = Local> {
 }
 
 impl Time {
-    ///
+    /// Creates a new local time value.
     pub fn local(hour: u8, minute: u8, second: u8) -> Option<Self> {
+        Time::new(hour, minute, second)
+    }
+}
+
+impl Time<Utc> {
+    /// Creates a new time value in UTC.
+    pub fn utc(hour: u8, minute: u8, second: u8) -> Option<Self> {
+        Time::new(hour, minute, second)
+    }
+}
+
+impl<T> Time<T> {
+    fn new(hour: u8, minute: u8, second: u8) -> Option<Self> {
         if hour > 23 || minute > 59 || second > 60 {
             return None;
         }
@@ -429,20 +477,30 @@ impl Time {
             _phantom: PhantomData
         })
     }
-}
 
-impl Time<Utc> {
-    ///
-    pub fn utc(hour: u8, minute: u8, second: u8) -> Option<Self> {
-        if hour > 23 || minute > 59 || second > 60 {
-            return None;
-        }
-        Some(Time {
-            hour,
-            minute,
-            second,
+    /// Returns a time value with all values set to zero.
+    pub fn zero() -> Self {
+        Time {
+            hour: 0,
+            minute: 0,
+            second: 0,
             _phantom: PhantomData
-        })
+        }
+    }
+
+    /// Returns the hour value.
+    pub fn hour(&self) -> u8 {
+        self.hour
+    }
+
+    /// Returns the minute value.
+    pub fn minute(&self) -> u8 {
+        self.minute
+    }
+
+    /// Returns the second value.
+    pub fn second(&self) -> u8 {
+        self.second
     }
 }
 

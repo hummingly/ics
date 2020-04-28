@@ -57,7 +57,7 @@ fn encode_chunk<W: fmt::Write>(output: &mut W, chunk: &[u8]) -> fmt::Result {
 /// The function assumes that input is an ASCII string containing only
 /// characters that are in the Base64 alphabet. Furthermore, the string must be
 /// properly padded, otherwise data will be lost.
-pub(crate) fn decode_base64<'b>(output: &mut Vec<u8>, input: &str) {
+pub(crate) fn decode_base64(output: &mut Vec<u8>, input: &str) {
     if input.is_empty() {
         return;
     }
@@ -195,10 +195,10 @@ mod binary {
 ///
 /// This method is used for properties with the value type "TEXT".
 pub(crate) fn escape_text<'t>(text: Cow<'t, str>) -> Cow<'t, str> {
-    let matches = |c| c == '\r' || is_escaped_char(&c);
+    let matches = |c| c == '\r' || is_escaped_char(c);
     if text.contains(matches) {
         let text = text.replace("\r\n", "\n");
-        let size = text.len() + text.chars().filter(is_escaped_char).count();
+        let size = text.len() + text.chars().filter(|&c| is_escaped_char(c)).count();
         let mut output = String::with_capacity(size);
         let mut last_end = 0;
         for (start, part) in text.match_indices(matches) {
@@ -219,8 +219,8 @@ pub(crate) fn escape_text<'t>(text: Cow<'t, str>) -> Cow<'t, str> {
     text
 }
 
-fn is_escaped_char(c: &char) -> bool {
-    c == &',' || c == &';' || c == &'\\'
+fn is_escaped_char(c: char) -> bool {
+    c == ',' || c == ';' || c == '\\'
 }
 
 #[cfg(test)]
