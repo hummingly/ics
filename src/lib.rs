@@ -34,8 +34,8 @@
 //!     // randomly generated.
 //!     let mut todo = ToDo::new(
 //!         "d4092ed9-1667-4518-a7c0-bcfaac4f1fc6",
-//!         Date::ymd(2018, Month::October, 21)
-//!             .and_then(|d| d.to_utc(19, 0, 0))
+//!         Date::new(2018, Month::October, 21)
+//!             .and_then(|d| d.and_hms(19, 0, 0))
 //!             .unwrap()
 //!     );
 //!     todo.push(Summary::new(Text::new("Katarina's Birthday Present")));

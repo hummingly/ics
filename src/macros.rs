@@ -8,7 +8,7 @@
 /// use ics::values::{DateTime, Month};
 ///
 /// # fn main() {
-/// let mut date = DtStart::utc(DateTime::utc_ymd(2018, Month::September, 6).unwrap());
+/// let mut date = DtStart::utc(DateTime::ymd(2018, Month::September, 6).unwrap());
 /// date.append(parameters!("TZID" => "America/New_York"; "VALUE" => "DATE-TIME"));
 /// assert_eq!(
 ///     Property::from(date).to_string(),

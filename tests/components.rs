@@ -23,8 +23,8 @@ fn event() {
 
     let mut event = Event::new(
         "b68378cf-872d-44f1-9703-5e3725c56e71",
-        Date::ymd(1997, Month::September, 1)
-            .and_then(|d| d.to_utc(13, 0, 0))
+        Date::new(1997, Month::September, 1)
+            .and_then(|d| d.and_hms(13, 0, 0))
             .unwrap()
     );
     event.push(Categories::new(Text::from_list(vec![
@@ -33,7 +33,7 @@ fn event() {
         "SPECIAL OCCASION",
     ])));
     event.push(Class::confidential());
-    event.push(DtStart::date(Date::ymd(1997, Month::November, 2).unwrap()));
+    event.push(DtStart::date(Date::new(1997, Month::November, 2).unwrap()));
     event.push(RRule::new(Text::new("FREQ=YEARLY")));
     event.push(Summary::new(Text::new("Our Blissful Anniversary")));
     event.push(Transp::transparent());
@@ -56,23 +56,23 @@ fn todo() {
 
     let mut todo = ToDo::new(
         "b68378cf-872d-44f1-9703-5e3725c56e71",
-        Date::ymd(2007, Month::May, 14)
-            .and_then(|d| d.to_utc(10, 32, 11))
+        Date::new(2007, Month::May, 14)
+            .and_then(|d| d.and_hms(10, 32, 11))
             .unwrap()
     );
     todo.push(Completed::new(
-        Date::ymd(2007, Month::July, 7)
-            .and_then(|d| d.to_utc(10, 0, 0))
+        Date::new(2007, Month::July, 7)
+            .and_then(|d| d.and_hms(10, 0, 0))
             .unwrap()
     ));
     todo.push(DtStart::utc(
-        Date::ymd(2007, Month::May, 14)
-            .and_then(|d| d.to_utc(11, 0, 0))
+        Date::new(2007, Month::May, 14)
+            .and_then(|d| d.and_hms(11, 0, 0))
             .unwrap()
     ));
     todo.push(Due::utc(
-        Date::ymd(2007, Month::July, 9)
-            .and_then(|d| d.to_utc(13, 0, 0))
+        Date::new(2007, Month::July, 9)
+            .and_then(|d| d.and_hms(13, 0, 0))
             .unwrap()
     ));
     todo.push(Priority::new(1));
@@ -96,11 +96,11 @@ fn journal() {
 
     let mut journal = Journal::new(
         "b68378cf-872d-44f1-9703-5e3725c56e71",
-        Date::ymd(1997, Month::September, 1)
-            .and_then(|d| d.to_utc(13, 0, 0))
+        Date::new(1997, Month::September, 1)
+            .and_then(|d| d.and_hms(13, 0, 0))
             .unwrap()
     );
-    journal.push(DtStart::date(Date::ymd(1997, Month::March, 17).unwrap()));
+    journal.push(DtStart::date(Date::new(1997, Month::March, 17).unwrap()));
     journal.push(Summary::new(Text::new("Staff meeting minutes")));
     journal.push(Description::new(Text::new("1. Staff meeting: Participants include Joe, Lisa, and Bob. Aurora project plans were reviewed. There is currently no budget reserves for this project. Lisa will escalate to management. Next meeting on Tuesday.\n\
     2. Telephone Conference: ABC Corp. sales representative called to discuss new printer. Promised to get us a demo by Friday.\n\
@@ -125,18 +125,18 @@ fn freebusy() {
 
     let mut freebusy = FreeBusy::new(
         "b68378cf-872d-44f1-9703-5e3725c56e71",
-        Date::ymd(1997, Month::September, 1)
-            .and_then(|d| d.to_utc(12, 0, 0))
+        Date::new(1997, Month::September, 1)
+            .and_then(|d| d.and_hms(12, 0, 0))
             .unwrap()
     );
     freebusy.push(DtStart::utc(
-        Date::ymd(1998, Month::March, 13)
-            .and_then(|d| d.to_utc(14, 17, 11))
+        Date::new(1998, Month::March, 13)
+            .and_then(|d| d.and_hms(14, 17, 11))
             .unwrap()
     ));
     freebusy.push(DtEnd::utc(
-        Date::ymd(1998, Month::April, 10)
-            .and_then(|d| d.to_utc(14, 17, 11))
+        Date::new(1998, Month::April, 10)
+            .and_then(|d| d.and_hms(14, 17, 11))
             .unwrap()
     ));
     freebusy.push(FreeBusyTime::new(Text::new(
@@ -176,16 +176,16 @@ fn time() {
                     END:VTIMEZONE\r\n";
 
     let mut standard = ZoneTime::standard(
-        Date::ymd(2007, Month::November, 4)
-            .and_then(|d| d.to_local(2, 0, 0))
+        Date::new(2007, Month::November, 4)
+            .and_then(|d| d.and_hms(2, 0, 0))
             .unwrap(),
         "-0400",
         "-0500"
     );
     standard.push(TzName::new(Text::new("EST")));
     let mut daylight = ZoneTime::daylight(
-        Date::ymd(2007, Month::March, 11)
-            .and_then(|d| d.to_local(2, 0, 0))
+        Date::new(2007, Month::March, 11)
+            .and_then(|d| d.and_hms(2, 0, 0))
             .unwrap(),
         "-0500",
         "-0400"
@@ -194,8 +194,8 @@ fn time() {
 
     let mut timezone = TimeZone::new("America/New_York", standard);
     timezone.push(LastModified::new(
-        Date::ymd(2005, Month::August, 9)
-            .and_then(|d| d.to_utc(5, 0, 0))
+        Date::new(2005, Month::August, 9)
+            .and_then(|d| d.and_hms(5, 0, 0))
             .unwrap()
     ));
     timezone.add_zonetime(daylight);

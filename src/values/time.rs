@@ -88,24 +88,21 @@ pub struct Date {
 }
 
 impl Date {
-    /// Creates a new date.
-    pub fn ymd(year: u16, month: Month, day: u8) -> Option<Self> {
+    /// Creates a new date from a year, month and day.
+    ///
+    /// Returns a valid date if the year is in the range of 0 to 9999
+    /// (inclusive) and the day and month match as well with the year.
+    pub fn new(year: u16, month: Month, day: u8) -> Option<Self> {
         if !is_valid_date(year, month, day) {
             return None;
         }
         Some(Date { year, month, day })
     }
 
-    /// Creates a new local date time with the current date and given time
-    /// values.
-    pub fn to_local(self, hour: u8, minute: u8, second: u8) -> Option<DateTime> {
-        Time::local(hour, minute, second).map(|time| DateTime { date: self, time })
-    }
-
-    /// Creates a new date time with the current date and given time values in
-    /// UTC.
-    pub fn to_utc(self, hour: u8, minute: u8, second: u8) -> Option<DateTime<Utc>> {
-        Time::utc(hour, minute, second).map(|time| DateTime { date: self, time })
+    /// Creates a new date time from this date and current time values if the
+    /// time values are in range.
+    pub fn and_hms<T>(self, hour: u8, minute: u8, second: u8) -> Option<DateTime<T>> {
+        Time::new(hour, minute, second).map(|time| DateTime { date: self, time })
     }
 
     /// Returns the year value which is a value in the range of 0 to 9999
@@ -156,38 +153,15 @@ pub struct DateTime<T = Local> {
     time: Time<T>
 }
 
-impl DateTime {
-    /// Creates a new local date time.
-    pub fn local(date: Date, time: Time) -> Self {
-        DateTime::new(date, time)
-    }
-
-    ///
-    pub fn local_ymd(year: u16, month: Month, day: u8) -> Option<Self> {
-        Date::ymd(year, month, day).map(|date| DateTime::new(date, Time::zero()))
-    }
-}
-
-impl DateTime<Utc> {
-    /// Creates a new date time with UTC time.
-    pub fn utc(date: Date, time: Time<Utc>) -> Self {
-        DateTime::new(date, time)
-    }
-
-    ///
-    pub fn utc_ymd(year: u16, month: Month, day: u8) -> Option<Self> {
-        Date::ymd(year, month, day).map(|date| DateTime::new(date, Time::zero()))
-    }
-}
-
 impl<T> DateTime<T> {
-    fn new(date: Date, time: Time<T>) -> Self {
+    /// Creates a new date time.
+    pub fn new(date: Date, time: Time<T>) -> Self {
         DateTime { date, time }
     }
 
-    /// Creates a new date time from the current value with the new time.
-    pub fn and_hms(self, hour: u8, minute: u8, second: u8) -> Option<Self> {
-        Time::new(hour, minute, second).map(|time| DateTime::new(self.date, time))
+    /// Creates a new date time with the time values set to 0.
+    pub fn ymd(year: u16, month: Month, day: u8) -> Option<Self> {
+        Date::new(year, month, day).map(|date| DateTime::new(date, Time::zero()))
     }
 
     /// Return a reference to the date.
@@ -466,7 +440,8 @@ impl Time<Utc> {
 }
 
 impl<T> Time<T> {
-    fn new(hour: u8, minute: u8, second: u8) -> Option<Self> {
+    /// Creates a new time value.
+    pub fn new(hour: u8, minute: u8, second: u8) -> Option<Self> {
         if hour > 23 || minute > 59 || second > 60 {
             return None;
         }
@@ -478,7 +453,7 @@ impl<T> Time<T> {
         })
     }
 
-    /// Returns a time value with all values set to zero.
+    /// Creates a time value with all values set to zero.
     pub fn zero() -> Self {
         Time {
             hour: 0,
@@ -615,18 +590,18 @@ mod test {
     #[test]
     fn datetime_local() {
         let expected = "19970714T173000";
-        let date = Date::ymd(1997, Month::July, 14).unwrap();
+        let date = Date::new(1997, Month::July, 14).unwrap();
         let time = Time::local(17, 30, 0).unwrap();
-        let datetime = DateTime::local(date, time);
+        let datetime = DateTime::new(date, time);
         assert_eq!(datetime.to_string(), expected);
     }
 
     #[test]
     fn datetime_utc() {
         let expected = "19970714T173000Z";
-        let date = Date::ymd(1997, Month::July, 14).unwrap();
+        let date = Date::new(1997, Month::July, 14).unwrap();
         let time = Time::utc(17, 30, 0).unwrap();
-        let datetime = DateTime::utc(date, time);
+        let datetime = DateTime::new(date, time);
         assert_eq!(datetime.to_string(), expected);
     }
 }

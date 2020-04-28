@@ -13,17 +13,15 @@ fn main() -> std::io::Result<()> {
     // generated and the date stamp which must be in UTC time.
     let mut todo = ToDo::new(
         "b68378cf-872d-44f1-9703-5e3725c56e71",
-        Date::ymd(1998, Month::January, 30)
-            .and_then(|d| d.to_utc(13, 45, 0))
+        Date::new(1998, Month::January, 30)
+            .and_then(|d| d.and_hms(13, 45, 0))
             .unwrap()
     );
     todo.push(Organizer::new(Text::new("mailto:unclesam@example.com")));
     let mut attendee = Attendee::new(Text::new("mailto:jqpublic@example.com"));
     attendee.add(PartStat::ACCEPTED);
     todo.push(attendee);
-    todo.push(Due::local(
-        DateTime::local_ymd(1998, Month::April, 15).unwrap()
-    ));
+    todo.push(Due::local(DateTime::ymd(1998, Month::April, 15).unwrap()));
     todo.push(Status::needs_action());
     todo.push(Summary::new(Text::new("Submit Income Taxes")));
     todo.push(Sequence::new(2));

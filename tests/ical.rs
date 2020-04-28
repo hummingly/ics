@@ -30,19 +30,19 @@ fn icalendar_event() {
 
     let mut event = Event::new(
         "b68378cf-872d-44f1-9703-5e3725c56e71",
-        Date::ymd(1996, Month::July, 4)
-            .and_then(|d| d.to_utc(12, 0, 0))
+        Date::new(1996, Month::July, 4)
+            .and_then(|d| d.and_hms(12, 0, 0))
             .unwrap()
     );
     event.push(Organizer::new(Text::new("mailto:jsmith@example.com")));
     event.push(DtStart::utc(
-        Date::ymd(1996, Month::September, 18)
-            .and_then(|d| d.to_utc(14, 30, 0))
+        Date::new(1996, Month::September, 18)
+            .and_then(|d| d.and_hms(14, 30, 0))
             .unwrap()
     ));
     event.push(DtEnd::utc(
-        Date::ymd(1996, Month::September, 20)
-            .and_then(|d| d.to_utc(22, 0, 0))
+        Date::new(1996, Month::September, 20)
+            .and_then(|d| d.and_hms(22, 0, 0))
             .unwrap()
     ));
     event.push(Status::confirmed());
@@ -88,17 +88,15 @@ fn icalendar_todo() {
 
     let mut todo = ToDo::new(
         "b68378cf-872d-44f1-9703-5e3725c56e71",
-        Date::ymd(1998, Month::January, 30)
-            .and_then(|d| d.to_utc(13, 45, 0))
+        Date::new(1998, Month::January, 30)
+            .and_then(|d| d.and_hms(13, 45, 0))
             .unwrap()
     );
     todo.push(Organizer::new(Text::new("mailto:unclesam@example.com")));
     let mut attendee = Attendee::new(Text::new("mailto:jqpublic@example.com"));
     attendee.add(PartStat::ACCEPTED);
     todo.push(attendee);
-    todo.push(Due::local(
-        DateTime::local_ymd(1998, Month::April, 15).unwrap()
-    ));
+    todo.push(Due::local(DateTime::ymd(1998, Month::April, 15).unwrap()));
     todo.push(Status::needs_action());
     todo.push(Summary::new(Text::new("Submit Income Taxes")));
     todo.push(Sequence::new(2));
