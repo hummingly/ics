@@ -1,7 +1,8 @@
 use std::fmt;
 use std::marker::PhantomData;
 // use std::ops::*;
-// use std::str::FromStr;
+use std::str::FromStr;
+use values::error::ParseDateError;
 
 // // time units in seconds
 // const SECOND: i64 = 1;
@@ -79,6 +80,35 @@ impl Month {
     }
 }
 
+impl FromStr for Month {
+    type Err = ParseDateError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        if s.len() != 2 {
+            return Err(ParseDateError::InvalidFormatting);
+        }
+        let month: u8 = s[4..6]
+            .parse()
+            .map_err(|_| ParseDateError::InvalidInteger)?;
+
+        Ok(match month {
+            1 => Month::January,
+            2 => Month::February,
+            3 => Month::March,
+            4 => Month::April,
+            5 => Month::May,
+            6 => Month::June,
+            7 => Month::July,
+            8 => Month::August,
+            9 => Month::September,
+            10 => Month::October,
+            11 => Month::November,
+            12 => Month::December,
+            _ => return Err(ParseDateError::OutOfRange)
+        })
+    }
+}
+
 /// ICalendar Date
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Date {
@@ -129,22 +159,22 @@ impl fmt::Display for Date {
     }
 }
 
-// impl FromStr for Date {
-//     // TODO: Replace placeholder
-//     type Err = ();
+impl FromStr for Date {
+    type Err = ParseDateError;
 
-//     fn from_str(s: &str) -> Result<Self, Self::Err> {
-//         if s.len() != 8 {
-//             return Err(());
-//         }
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        if s.len() != 8 {
+            return Err(ParseDateError::InvalidFormatting);
+        }
+        let year = s[0..4]
+            .parse()
+            .map_err(|_| ParseDateError::InvalidInteger)?;
+        let month = s[4..6].parse()?;
+        let day = s[6..].parse().map_err(|_| ParseDateError::InvalidInteger)?;
 
-//         let year: u16 = s[0..4].parse().unwrap();
-//         let month: u8 = s[4..6].parse().unwrap();
-//         let day: u8 = s[6..].parse().unwrap();
-
-//         Date::checked_ymd(year, month, day).ok_or(())
-//     }
-// }
+        Date::new(year, month, day).ok_or(ParseDateError::OutOfRange)
+    }
+}
 
 /// ICalendar Date Time
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]

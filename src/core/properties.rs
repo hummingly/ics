@@ -608,29 +608,22 @@ property!(FreeBusyTime, "FREEBUSY");
 
 /// TRANSP Property
 #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
-pub struct Transp<'a> {
-    value: bool,
-    parameters: Parameters<'a>
+pub enum Transp<'a> {
+    /// Blocks or opaque on busy time searches
+    Opaque(Parameters<'a>),
+    /// Transparent on busy time searches.
+    Transparent(Parameters<'a>)
 }
 
 impl<'a> Transp<'a> {
-    const OPAQUE: bool = false;
-    const TRANSPARENT: bool = true;
-
     /// Creates a new TRANSP Property set to OPAQUE.
     pub fn opaque() -> Self {
-        Self {
-            value: Self::OPAQUE,
-            parameters: BTreeMap::new()
-        }
+        Transp::Opaque(BTreeMap::new())
     }
 
     /// Creates a new TRANSP Property set to TRANSPARENT.
     pub fn transparent() -> Self {
-        Self {
-            value: Self::TRANSPARENT,
-            parameters: BTreeMap::new()
-        }
+        Transp::Transparent(BTreeMap::new())
     }
 
     /// Adds a parameter to the property.
@@ -639,27 +632,37 @@ impl<'a> Transp<'a> {
         P: Into<Parameter<'a>>
     {
         let param = parameter.into();
-        self.parameters.insert(param.key, param.value);
+        self.parameters_mut().insert(param.key, param.value);
     }
 
     /// Adds several parameters at once to the property. For creating
     /// several parameters at once, consult the documentation of
     /// the `parameters!` macro.
     pub fn append(&mut self, mut parameters: Parameters<'a>) {
-        self.parameters.append(&mut parameters);
+        self.parameters_mut().append(&mut parameters);
+    }
+
+    fn parameters_mut(&mut self) -> &mut Parameters<'a> {
+        match self {
+            Transp::Opaque(parameters) => parameters,
+            Transp::Transparent(parameters) => parameters
+        }
     }
 }
 
 impl<'a> From<Transp<'a>> for Property<'a> {
     fn from(builder: Transp<'a>) -> Self {
-        Property {
-            key: "TRANSP".into(),
-            value: Cow::Borrowed(if builder.value == Transp::OPAQUE {
-                "OPAQUE"
-            } else {
-                "TRANSPARENT"
-            }),
-            parameters: builder.parameters
+        match builder {
+            Transp::Opaque(parameters) => Property {
+                key: "TRANSP".into(),
+                value: "OPAQUE".into(),
+                parameters
+            },
+            Transp::Transparent(parameters) => Property {
+                key: "TRANSP".into(),
+                value: "TRANSPARENT".into(),
+                parameters
+            }
         }
     }
 }

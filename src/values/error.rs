@@ -66,3 +66,34 @@ impl Error for ParseBoolError {
         None
     }
 }
+
+/// Parsing errors for Date related types.
+#[derive(Debug)]
+pub enum ParseDateError {
+    /// The input was not formatted as YYYYMMDD string.
+    InvalidFormatting,
+    /// The input contained non-integer values.
+    InvalidInteger,
+    /// The input contained integer values that are out of the valid range.
+    OutOfRange
+}
+
+impl fmt::Display for ParseDateError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            ParseDateError::InvalidFormatting => writeln!(f, "Invalid Format: Dates must be formatted as YYYYMMDD."),
+            ParseDateError::InvalidInteger => writeln!(f, "Invalid Integer: The year, month and day must be valid unsigned integers in the correct range."),
+            ParseDateError::OutOfRange => writeln!(f, "Value Out Of Range: Value was out of the valid range. The year is between 0 to 9999 (inclusive), the month between 1 to 12 (inclusive) and the day between 1 to 31 (inclusive).")
+        }
+    }
+}
+
+impl Error for ParseDateError {
+    fn description(&self) -> &str {
+        "Dates must be formatted as YYYYMMDD string where the year is between 0 to 9999 (inclusive), the month between 1 to 12 (inclusive) and the day between 1 to 31 (inclusive)."
+    }
+
+    fn cause(&self) -> Option<&Error> {
+        None
+    }
+}
