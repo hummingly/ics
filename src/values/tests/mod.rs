@@ -78,26 +78,32 @@ mod encoding {
 
         #[test]
         fn escaped_chars() {
-            let s = ",\r\n;:\\ \n \r\n";
+            let mut output = String::new();
+            let input = ",\r\n;:\\ \n \r\n";
             let expected = "\\,\n\\;:\\\\ \n \n";
-            assert_eq!(expected, escape_text(s.into()));
+            escape_text(&mut output, input).unwrap();
+            assert_eq!(expected, output);
         }
 
         #[test]
         fn no_escaped_chars() {
-            let s = "This is a simple sentence.";
-            let expected = s.clone();
-            assert_eq!(expected, escape_text(s.into()));
+            let mut output = String::new();
+            let input = "This is a simple sentence.";
+            let expected = input;
+            escape_text(&mut output, input).unwrap();
+            assert_eq!(expected, output);
         }
 
         // test run with default features enabled but should be correct regardless
         #[test]
         fn escape_property() {
             use components::Property;
-            let s = "Hello, World! Today is a beautiful day to test: Escape Methods.\n Characters like ; or \\ must be escaped.\r\n";
-            let expected_value = "Hello\\, World! Today is a beautiful day to test: Escape Methods.\n Characters like \\; or \\\\ must be escaped.\n";
-            let property = Property::new("COMMENT", escape_text(s.into()));
-            assert_eq!(expected_value, property.value);
+            let mut output = String::new();
+            let input = "Hello, World! Today is a beautiful day to test: Escape Methods.\n Characters like ; or \\ must be escaped.\r\n";
+            let expected = "Hello\\, World! Today is a beautiful day to test: Escape Methods.\n Characters like \\; or \\\\ must be escaped.\n";
+            escape_text(&mut output, input).unwrap();
+            let property = Property::new("COMMENT", output);
+            assert_eq!(expected, property.value);
         }
     }
 }

@@ -3,7 +3,6 @@ use properties::{
     Action, Description, DtStamp, DtStart, ProdID, Summary, Trigger, TzID, TzOffsetFrom,
     TzOffsetTo, Version, UID
 };
-use std::borrow::Cow;
 use std::fmt;
 use std::fs::File;
 use std::io::{self, Write};
@@ -27,16 +26,13 @@ impl<'a> ICalendar<'a> {
     /// "VERSION" and "PRODID" properties are required.
     pub fn new<V, P, C>(version: V, prodid: P, component: C) -> Self
     where
-        V: Into<Cow<'a, str>>,
-        P: Into<Cow<'a, str>>,
+        V: Into<Text<'a>>,
+        P: Into<Text<'a>>,
         C: Into<Component<'a>>
     {
         ICalendar(Component {
             name: "VCALENDAR".into(),
-            properties: vec![
-                Version::new(Text::new(version)).into(),
-                ProdID::new(Text::new(prodid)).into(),
-            ],
+            properties: vec![Version::new(version).into(), ProdID::new(prodid).into()],
             subcomponents: vec![component.into()]
         })
     }
@@ -132,13 +128,10 @@ impl<'a> Event<'a> {
     /// reasons.
     pub fn new<U>(uid: U, dtstamp: DateTime<Utc>) -> Self
     where
-        U: Into<Cow<'a, str>>
+        U: Into<Text<'a>>
     {
         Self {
-            properties: vec![
-                UID::new(Text::new(uid)).into(),
-                DtStamp::new(dtstamp).into(),
-            ],
+            properties: vec![UID::new(uid).into(), DtStamp::new(dtstamp).into()],
             alarms: Vec::new()
         }
     }
@@ -187,13 +180,10 @@ impl<'a> ToDo<'a> {
     /// reasons.
     pub fn new<U>(uid: U, dtstamp: DateTime<Utc>) -> Self
     where
-        U: Into<Cow<'a, str>>
+        U: Into<Text<'a>>
     {
         Self {
-            properties: vec![
-                UID::new(Text::new(uid)).into(),
-                DtStamp::new(dtstamp).into(),
-            ],
+            properties: vec![UID::new(uid).into(), DtStamp::new(dtstamp).into()],
             alarms: Vec::new()
         }
     }
@@ -243,12 +233,9 @@ impl<'a> Journal<'a> {
     /// reasons.
     pub fn new<U>(uid: U, dtstamp: DateTime<Utc>) -> Self
     where
-        U: Into<Cow<'a, str>>
+        U: Into<Text<'a>>
     {
-        Journal(vec![
-            UID::new(Text::new(uid)).into(),
-            DtStamp::new(dtstamp).into(),
-        ])
+        Journal(vec![UID::new(uid).into(), DtStamp::new(dtstamp).into()])
     }
 
     /// Adds a property to the journal. RFC5545 and RFC7986 specify which
@@ -292,12 +279,9 @@ impl<'a> FreeBusy<'a> {
     /// reasons.
     pub fn new<U>(uid: U, dtstamp: DateTime<Utc>) -> Self
     where
-        U: Into<Cow<'a, str>>
+        U: Into<Text<'a>>
     {
-        FreeBusy(vec![
-            UID::new(Text::new(uid)).into(),
-            DtStamp::new(dtstamp).into(),
-        ])
+        FreeBusy(vec![UID::new(uid).into(), DtStamp::new(dtstamp).into()])
     }
 
     /// Adds a property to the free busy schedule. The RFC5545 specifies which
@@ -343,10 +327,10 @@ impl<'a> TimeZone<'a> {
     /// sub-component) are required.
     pub fn new<S>(tzid: S, definition: ZoneTime<'a>) -> Self
     where
-        S: Into<Cow<'a, str>>
+        S: Into<Text<'a>>
     {
         Self {
-            properties: vec![TzID::new(Text::new(tzid)).into()],
+            properties: vec![TzID::new(tzid).into()],
             zone_times: vec![definition]
         }
     }
@@ -406,8 +390,8 @@ impl<'a> ZoneTime<'a> {
     /// consists of a collection of properties that describe Standard Time.
     pub fn standard<T, F>(dtstart: DateTime, tz_offset_from: F, tz_offset_to: T) -> Self
     where
-        F: Into<Cow<'a, str>>,
-        T: Into<Cow<'a, str>>
+        F: Into<Text<'a>>,
+        T: Into<Text<'a>>
     {
         ZoneTime::Standard(Standard::new(dtstart, tz_offset_from, tz_offset_to))
     }
@@ -418,8 +402,8 @@ impl<'a> ZoneTime<'a> {
     /// Time.
     pub fn daylight<T, F>(dtstart: DateTime, tz_offset_from: F, tz_offset_to: T) -> Self
     where
-        F: Into<Cow<'a, str>>,
-        T: Into<Cow<'a, str>>
+        F: Into<Text<'a>>,
+        T: Into<Text<'a>>
     {
         ZoneTime::Daylight(Daylight::new(dtstart, tz_offset_from, tz_offset_to))
     }
@@ -467,13 +451,13 @@ impl<'a> Standard<'a> {
     /// "TZOFFSETFROM" and "TZOFFSETTO" are required.
     pub fn new<T, F>(dtstart: DateTime, tz_offset_from: F, tz_offset_to: T) -> Self
     where
-        F: Into<Cow<'a, str>>,
-        T: Into<Cow<'a, str>>
+        F: Into<Text<'a>>,
+        T: Into<Text<'a>>
     {
         Standard(vec![
             DtStart::local(dtstart).into(),
-            TzOffsetFrom::new(Text::new(tz_offset_from)).into(),
-            TzOffsetTo::new(Text::new(tz_offset_to)).into(),
+            TzOffsetFrom::new(tz_offset_from).into(),
+            TzOffsetTo::new(tz_offset_to).into(),
         ])
     }
 
@@ -516,13 +500,13 @@ impl<'a> Daylight<'a> {
     /// "TZOFFSETFROM" and "TZOFFSETTO" are required.
     pub fn new<T, F>(dtstart: DateTime, tz_offset_from: F, tz_offset_to: T) -> Self
     where
-        F: Into<Cow<'a, str>>,
-        T: Into<Cow<'a, str>>
+        F: Into<Text<'a>>,
+        T: Into<Text<'a>>
     {
         Daylight(vec![
             DtStart::local(dtstart).into(),
-            TzOffsetFrom::new(Text::new(tz_offset_from)).into(),
-            TzOffsetTo::new(Text::new(tz_offset_to)).into(),
+            TzOffsetFrom::new(tz_offset_from).into(),
+            TzOffsetTo::new(tz_offset_to).into(),
         ])
     }
 

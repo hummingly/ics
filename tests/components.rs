@@ -5,7 +5,7 @@ use ics::properties::{
     Attach, Attendee, Categories, Class, Completed, Description, DtEnd, DtStart, Due, FreeBusyTime,
     LastModified, Organizer, Priority, RRule, Status, Summary, Transp, Trigger, TzName, URL
 };
-use ics::values::{Date, Month, Text};
+use ics::values::{Date, Month};
 use ics::{Alarm, Event, FreeBusy, Journal, TimeZone, ToDo, ZoneTime};
 
 #[test]
@@ -27,15 +27,16 @@ fn event() {
             .and_then(|d| d.and_hms(13, 0, 0))
             .unwrap()
     );
-    event.push(Categories::new(Text::from_list(vec![
-        "ANNIVERSARY",
-        "PERSONAL",
-        "SPECIAL OCCASION",
-    ])));
+    let categories = [
+        "ANNIVERSARY".into(),
+        "PERSONAL".into(),
+        "SPECIAL OCCASION".into()
+    ];
+    event.push(Categories::new(categories.as_ref()));
     event.push(Class::confidential());
     event.push(DtStart::date(Date::new(1997, Month::November, 2).unwrap()));
-    event.push(RRule::new(Text::new("FREQ=YEARLY")));
-    event.push(Summary::new(Text::new("Our Blissful Anniversary")));
+    event.push(RRule::new("FREQ=YEARLY"));
+    event.push(Summary::new("Our Blissful Anniversary"));
     event.push(Transp::transparent());
 
     assert_eq!(event.to_string(), expected);
@@ -76,7 +77,7 @@ fn todo() {
             .unwrap()
     ));
     todo.push(Priority::new(1));
-    todo.push(Summary::new(Text::new("Submit Revised Internet-Draft")));
+    todo.push(Summary::new("Submit Revised Internet-Draft"));
     todo.push(Status::needs_action());
 
     assert_eq!(todo.to_string(), expected);
@@ -101,10 +102,10 @@ fn journal() {
             .unwrap()
     );
     journal.push(DtStart::date(Date::new(1997, Month::March, 17).unwrap()));
-    journal.push(Summary::new(Text::new("Staff meeting minutes")));
-    journal.push(Description::new(Text::new("1. Staff meeting: Participants include Joe, Lisa, and Bob. Aurora project plans were reviewed. There is currently no budget reserves for this project. Lisa will escalate to management. Next meeting on Tuesday.\n\
+    journal.push(Summary::new("Staff meeting minutes"));
+    journal.push(Description::new("1. Staff meeting: Participants include Joe, Lisa, and Bob. Aurora project plans were reviewed. There is currently no budget reserves for this project. Lisa will escalate to management. Next meeting on Tuesday.\n\
     2. Telephone Conference: ABC Corp. sales representative called to discuss new printer. Promised to get us a demo by Friday.\n\
-    3. Henry Miller (Handsoff Insurance): Car was totaled by tree. Is looking into a loaner car. 555-2323 (tel).")));
+    3. Henry Miller (Handsoff Insurance): Car was totaled by tree. Is looking into a loaner car. 555-2323 (tel)."));
 
     assert_eq!(journal.to_string(), expected);
 }
@@ -139,19 +140,13 @@ fn freebusy() {
             .and_then(|d| d.and_hms(14, 17, 11))
             .unwrap()
     ));
-    freebusy.push(FreeBusyTime::new(Text::new(
-        "19980314T233000Z/19980315T003000Z"
-    )));
-    freebusy.push(FreeBusyTime::new(Text::new(
-        "19980316T153000Z/19980316T163000Z"
-    )));
-    freebusy.push(FreeBusyTime::new(Text::new(
-        "19980318T030000Z/19980318T040000Z"
-    )));
-    freebusy.push(Organizer::new(Text::new("jsmith@example.com")));
-    freebusy.push(URL::new(Text::new(
+    freebusy.push(FreeBusyTime::new("19980314T233000Z/19980315T003000Z"));
+    freebusy.push(FreeBusyTime::new("19980316T153000Z/19980316T163000Z"));
+    freebusy.push(FreeBusyTime::new("19980318T030000Z/19980318T040000Z"));
+    freebusy.push(Organizer::new("jsmith@example.com"));
+    freebusy.push(URL::new(
         "http://www.example.com/calendar/busytime/jsmith.ifb"
-    )));
+    ));
 
     assert_eq!(freebusy.to_string(), expected);
 }
@@ -182,7 +177,7 @@ fn time() {
         "-0400",
         "-0500"
     );
-    standard.push(TzName::new(Text::new("EST")));
+    standard.push(TzName::new("EST"));
     let mut daylight = ZoneTime::daylight(
         Date::new(2007, Month::March, 11)
             .and_then(|d| d.and_hms(2, 0, 0))
@@ -190,7 +185,7 @@ fn time() {
         "-0500",
         "-0400"
     );
-    daylight.push(TzName::new(Text::new("EDT")));
+    daylight.push(TzName::new("EDT"));
 
     let mut timezone = TimeZone::new("America/New_York", standard);
     timezone.push(LastModified::new(
@@ -214,16 +209,16 @@ fn alarm() {
                     ATTACH;FMTTYPE=application/msword:http://example.com/templates/agenda.doc\r\n\
                     END:VALARM\r\n";
 
-    let mut trigger = Trigger::new(Text::new("-P2D"));
+    let mut trigger = Trigger::new("-P2D");
     trigger.add(Related::End);
     let mut alarm = Alarm::email(
         trigger,
         Description::new(
-            Text::new("A draft agenda needs to be sent out to the attendees to the weekly managers meeting (MGR-LIST). Attached is a pointer the document template for the agenda file.")
+            "A draft agenda needs to be sent out to the attendees to the weekly managers meeting (MGR-LIST). Attached is a pointer the document template for the agenda file."
         ),
-        Summary::new(Text::new("*** REMINDER: SEND AGENDA FOR WEEKLY STAFF MEETING ***"))
+        Summary::new("*** REMINDER: SEND AGENDA FOR WEEKLY STAFF MEETING ***")
     );
-    alarm.push(Attendee::new(Text::new("mailto:john_doe@example.com")));
+    alarm.push(Attendee::new("mailto:john_doe@example.com"));
     let mut attach = Attach::uri("http://example.com/templates/agenda.doc");
     attach.add(FmtType::new("application/msword"));
     alarm.push(attach);

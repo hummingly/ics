@@ -1,7 +1,7 @@
 extern crate ics;
 
 use ics::properties::{Categories, Description, DtEnd, DtStart, Organizer, Status, Summary};
-use ics::values::{Date, Month, Text};
+use ics::values::{Date, Month};
 use ics::{Event, ICalendar};
 
 fn main() -> std::io::Result<()> {
@@ -14,7 +14,7 @@ fn main() -> std::io::Result<()> {
             .and_then(|d| d.and_hms(12, 0, 0))
             .unwrap()
     );
-    event.push(Organizer::new(Text::new("mailto:jsmith@example.com")));
+    event.push(Organizer::new("mailto:jsmith@example.com"));
     event.push(DtStart::utc(
         Date::new(1996, Month::September, 18)
             .and_then(|d| d.and_hms(14, 30, 0))
@@ -26,16 +26,16 @@ fn main() -> std::io::Result<()> {
             .unwrap()
     ));
     event.push(Status::confirmed());
-    event.push(Categories::new(Text::new("CONFERENCE")));
-    event.push(Summary::new(Text::new("Networld+Interop Conference")));
+    event.push(Categories::new("CONFERENCE"));
+    event.push(Summary::new("Networld+Interop Conference"));
 
     // Values that are "TEXT" must be escaped (only if the text contains a comma,
     // semicolon or backlash).
-    event.push(Description::new(Text::new(
+    event.push(Description::new(
         "Networld+Interop Conference and Exhibit\n\
          Atlanta World Congress Center\n\
          Atlanta, Georgia"
-    )));
+    ));
 
     // Create new iCalendar object
     // An iCalendar object must at least consist a component and the VERSION and

@@ -2,7 +2,6 @@ use super::error::ParseBinaryError;
 use std::borrow::Cow;
 // use std::collections::HashMap;
 use std::fmt;
-use std::iter::FromIterator;
 use std::str::FromStr;
 
 use values::encoding::{decode_base64, encode_base64, escape_text};
@@ -72,41 +71,30 @@ impl<'b> FromStr for Binary<'b> {
 /// Text characters like comma, semicolon and backlash are automatically escaped
 /// by prepending a backlash before the escaped chracters.
 #[derive(Debug, Default, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
-pub struct Text<'t>(pub(crate) Cow<'t, str>);
+pub struct Text<'t>(Cow<'t, str>);
 
 impl<'t> Text<'t> {
-    /// Creates new Text by prepending commas, semicolons and backlashes with a
-    /// backlash.
-    pub fn new<T>(text: T) -> Self
-    where
-        T: Into<Cow<'t, str>>
-    {
-        // TODO: Escape in toString
-        Text(escape_text(text.into()))
+    /// Returns the text content.
+    pub fn get(&self) -> &str {
+        &self.0
     }
+}
 
-    /// TODO: This is an internal function! Each property that supports lists
-    /// should instead have this on their API
-    pub fn from_list<T>(list: Vec<T>) -> Self
-    where
-        T: Into<Cow<'t, str>>
-    {
-        if list.is_empty() {
-            return Text(Cow::Borrowed(""));
-        }
+impl<'t> From<&'t str> for Text<'t> {
+    fn from(value: &'t str) -> Self {
+        Text(Cow::Borrowed(value))
+    }
+}
 
-        let mut text = String::from_iter(
-            list.into_iter()
-                .map(|l| [escape_text(l.into()), Cow::Borrowed(",")].concat())
-        );
-        text.pop();
-        Text(Cow::Owned(text))
+impl<'t> From<String> for Text<'t> {
+    fn from(value: String) -> Self {
+        Text(Cow::Owned(value))
     }
 }
 
 impl<'t> fmt::Display for Text<'t> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.0)
+        escape_text(f, &self.0)
     }
 }
 

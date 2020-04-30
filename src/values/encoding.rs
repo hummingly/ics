@@ -1,4 +1,3 @@
-use std::borrow::Cow;
 use std::fmt;
 
 // Mask for extracting 6 bits from a byte.
@@ -103,29 +102,26 @@ fn to_binary(c: u8) -> u8 {
 /// Escapes comma, semicolon and backlash character by prepending a backlash.
 ///
 /// This method is used for properties with the value type "TEXT".
-pub(crate) fn escape_text<'t>(text: Cow<'t, str>) -> Cow<'t, str> {
+pub(crate) fn escape_text<'t, W: fmt::Write>(output: &mut W, input: &str) -> fmt::Result {
     let matches = |c| c == '\r' || is_escaped_char(c);
-    if text.contains(matches) {
-        let text = text.replace("\r\n", "\n");
-        let size = text.len() + text.chars().filter(|&c| is_escaped_char(c)).count();
-        let mut output = String::with_capacity(size);
+    if input.contains(matches) {
+        let text = input.replace("\r\n", "\n");
         let mut last_end = 0;
         for (start, part) in text.match_indices(matches) {
-            output.push_str(&text[last_end..start]);
+            output.write_str(&text[last_end..start])?;
             match part {
-                "," => output.push_str("\\,"),
-                ";" => output.push_str("\\;"),
-                "\\" => output.push_str("\\\\"),
+                "," => output.write_str("\\,")?,
+                ";" => output.write_str("\\;")?,
+                "\\" => output.write_str("\\\\")?,
                 // \r was in old MacOS versions the newline character
-                "\r" => output.push_str("\n"),
+                "\r" => output.write_str("\n")?,
                 _ => unreachable!()
             }
             last_end = start + part.len();
         }
-        output.push_str(&text[last_end..text.len()]);
-        return Cow::Owned(output);
+        return output.write_str(&text[last_end..text.len()]);
     }
-    text
+    output.write_str(input)
 }
 
 fn is_escaped_char(c: char) -> bool {

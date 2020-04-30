@@ -18,7 +18,7 @@
 //! // constructors whenever possible
 //! let confidential = Class::confidential();
 //!
-//! assert_eq!(Class::new(Text::new("CONFIDENTIAL")), confidential);
+//! assert_eq!(Class::new("CONFIDENTIAL"), confidential);
 //! assert_eq!(Property::new("CLASS", "CONFIDENTIAL"), confidential.into());
 //! ```
 //! For more information on properties, please refer to the specification [RFC5545 3.7. Calendar Properties](https://tools.ietf.org/html/rfc5545#section-3.7) and [RFC7986 5. Properties](https://tools.ietf.org/html/rfc7986#section-5).
@@ -137,7 +137,52 @@ impl<'a> From<Attach<'a>> for Property<'a> {
     }
 }
 
-property!(Categories, "CATEGORIES");
+/// CATEGORIES Property
+#[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
+pub struct Categories<'a> {
+    value: List<'a, Text<'a>>,
+    parameters: Parameters<'a>
+}
+
+impl<'a> Categories<'a> {
+    /// Creates a new CATEGORIES Property with the given value.
+    pub fn new<T>(value: T) -> Self
+    where
+        T: Into<List<'a, Text<'a>>>
+    {
+        Self {
+            value: value.into(),
+            parameters: BTreeMap::new()
+        }
+    }
+
+    /// Adds a parameter to the property.
+    pub fn add<P>(&mut self, parameter: P)
+    where
+        P: Into<Parameter<'a>>
+    {
+        let param = parameter.into();
+        self.parameters.insert(param.key, param.value);
+    }
+
+    /// Adds several parameters at once to the property. For creating
+    /// several parameters at once, consult the documentation of
+    /// the `parameters!` macro.
+    pub fn append(&mut self, mut parameters: Parameters<'a>) {
+        self.parameters.append(&mut parameters);
+    }
+}
+
+impl<'a> From<Categories<'a>> for Property<'a> {
+    fn from(builder: Categories<'a>) -> Self {
+        Property {
+            key: "CATEGORIES".into(),
+            value: builder.value.to_string().into(),
+            parameters: builder.parameters
+        }
+    }
+}
+
 property_with_constructor!(
     /// [Format definitions of classifications](https://tools.ietf.org/html/rfc5545#section-3.8.1.3)
     Class, "CLASS",
@@ -948,7 +993,14 @@ impl<'a> Default for Transp<'a> {
     }
 }
 
-impl_default_prop!(CalScale, "GREGORIAN");
+impl<'a> Default for CalScale<'a> {
+    fn default() -> Self {
+        Self {
+            value: "GREGORIAN".into(),
+            parameters: BTreeMap::new()
+        }
+    }
+}
 
 #[cfg(feature = "rfc7986")]
 pub use self::rfc7986::*;

@@ -62,9 +62,11 @@ macro_rules! property {
             #[doc = "Creates a new "]
             #[doc=$name]
             #[doc = " Property with the given value."]
-            pub fn new(value: Text<'a>) -> Self {
+            pub fn new<T>(value: T) -> Self
+            where T: Into<Text<'a>>
+            {
                 Self {
-                    value,
+                    value: value.into(),
                     parameters: BTreeMap::new()
                 }
             }
@@ -108,9 +110,11 @@ macro_rules! property_with_constructor {
             #[doc = "Creates a new "]
             #[doc=$name]
             #[doc = " Property with the given value."]
-            pub fn new(value: Text<'a>) -> Self {
+            pub fn new<T>(value: T) -> Self
+            where T: Into<Text<'a>>
+            {
                 Self {
-                    value,
+                    value: value.into(),
                     parameters: BTreeMap::new()
                 }
             }
@@ -121,7 +125,7 @@ macro_rules! property_with_constructor {
                 #[doc = "Property Value: "]#[doc = $value]
                 pub fn $const_ident() -> Self {
                     Self {
-                        value: Text($value.into()),
+                        value: $value.into(),
                         parameters: BTreeMap::new()
                     }
                 }
@@ -264,26 +268,13 @@ macro_rules! parameter_with_const {
     };
 }
 
-macro_rules! impl_default_prop {
-    ($type:ident, $default:expr) => {
-        impl<'a> Default for $type<'a> {
-            fn default() -> Self {
-                Self {
-                    value: Text($default.into()),
-                    parameters: BTreeMap::new()
-                }
-            }
-        }
-    };
-}
-
 macro_rules! impl_from_prop {
     ($type:ident, $name:expr) => {
         impl<'a> From<$type<'a>> for Property<'a> {
             fn from(builder: $type<'a>) -> Self {
                 Property {
                     key: $name.into(),
-                    value: builder.value.0,
+                    value: builder.value.to_string().into(),
                     parameters: builder.parameters
                 }
             }

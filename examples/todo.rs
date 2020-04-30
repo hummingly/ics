@@ -4,7 +4,7 @@ use ics::parameters::{FmtType, PartStat};
 use ics::properties::{
     Attach, Attendee, Due, Duration, Organizer, Repeat, Sequence, Status, Summary, Trigger
 };
-use ics::values::{Date, DateTime, Month, Text};
+use ics::values::{Date, DateTime, Month};
 use ics::{Alarm, ICalendar, ToDo};
 
 fn main() -> std::io::Result<()> {
@@ -17,21 +17,21 @@ fn main() -> std::io::Result<()> {
             .and_then(|d| d.and_hms(13, 45, 0))
             .unwrap()
     );
-    todo.push(Organizer::new(Text::new("mailto:unclesam@example.com")));
-    let mut attendee = Attendee::new(Text::new("mailto:jqpublic@example.com"));
+    todo.push(Organizer::new("mailto:unclesam@example.com"));
+    let mut attendee = Attendee::new("mailto:jqpublic@example.com");
     attendee.add(PartStat::ACCEPTED);
     todo.push(attendee);
     todo.push(Due::local(DateTime::ymd(1998, Month::April, 15).unwrap()));
     todo.push(Status::needs_action());
-    todo.push(Summary::new(Text::new("Submit Income Taxes")));
+    todo.push(Summary::new("Submit Income Taxes"));
     todo.push(Sequence::new(2));
     // add alarm to todo
-    let mut alarm = Alarm::audio(Trigger::new(Text::new("19980403T120000Z")));
+    let mut alarm = Alarm::audio(Trigger::new("19980403T120000Z"));
     let mut attach = Attach::uri("http://example.com/pub/audio-files/ssbanner.aud");
     attach.add(FmtType::new("audio/basic"));
     alarm.push(attach);
     alarm.push(Repeat::new(4));
-    alarm.push(Duration::new(Text::new("PT1H")));
+    alarm.push(Duration::new("PT1H"));
     todo.add_alarm(alarm);
 
     // Create new iCalendar object

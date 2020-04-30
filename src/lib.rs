@@ -38,8 +38,8 @@
 //!             .and_then(|d| d.and_hms(19, 0, 0))
 //!             .unwrap()
 //!     );
-//!     todo.push(Summary::new(Text::new("Katarina's Birthday Present")));
-//!     todo.push(Comment::new(Text::new("Buy her Imagine Dragons tickets!")));
+//!     todo.push(Summary::new("Katarina's Birthday Present"));
+//!     todo.push(Comment::new("Buy her Imagine Dragons tickets!"));
 //!     todo.push(Status::needs_action());
 //!
 //!     // The ICalendar object is what is later written to the file.
@@ -51,7 +51,8 @@
 //! }
 //! ```
 
-#![forbid(unsafe_code, missing_docs)]
+// TODO: Add unsafe when updating rustc and fixing other TODOs.
+#![forbid(missing_docs)]
 
 #[macro_use]
 mod macros;
