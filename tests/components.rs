@@ -5,7 +5,7 @@ use ics::properties::{
     Attach, Attendee, Categories, Class, Completed, Description, DtEnd, DtStart, Due, FreeBusyTime,
     LastModified, Organizer, Priority, RRule, Status, Summary, Transp, Trigger, TzName, URL
 };
-use ics::values::{Date, Month};
+use ics::values::{Date, Month, Text};
 use ics::{Alarm, Event, FreeBusy, Journal, TimeZone, ToDo, ZoneTime};
 
 #[test]
@@ -27,12 +27,12 @@ fn event() {
             .and_then(|d| d.and_hms(13, 0, 0))
             .unwrap()
     );
-    let categories = [
+    let categories: &[Text] = &[
         "ANNIVERSARY".into(),
         "PERSONAL".into(),
         "SPECIAL OCCASION".into()
     ];
-    event.push(Categories::new(categories.as_ref()));
+    event.push(Categories::new(categories));
     event.push(Class::confidential());
     event.push(DtStart::date(Date::new(1997, Month::November, 2).unwrap()));
     event.push(RRule::new("FREQ=YEARLY"));
