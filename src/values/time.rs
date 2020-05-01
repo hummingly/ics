@@ -217,6 +217,34 @@ impl fmt::Display for DateTime<Utc> {
     }
 }
 
+impl FromStr for DateTime {
+    // TODO: Replace placeholder
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        if s.len() != 15 || !(&s[8..9] == "T") {
+            return Err(());
+        }
+        let date = s[0..8].parse().unwrap();
+        let time = s[9..15].parse().unwrap();
+        Ok(DateTime::new(date, time))
+    }
+}
+
+impl FromStr for DateTime<Utc> {
+    // TODO: Replace placeholder
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        if s.len() != 16 || !(&s[8..9] == "T") {
+            return Err(());
+        }
+        let date = s[0..8].parse().unwrap();
+        let time = s[9..16].parse().unwrap();
+        Ok(DateTime::new(date, time))
+    }
+}
+
 // // TODO: Check for std::i64::MIN
 // #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 // pub struct Duration(i64);
@@ -521,80 +549,104 @@ impl fmt::Display for Time<Utc> {
     }
 }
 
-// pub struct UTCOffset(i32);
+impl FromStr for Time {
+    // TODO: Replace placeholder
+    type Err = ();
 
-// impl UTCOffset {
-//     fn new(seconds: i32) -> Self {
-//         UTCOffset(seconds)
-//     }
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        if s.len() != 6 {
+            return Err(());
+        }
+        let hour = s[0..2].parse().unwrap();
+        let minute = s[2..4].parse().unwrap();
+        let second = s[4..6].parse().unwrap();
+        Time::local(hour, minute, second).ok_or(())
+    }
+}
 
-//     pub fn east(hour: u8, minute: u8, second: u8) -> Self {
-//         UTCOffset::checked_east(hour, minute, second).unwrap()
-//     }
+impl FromStr for Time<Utc> {
+    // TODO: Replace placeholder
+    type Err = ();
 
-//     pub fn checked_east(hour: u8, minute: u8, second: u8) -> Option<Self> {
-//         if hour > 23 || minute > 59 || second > 59 {
-//             return None;
-//         }
-//         let (h, m, s) = (hour as i32, minute as i32, second as i32);
-//         Some(UTCOffset::new(h * HOUR as i32 + m * MINUTE as i32 + s))
-//     }
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        if s.len() != 7 || !(&s[6..7] == "Z") {
+            return Err(());
+        }
+        let hour = s[0..2].parse().unwrap();
+        let minute = s[2..4].parse().unwrap();
+        let second = s[4..6].parse().unwrap();
+        Time::utc(hour, minute, second).ok_or(())
+    }
+}
 
-//     pub fn west(hour: u8, minute: u8, second: u8) -> Self {
-//         UTCOffset::checked_west(hour, minute, second).unwrap()
-//     }
+/// TODO
+pub struct UtcOffset {
+    hour: i8,
+    minute: u8,
+    second: u8
+}
 
-//     pub fn checked_west(hour: u8, minute: u8, second: u8) -> Option<Self> {
-//         if hour > 23 || minute > 59 || second > 59 {
-//             return None;
-//         }
-//         let (h, m, s) = (hour as i32, minute as i32, second as i32);
-//         Some(UTCOffset::new(-(h * HOUR as i32 + m * MINUTE as i32 + s)))
-//     }
-// }
+impl UtcOffset {
+    fn new(hour: i8, minute: u8, second: u8) -> Self {
+        UtcOffset {
+            hour,
+            minute,
+            second
+        }
+    }
 
-// impl fmt::Display for UTCOffset {
-//     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-//         if self.0 == 0 {
-//             return write!(f, "+0000");
-//         }
+    /// TODO
+    pub fn east(hour: u8, minute: u8, second: u8) -> Option<Self> {
+        if hour > 23 || minute > 59 || second > 59 {
+            return None;
+        }
+        Some(UtcOffset::new(hour as i8, minute, second))
+    }
 
-//         let (hours, m) = modulus(self.0 as i64, HOUR);
-//         let (minutes, seconds) = modulus(m as i64, MINUTE);
+    /// TODO
+    pub fn west(hour: u8, minute: u8, second: u8) -> Option<Self> {
+        if hour > 23 || minute > 59 || second > 59 {
+            return None;
+        }
+        Some(UtcOffset::new(-(hour as i8), minute, second))
+    }
+}
 
-//         write!(f, "{}", if self.0.is_positive() { "+" } else { "-" })?;
-//         write!(f, "{}{}", hours, minutes)?;
-//         if seconds > 0 {
-//             write!(f, "{}", seconds)?;
-//         }
-//         Ok(())
-//     }
-// }
+impl fmt::Display for UtcOffset {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{:+03}", self.hour)?;
+        write!(f, "{:02}", self.minute)?;
+        if self.second > 0 {
+            write!(f, "{:02}", self.second)?;
+        }
+        Ok(())
+    }
+}
 
-// impl FromStr for UTCOffset {
-//     // TODO: Replace placeholder
-//     type Err = ();
+impl FromStr for UtcOffset {
+    // TODO: Replace placeholder
+    type Err = ();
 
-//     fn from_str(s: &str) -> Result<Self, Self::Err> {
-//         if s.len() < 5 {
-//             return Err(());
-//         }
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        if s.len() < 5 {
+            return Err(());
+        }
 
-//         let sign = &s[0..1];
-//         let hour: u8 = s[1..3].parse().unwrap();
-//         let minute: u8 = s[3..5].parse().unwrap();
-//         let second: u8 = if s.len() == 7 {
-//             s[5..7].parse().unwrap()
-//         } else {
-//             0
-//         };
+        let sign = &s[0..1];
+        let hour = s[1..3].parse().unwrap();
+        let minute = s[3..5].parse().unwrap();
+        let second = if s.len() == 7 {
+            s[5..7].parse().unwrap()
+        } else {
+            0
+        };
 
-//         match sign {
-//             "+" => UTCOffset::checked_east(hour, minute, second).ok_or(()),
-//             "-" => UTCOffset::checked_west(hour, minute, second).ok_or(()),
-//             _ => Err(())
-//         }
-//     }
-// }
+        match sign {
+            "+" => UtcOffset::east(hour, minute, second).ok_or(()),
+            "-" => UtcOffset::west(hour, minute, second).ok_or(()),
+            _ => Err(())
+        }
+    }
+}
 
 // pub struct Recur;

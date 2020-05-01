@@ -43,15 +43,6 @@ impl<'a> From<Resource<'a>> for Cow<'a, str> {
     }
 }
 
-// impl<'a> fmt::Display for Resource<'a> {
-//     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-//         match self {
-//             Resource::Link(uri) => write!(f, "{}", uri),
-//             Resource::Data(binary) => write!(f, "{}", binary)
-//         }
-//     }
-// }
-
 #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 enum TimeStamp<T = Local> {
     Date(Date),
@@ -103,9 +94,12 @@ impl<'a> Attach<'a> {
     /// Creates a new ATTACH Property from binary content. The value type is
     /// "BINARY" which is why the "ENCODING" parameter with the value
     /// "BASE64" is also added.
-    pub fn binary(value: Binary<'a>) -> Self {
+    pub fn binary<B>(value: B) -> Self
+    where
+        B: Into<Binary<'a>>
+    {
         Self {
-            value: Resource::Data(value),
+            value: Resource::Data(value.into()),
             parameters: parameters!("ENCODING" => "BASE64"; "VALUE" => "BINARY")
         }
     }
@@ -285,7 +279,7 @@ impl<'a> From<PercentComplete<'a>> for Property<'a> {
 }
 
 /// PRIORITY Property
-#[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
+#[derive(Debug, Default, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Priority<'a> {
     value: Integer,
     parameters: Parameters<'a>
@@ -411,7 +405,7 @@ impl<'a> DtEnd<'a> {
 
     /// Creates a new DTEND Property from a local date time with a time zone
     /// reference.
-    pub fn with_tzid(value: DateTime, tzid: TzIDParam<'a>) -> Self {
+    pub fn with_timezone(value: DateTime, tzid: TzIDParam<'a>) -> Self {
         let mut end = Self {
             value: TimeStamp::DateTime(value),
             parameters: BTreeMap::new()
@@ -431,7 +425,7 @@ impl<'a> DtEnd<'a> {
 }
 
 impl<'a> DtEnd<'a, Utc> {
-    /// Creates a new DTEND Property from a local date time.
+    /// Creates a new DTEND Property from a date time with UTC time.
     pub fn utc(value: DateTime<Utc>) -> Self {
         Self {
             value: TimeStamp::DateTime(value),
@@ -496,7 +490,7 @@ impl<'a> Due<'a> {
 
     /// Creates a new DUE Property from a local date time with a time zone
     /// reference.
-    pub fn with_tzid(value: DateTime, tzid: TzIDParam<'a>) -> Self {
+    pub fn with_timezone(value: DateTime, tzid: TzIDParam<'a>) -> Self {
         let mut end = Self {
             value: TimeStamp::DateTime(value),
             parameters: BTreeMap::new()
@@ -516,7 +510,7 @@ impl<'a> Due<'a> {
 }
 
 impl<'a> Due<'a, Utc> {
-    /// Creates a new DUE Property from a local date time.
+    /// Creates a new DUE Property from a date time with UTC time.
     pub fn utc(value: DateTime<Utc>) -> Self {
         Self {
             value: TimeStamp::DateTime(value),
@@ -581,7 +575,7 @@ impl<'a> DtStart<'a> {
 
     /// Creates a new DTSTART Property from a local date time with a time zone
     /// reference.
-    pub fn with_tzid(value: DateTime, tzid: TzIDParam<'a>) -> Self {
+    pub fn with_timezone(value: DateTime, tzid: TzIDParam<'a>) -> Self {
         let mut end = Self {
             value: TimeStamp::DateTime(value),
             parameters: BTreeMap::new()
@@ -601,7 +595,7 @@ impl<'a> DtStart<'a> {
 }
 
 impl<'a> DtStart<'a, Utc> {
-    /// Creates a new DTSTART Property from a local date time.
+    /// Creates a new DTSTART Property from a date time with UTC time.
     pub fn utc(value: DateTime<Utc>) -> Self {
         Self {
             value: TimeStamp::DateTime(value),
@@ -736,7 +730,7 @@ property_with_constructor!(
 );
 
 /// REPEAT Property
-#[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
+#[derive(Debug, Default, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Repeat<'a> {
     value: Integer,
     parameters: Parameters<'a>
@@ -910,7 +904,7 @@ impl<'a> From<LastModified<'a>> for Property<'a> {
 }
 
 /// SEQUENCE Property
-#[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
+#[derive(Debug, Default, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Sequence<'a> {
     value: Integer,
     parameters: Parameters<'a>
@@ -953,33 +947,6 @@ impl<'a> From<Sequence<'a>> for Property<'a> {
 }
 
 property!(RequestStatus, "REQUEST-STATUS");
-
-impl<'a> Default for Priority<'a> {
-    fn default() -> Self {
-        Self {
-            value: 0,
-            parameters: BTreeMap::new()
-        }
-    }
-}
-
-impl<'a> Default for Repeat<'a> {
-    fn default() -> Self {
-        Self {
-            value: 0,
-            parameters: BTreeMap::new()
-        }
-    }
-}
-
-impl<'a> Default for Sequence<'a> {
-    fn default() -> Self {
-        Self {
-            value: 0,
-            parameters: BTreeMap::new()
-        }
-    }
-}
 
 impl<'a> Default for Class<'a> {
     fn default() -> Self {
@@ -1047,9 +1014,12 @@ mod rfc7986 {
         /// Creates a new IMAGE Property with the given value. The value type is
         /// "BINARY" which is why the "ENCODING" parameter with the value
         /// "BASE64" is also added.
-        pub fn binary(value: Binary<'a>) -> Self {
+        pub fn binary<B>(value: B) -> Self
+        where
+            B: Into<Binary<'a>>
+        {
             Image {
-                value: Resource::Data(value),
+                value: Resource::Data(value.into()),
                 parameters: parameters!("ENCODING" => "BASE64"; "VALUE" => "BINARY")
             }
         }

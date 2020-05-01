@@ -14,17 +14,21 @@ use values::encoding::{decode_base64, encode_base64, escape_text};
 pub struct Binary<'b>(Cow<'b, [u8]>);
 
 impl<'b> Binary<'b> {
-    /// Creates binary data by encoding bytes with standard Base64 encoding.
-    pub fn new<B>(bytes: B) -> Self
-    where
-        B: Into<Cow<'b, [u8]>>
-    {
-        Binary(bytes.into())
-    }
-
     /// Returns binary data as slice of bytes.
     pub fn get(&self) -> &[u8] {
         &self.0
+    }
+}
+
+impl<'b> From<&'b [u8]> for Binary<'b> {
+    fn from(value: &'b [u8]) -> Self {
+        Binary(Cow::Borrowed(value))
+    }
+}
+
+impl<'b> From<Vec<u8>> for Binary<'b> {
+    fn from(value: Vec<u8>) -> Self {
+        Binary(Cow::Owned(value))
     }
 }
 
@@ -39,7 +43,7 @@ impl<'b> FromStr for Binary<'b> {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         if s.is_empty() {
-            return Ok(Binary::new([].as_ref()));
+            return Ok(Binary::from([].as_ref()));
         }
 
         // 24 bit groups are always encoded as 4 characters. Since shorter byte
@@ -57,7 +61,7 @@ impl<'b> FromStr for Binary<'b> {
             (None, _, _) | (Some(b'='), None, _) | (Some(b'='), Some(b'='), None) => {
                 let mut output = Vec::with_capacity(s.len() - s.len() / 3);
                 decode_base64(&mut output, s);
-                Ok(Binary::new(output))
+                Ok(Binary::from(output))
             }
             _ => Err(ParseBinaryError::InvalidEncoding)
         }

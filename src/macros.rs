@@ -63,7 +63,8 @@ macro_rules! property {
             #[doc=$name]
             #[doc = " Property with the given value."]
             pub fn new<T>(value: T) -> Self
-            where T: Into<Text<'a>>
+            where
+                T: Into<Text<'a>>
             {
                 Self {
                     value: value.into(),
@@ -111,7 +112,8 @@ macro_rules! property_with_constructor {
             #[doc=$name]
             #[doc = " Property with the given value."]
             pub fn new<T>(value: T) -> Self
-            where T: Into<Text<'a>>
+            where
+                T: Into<Text<'a>>
             {
                 Self {
                     value: value.into(),
@@ -124,10 +126,7 @@ macro_rules! property_with_constructor {
                 ///
                 #[doc = "Property Value: "]#[doc = $value]
                 pub fn $const_ident() -> Self {
-                    Self {
-                        value: $value.into(),
-                        parameters: BTreeMap::new()
-                    }
+                    Self::new($value)
                 }
             )*
 
@@ -171,9 +170,12 @@ macro_rules! property_with_parameter {
             #[doc = "Creates a new "]
             #[doc=$name]
             #[doc = " Property with the given value."]
-            pub fn new(value: Text<'a>) -> Self {
+            pub fn new<T>(value: T) -> Self
+            where
+                T: Into<Text<'a>>
+            {
                 Self {
-                    value,
+                    value: value.into(),
                     parameters: parameters!("VALUE" => $value)
                 }
             }

@@ -114,17 +114,20 @@ mod string {
     // https://tools.ietf.org/html/rfc4648#section-10
     #[test]
     fn parse_valid_binary() {
-        assert_eq!(Some(Binary::new(b"".as_ref())), "".parse().ok());
-        assert_eq!(Some(Binary::new(b"f".as_ref())), "Zg==".parse().ok());
-        assert_eq!(Some(Binary::new(b"fo".as_ref())), "Zm8=".parse().ok());
-        assert_eq!(Some(Binary::new(b"foo".as_ref())), "Zm9v".parse().ok());
-        assert_eq!(Some(Binary::new(b"foob".as_ref())), "Zm9vYg==".parse().ok());
+        assert_eq!(Some(Binary::from(b"".as_ref())), "".parse().ok());
+        assert_eq!(Some(Binary::from(b"f".as_ref())), "Zg==".parse().ok());
+        assert_eq!(Some(Binary::from(b"fo".as_ref())), "Zm8=".parse().ok());
+        assert_eq!(Some(Binary::from(b"foo".as_ref())), "Zm9v".parse().ok());
         assert_eq!(
-            Some(Binary::new(b"fooba".as_ref())),
+            Some(Binary::from(b"foob".as_ref())),
+            "Zm9vYg==".parse().ok()
+        );
+        assert_eq!(
+            Some(Binary::from(b"fooba".as_ref())),
             "Zm9vYmE=".parse().ok()
         );
         assert_eq!(
-            Some(Binary::new(b"foobar".as_ref())),
+            Some(Binary::from(b"foobar".as_ref())),
             "Zm9vYmFy".parse().ok()
         );
     }
