@@ -27,12 +27,12 @@ fn event() {
             .and_then(|d| d.and_hms(13, 0, 0))
             .unwrap()
     );
-    let categories: &[Text] = &[
+    let categories: [Text; 3] = [
         "ANNIVERSARY".into(),
         "PERSONAL".into(),
         "SPECIAL OCCASION".into()
     ];
-    event.push(Categories::new(categories));
+    event.push(Categories::new(categories.as_ref()));
     event.push(Class::confidential());
     event.push(DtStart::date(Date::new(1997, Month::November, 2).unwrap()));
     event.push(RRule::new("FREQ=YEARLY"));
