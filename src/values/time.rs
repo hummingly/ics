@@ -222,7 +222,7 @@ impl FromStr for DateTime {
     type Err = ();
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        if s.len() != 15 || !(&s[8..9] == "T") {
+        if s.len() != 15 || &s[8..9] != "T" {
             return Err(());
         }
         let date = s[0..8].parse().unwrap();
@@ -236,7 +236,7 @@ impl FromStr for DateTime<Utc> {
     type Err = ();
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        if s.len() != 16 || !(&s[8..9] == "T") {
+        if s.len() != 16 || &s[8..9] != "T" {
             return Err(());
         }
         let date = s[0..8].parse().unwrap();
@@ -569,7 +569,7 @@ impl FromStr for Time<Utc> {
     type Err = ();
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        if s.len() != 7 || !(&s[6..7] == "Z") {
+        if s.len() != 7 || &s[6..7] != "Z" {
             return Err(());
         }
         let hour = s[0..2].parse().unwrap();

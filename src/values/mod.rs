@@ -61,14 +61,14 @@ pub type Integer = i32;
 pub type Float = f32;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
-enum ListValue<'a, T: Clone> {
+enum ListValue<'a, T: 'a + Clone> {
     Value(T),
     List(Cow<'a, [T]>)
 }
 
 /// Generic List for ICalendar types
 #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
-pub struct List<'a, T: Clone>(ListValue<'a, T>);
+pub struct List<'a, T: Clone + 'a>(ListValue<'a, T>);
 
 impl<'a, T: Clone> List<'a, T> {
     /// Returns ICalendar values as slice.

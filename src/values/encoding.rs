@@ -102,7 +102,7 @@ fn to_binary(c: u8) -> u8 {
 /// Escapes comma, semicolon and backlash character by prepending a backlash.
 ///
 /// This method is used for properties with the value type "TEXT".
-pub(crate) fn escape_text<'t, W: fmt::Write>(output: &mut W, input: &str) -> fmt::Result {
+pub(crate) fn escape_text<W: fmt::Write>(output: &mut W, input: &str) -> fmt::Result {
     let matches = |c| c == '\r' || is_escaped_char(c);
     if input.contains(matches) {
         let text = input.replace("\r\n", "\n");
