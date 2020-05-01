@@ -43,30 +43,6 @@ impl<'a> From<Resource<'a>> for Cow<'a, str> {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
-enum TimeStamp<T = Local> {
-    Date(Date),
-    DateTime(DateTime<T>)
-}
-
-impl<'a> From<TimeStamp> for Cow<'a, str> {
-    fn from(value: TimeStamp) -> Self {
-        Cow::Owned(match value {
-            TimeStamp::Date(d) => d.to_string(),
-            TimeStamp::DateTime(d) => d.to_string()
-        })
-    }
-}
-
-impl<'a> From<TimeStamp<Utc>> for Cow<'a, str> {
-    fn from(value: TimeStamp<Utc>) -> Self {
-        Cow::Owned(match value {
-            TimeStamp::Date(d) => d.to_string(),
-            TimeStamp::DateTime(d) => d.to_string()
-        })
-    }
-}
-
 property!(CalScale, "CALSCALE");
 property!(Method, "METHOD");
 property!(ProdID, "PRODID");
@@ -390,7 +366,7 @@ impl<'a> From<Completed<'a>> for Property<'a> {
 /// DTEND Property
 #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct DtEnd<'a, T = Local> {
-    value: TimeStamp<T>,
+    value: DateTime<T>,
     parameters: Parameters<'a>
 }
 
@@ -398,7 +374,7 @@ impl<'a> DtEnd<'a> {
     /// Creates a new DTEND Property from a local date time.
     pub fn local(value: DateTime) -> Self {
         Self {
-            value: TimeStamp::DateTime(value),
+            value,
             parameters: BTreeMap::new()
         }
     }
@@ -407,7 +383,7 @@ impl<'a> DtEnd<'a> {
     /// reference.
     pub fn with_timezone(value: DateTime, tzid: TzIDParam<'a>) -> Self {
         let mut end = Self {
-            value: TimeStamp::DateTime(value),
+            value: value,
             parameters: BTreeMap::new()
         };
         end.add(tzid);
@@ -418,7 +394,7 @@ impl<'a> DtEnd<'a> {
     /// DATE.
     pub fn date(value: Date) -> Self {
         Self {
-            value: TimeStamp::Date(value),
+            value: DateTime::new(value, Time::zero()),
             parameters: parameters!("VALUE" => "DATE")
         }
     }
@@ -428,7 +404,7 @@ impl<'a> DtEnd<'a, Utc> {
     /// Creates a new DTEND Property from a date time with UTC time.
     pub fn utc(value: DateTime<Utc>) -> Self {
         Self {
-            value: TimeStamp::DateTime(value),
+            value,
             parameters: BTreeMap::new()
         }
     }
@@ -456,7 +432,11 @@ impl<'a> From<DtEnd<'a>> for Property<'a> {
     fn from(builder: DtEnd<'a>) -> Self {
         Property {
             key: "DTEND".into(),
-            value: builder.value.into(),
+            value: if let Some("DATE") = builder.parameters.get("VALUE").map(|v| v.as_ref()) {
+                builder.value.date().to_string().into()
+            } else {
+                builder.value.to_string().into()
+            },
             parameters: builder.parameters
         }
     }
@@ -466,7 +446,11 @@ impl<'a> From<DtEnd<'a, Utc>> for Property<'a> {
     fn from(builder: DtEnd<'a, Utc>) -> Self {
         Property {
             key: "DTEND".into(),
-            value: builder.value.into(),
+            value: if let Some("DATE") = builder.parameters.get("VALUE").map(|v| v.as_ref()) {
+                builder.value.date().to_string().into()
+            } else {
+                builder.value.to_string().into()
+            },
             parameters: builder.parameters
         }
     }
@@ -475,7 +459,7 @@ impl<'a> From<DtEnd<'a, Utc>> for Property<'a> {
 /// DUE Property
 #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Due<'a, T = Local> {
-    value: TimeStamp<T>,
+    value: DateTime<T>,
     parameters: Parameters<'a>
 }
 
@@ -483,7 +467,7 @@ impl<'a> Due<'a> {
     /// Creates a new DUE Property from a local date time.
     pub fn local(value: DateTime) -> Self {
         Self {
-            value: TimeStamp::DateTime(value),
+            value,
             parameters: BTreeMap::new()
         }
     }
@@ -492,7 +476,7 @@ impl<'a> Due<'a> {
     /// reference.
     pub fn with_timezone(value: DateTime, tzid: TzIDParam<'a>) -> Self {
         let mut end = Self {
-            value: TimeStamp::DateTime(value),
+            value,
             parameters: BTreeMap::new()
         };
         end.add(tzid);
@@ -503,7 +487,7 @@ impl<'a> Due<'a> {
     /// DATE.
     pub fn date(value: Date) -> Self {
         Self {
-            value: TimeStamp::Date(value),
+            value: DateTime::new(value, Time::zero()),
             parameters: parameters!("VALUE" => "DATE")
         }
     }
@@ -513,7 +497,7 @@ impl<'a> Due<'a, Utc> {
     /// Creates a new DUE Property from a date time with UTC time.
     pub fn utc(value: DateTime<Utc>) -> Self {
         Self {
-            value: TimeStamp::DateTime(value),
+            value,
             parameters: BTreeMap::new()
         }
     }
@@ -541,7 +525,11 @@ impl<'a> From<Due<'a>> for Property<'a> {
     fn from(builder: Due<'a>) -> Self {
         Property {
             key: "DUE".into(),
-            value: builder.value.into(),
+            value: if let Some("DATE") = builder.parameters.get("VALUE").map(|v| v.as_ref()) {
+                builder.value.date().to_string().into()
+            } else {
+                builder.value.to_string().into()
+            },
             parameters: builder.parameters
         }
     }
@@ -551,7 +539,11 @@ impl<'a> From<Due<'a, Utc>> for Property<'a> {
     fn from(builder: Due<'a, Utc>) -> Self {
         Property {
             key: "DUE".into(),
-            value: builder.value.into(),
+            value: if let Some("DATE") = builder.parameters.get("VALUE").map(|v| v.as_ref()) {
+                builder.value.date().to_string().into()
+            } else {
+                builder.value.to_string().into()
+            },
             parameters: builder.parameters
         }
     }
@@ -560,7 +552,7 @@ impl<'a> From<Due<'a, Utc>> for Property<'a> {
 /// DTSTART Property
 #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct DtStart<'a, T = Local> {
-    value: TimeStamp<T>,
+    value: DateTime<T>,
     parameters: Parameters<'a>
 }
 
@@ -568,7 +560,7 @@ impl<'a> DtStart<'a> {
     /// Creates a new DTSTART Property from a local date time.
     pub fn local(value: DateTime) -> Self {
         Self {
-            value: TimeStamp::DateTime(value),
+            value,
             parameters: BTreeMap::new()
         }
     }
@@ -577,7 +569,7 @@ impl<'a> DtStart<'a> {
     /// reference.
     pub fn with_timezone(value: DateTime, tzid: TzIDParam<'a>) -> Self {
         let mut end = Self {
-            value: TimeStamp::DateTime(value),
+            value,
             parameters: BTreeMap::new()
         };
         end.add(tzid);
@@ -588,7 +580,7 @@ impl<'a> DtStart<'a> {
     /// to DATE.
     pub fn date(value: Date) -> Self {
         Self {
-            value: TimeStamp::Date(value),
+            value: DateTime::new(value, Time::zero()),
             parameters: parameters!("VALUE" => "DATE")
         }
     }
@@ -598,7 +590,7 @@ impl<'a> DtStart<'a, Utc> {
     /// Creates a new DTSTART Property from a date time with UTC time.
     pub fn utc(value: DateTime<Utc>) -> Self {
         Self {
-            value: TimeStamp::DateTime(value),
+            value,
             parameters: BTreeMap::new()
         }
     }
@@ -626,7 +618,11 @@ impl<'a> From<DtStart<'a>> for Property<'a> {
     fn from(builder: DtStart<'a>) -> Self {
         Property {
             key: "DTSTART".into(),
-            value: builder.value.into(),
+            value: if let Some("DATE") = builder.parameters.get("VALUE").map(|v| v.as_ref()) {
+                builder.value.date().to_string().into()
+            } else {
+                builder.value.to_string().into()
+            },
             parameters: builder.parameters
         }
     }
@@ -636,7 +632,11 @@ impl<'a> From<DtStart<'a, Utc>> for Property<'a> {
     fn from(builder: DtStart<'a, Utc>) -> Self {
         Property {
             key: "DTSTART".into(),
-            value: builder.value.into(),
+            value: if let Some("DATE") = builder.parameters.get("VALUE").map(|v| v.as_ref()) {
+                builder.value.date().to_string().into()
+            } else {
+                builder.value.to_string().into()
+            },
             parameters: builder.parameters
         }
     }

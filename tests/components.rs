@@ -5,7 +5,7 @@ use ics::properties::{
     Attach, Attendee, Categories, Class, Completed, Description, DtEnd, DtStart, Due, FreeBusyTime,
     LastModified, Organizer, Priority, RRule, Status, Summary, Transp, Trigger, TzName, URL
 };
-use ics::values::{Date, Month, Text};
+use ics::values::{Date, Month};
 use ics::{Alarm, Event, FreeBusy, Journal, TimeZone, ToDo, ZoneTime};
 
 #[test]
@@ -27,12 +27,15 @@ fn event() {
             .and_then(|d| d.and_hms(13, 0, 0))
             .unwrap()
     );
-    let categories: [Text; 3] = [
+    // This example needs to be compatible with rustc 1.26 but if you have a much
+    // higher version, you can just store the values in an array instead of a Vec
+    // and call `as_ref` on it when you pass it to the constructor.
+    let categories = vec![
         "ANNIVERSARY".into(),
         "PERSONAL".into(),
-        "SPECIAL OCCASION".into()
+        "SPECIAL OCCASION".into(),
     ];
-    event.push(Categories::new(categories.as_ref()));
+    event.push(Categories::new(categories));
     event.push(Class::confidential());
     event.push(DtStart::date(Date::new(1997, Month::November, 2).unwrap()));
     event.push(RRule::new("FREQ=YEARLY"));
