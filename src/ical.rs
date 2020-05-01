@@ -7,7 +7,6 @@ use std::fmt;
 use std::fs::File;
 use std::io::{self, Write};
 use std::path::Path;
-use std::slice::Iter;
 use values::{DateTime, Text, Utc};
 
 /// The iCalendar object specified as VCALENDAR.
@@ -150,14 +149,21 @@ impl<'a> Event<'a> {
 
 impl<'a> fmt::Display for Event<'a> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        <Self as IcalComponentDisplay>::fmt(self, f)
+        writeln!(f, "BEGIN:VEVENT\r")?;
+        for property in &self.properties {
+            write!(f, "{}", property)?;
+        }
+        for component in &self.alarms {
+            write!(f, "{}", component)?;
+        }
+        writeln!(f, "END:VEVENT\r")
     }
 }
 
 impl<'a> From<Event<'a>> for Component<'a> {
     fn from(component: Event<'a>) -> Self {
         Component {
-            name: Event::COMPONENT_NAME.into(),
+            name: "VEVENT".into(),
             properties: component.properties,
             subcomponents: component.alarms.into_iter().map(Component::from).collect()
         }
@@ -205,14 +211,21 @@ impl<'a> ToDo<'a> {
 
 impl<'a> fmt::Display for ToDo<'a> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        <Self as IcalComponentDisplay>::fmt(self, f)
+        writeln!(f, "BEGIN:VTODO\r")?;
+        for property in &self.properties {
+            write!(f, "{}", property)?;
+        }
+        for component in &self.alarms {
+            write!(f, "{}", component)?;
+        }
+        writeln!(f, "END:VTODO\r")
     }
 }
 
 impl<'a> From<ToDo<'a>> for Component<'a> {
     fn from(component: ToDo<'a>) -> Self {
         Component {
-            name: ToDo::COMPONENT_NAME.into(),
+            name: "VTODO".into(),
             properties: component.properties,
             subcomponents: component.alarms.into_iter().map(Component::from).collect()
         }
@@ -250,14 +263,18 @@ impl<'a> Journal<'a> {
 
 impl<'a> fmt::Display for Journal<'a> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        <Self as IcalComponentDisplay>::fmt(self, f)
+        writeln!(f, "BEGIN:VJOURNAL\r")?;
+        for property in &self.0 {
+            write!(f, "{}", property)?;
+        }
+        writeln!(f, "END:VJOURNAL\r")
     }
 }
 
 impl<'a> From<Journal<'a>> for Component<'a> {
     fn from(component: Journal<'a>) -> Self {
         Component {
-            name: Journal::COMPONENT_NAME.into(),
+            name: "VJOURNAL".into(),
             properties: component.0,
             subcomponents: Vec::new()
         }
@@ -296,14 +313,18 @@ impl<'a> FreeBusy<'a> {
 
 impl<'a> fmt::Display for FreeBusy<'a> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        <Self as IcalComponentDisplay>::fmt(self, f)
+        writeln!(f, "BEGIN:VFREEBUSY\r")?;
+        for property in &self.0 {
+            write!(f, "{}", property)?;
+        }
+        writeln!(f, "END:VFREEBUSY\r")
     }
 }
 
 impl<'a> From<FreeBusy<'a>> for Component<'a> {
     fn from(component: FreeBusy<'a>) -> Self {
         Component {
-            name: FreeBusy::COMPONENT_NAME.into(),
+            name: "VFREEBUSY".into(),
             properties: component.0,
             subcomponents: Vec::new()
         }
@@ -465,14 +486,18 @@ impl<'a> Standard<'a> {
 
 impl<'a> fmt::Display for Standard<'a> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        <Self as IcalComponentDisplay>::fmt(self, f)
+        writeln!(f, "BEGIN:STANDARD\r")?;
+        for property in &self.0 {
+            write!(f, "{}", property)?;
+        }
+        writeln!(f, "END:STANDARD\r")
     }
 }
 
 impl<'a> From<Standard<'a>> for Component<'a> {
     fn from(component: Standard<'a>) -> Self {
         Component {
-            name: Standard::COMPONENT_NAME.into(),
+            name: "STANDARD".into(),
             properties: component.0,
             subcomponents: Vec::new()
         }
@@ -516,14 +541,18 @@ impl<'a> Daylight<'a> {
 
 impl<'a> fmt::Display for Daylight<'a> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        <Self as IcalComponentDisplay>::fmt(self, f)
+        writeln!(f, "BEGIN:DAYLIGHT\r")?;
+        for property in &self.0 {
+            write!(f, "{}", property)?;
+        }
+        writeln!(f, "END:DAYLIGHT\r")
     }
 }
 
 impl<'a> From<Daylight<'a>> for Component<'a> {
     fn from(component: Daylight<'a>) -> Self {
         Component {
-            name: Daylight::COMPONENT_NAME.into(),
+            name: "DAYLIGHT".into(),
             properties: component.0,
             subcomponents: Vec::new()
         }
@@ -585,98 +614,20 @@ impl<'a> Alarm<'a> {
 
 impl<'a> fmt::Display for Alarm<'a> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        <Self as IcalComponentDisplay>::fmt(self, f)
+        writeln!(f, "BEGIN:VALARM\r")?;
+        for property in &self.0 {
+            write!(f, "{}", property)?;
+        }
+        writeln!(f, "END:VALARM\r")
     }
 }
 
 impl<'a> From<Alarm<'a>> for Component<'a> {
     fn from(component: Alarm<'a>) -> Self {
         Component {
-            name: Alarm::COMPONENT_NAME.into(),
+            name: "VALARM".into(),
             properties: component.0,
             subcomponents: Vec::new()
         }
-    }
-}
-
-pub trait IcalComponentDisplay<'c> {
-    type C: fmt::Display;
-    const COMPONENT_NAME: &'static str;
-    fn properties(&self) -> Iter<Property<'c>>;
-    fn subcomponents(&self) -> Iter<Self::C> {
-        [].iter()
-    }
-
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        writeln!(f, "BEGIN:{}\r", Self::COMPONENT_NAME)?;
-        for property in self.properties() {
-            write!(f, "{}", property)?;
-        }
-        for component in self.subcomponents() {
-            write!(f, "{}", component)?;
-        }
-        writeln!(f, "END:{}\r", Self::COMPONENT_NAME)
-    }
-}
-
-impl<'c> IcalComponentDisplay<'c> for Event<'c> {
-    type C = Alarm<'c>;
-    const COMPONENT_NAME: &'static str = "VEVENT";
-    fn properties(&self) -> Iter<Property<'c>> {
-        self.properties.iter()
-    }
-    fn subcomponents(&self) -> Iter<Self::C> {
-        self.alarms.iter()
-    }
-}
-
-impl<'c> IcalComponentDisplay<'c> for ToDo<'c> {
-    type C = Alarm<'c>;
-    const COMPONENT_NAME: &'static str = "VTODO";
-    fn properties(&self) -> Iter<Property<'c>> {
-        self.properties.iter()
-    }
-    fn subcomponents(&self) -> Iter<Self::C> {
-        self.alarms.iter()
-    }
-}
-
-impl<'c> IcalComponentDisplay<'c> for Journal<'c> {
-    type C = bool;
-    const COMPONENT_NAME: &'static str = "VJOURNAL";
-    fn properties(&self) -> Iter<Property<'c>> {
-        self.0.iter()
-    }
-}
-
-impl<'c> IcalComponentDisplay<'c> for FreeBusy<'c> {
-    type C = bool;
-    const COMPONENT_NAME: &'static str = "VFREEBUSY";
-    fn properties(&self) -> Iter<Property<'c>> {
-        self.0.iter()
-    }
-}
-
-impl<'c> IcalComponentDisplay<'c> for Standard<'c> {
-    type C = bool;
-    const COMPONENT_NAME: &'static str = "STANDARD";
-    fn properties(&self) -> Iter<Property<'c>> {
-        self.0.iter()
-    }
-}
-
-impl<'c> IcalComponentDisplay<'c> for Daylight<'c> {
-    type C = bool;
-    const COMPONENT_NAME: &'static str = "DAYLIGHT";
-    fn properties(&self) -> Iter<Property<'c>> {
-        self.0.iter()
-    }
-}
-
-impl<'c> IcalComponentDisplay<'c> for Alarm<'c> {
-    type C = bool;
-    const COMPONENT_NAME: &'static str = "VALARM";
-    fn properties(&self) -> Iter<Property<'c>> {
-        self.0.iter()
     }
 }
