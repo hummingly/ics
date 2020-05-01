@@ -313,8 +313,12 @@ impl<'a> From<FreeBusy<'a>> for Component<'a> {
 /// The VTIMEZONE calendar component.
 ///
 ///  A `TimeZone` component is unambiguously defined by the set of time
-/// measurement rules (`ZoneTime`) determined by the governing body for a given
+/// measurement rules determined by the governing body for a given
 /// geographic area. (see [RFC5545 3.6.5. Time Zone Component Component](https://tools.ietf.org/html/rfc5545#section-3.6.5))
+///
+/// This means a `TimeZone` component must consist of at least a `TZID` property
+/// and a zone time component which can be either the `Standard` or `Daylight`
+/// component.
 #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct TimeZone<'a> {
     properties: Vec<Property<'a>>,
@@ -322,16 +326,27 @@ pub struct TimeZone<'a> {
 }
 
 impl<'a> TimeZone<'a> {
-    /// Creates a new "VTIMEZONE" calendar component. The "TZID" property and
-    /// at least one zone time component ("STANDARD" or "DAYLIGHT"
-    /// sub-component) are required.
-    pub fn new<S>(tzid: S, definition: ZoneTime<'a>) -> Self
+    /// Creates a new "VTIMEZONE" calendar component from a "TZID" property and
+    /// `Standard` sub-component.
+    pub fn from_standard<S>(tzid: S, definition: Standard<'a>) -> Self
     where
         S: Into<Text<'a>>
     {
         Self {
             properties: vec![TzID::new(tzid).into()],
-            zone_times: vec![definition]
+            zone_times: vec![ZoneTime::Standard(definition)]
+        }
+    }
+
+    /// Creates a new "VTIMEZONE" calendar component from a "TZID" property and
+    /// `Daylight` sub-component.
+    pub fn from_daylight<S>(tzid: S, definition: Daylight<'a>) -> Self
+    where
+        S: Into<Text<'a>>
+    {
+        Self {
+            properties: vec![TzID::new(tzid).into()],
+            zone_times: vec![ZoneTime::Daylight(definition)]
         }
     }
 
@@ -344,23 +359,36 @@ impl<'a> TimeZone<'a> {
         self.properties.push(property.into());
     }
 
-    /// Adds an additional zone time to the time zone. For more time zone
-    /// definitions, the IANA database could prove helpful.
-    pub fn add_zonetime(&mut self, zone_time: ZoneTime<'a>) {
-        self.zone_times.push(zone_time);
+    /// Adds an additional `Standard` sub-component to the time zone. For more
+    /// time zone definitions, the IANA database could prove helpful.
+    pub fn add_standard(&mut self, standard: Standard<'a>) {
+        self.zone_times.push(ZoneTime::Standard(standard));
+    }
+
+    /// Adds an additional `Daylight` sub-component to the time zone. For more
+    /// time zone definitions, the IANA database could prove helpful.
+    pub fn add_daylight(&mut self, daylight: Daylight<'a>) {
+        self.zone_times.push(ZoneTime::Daylight(daylight));
     }
 }
 
 impl<'a> fmt::Display for TimeZone<'a> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        <Self as IcalComponentDisplay>::fmt(self, f)
+        writeln!(f, "BEGIN:VTIMEZONE\r")?;
+        for property in &self.properties {
+            write!(f, "{}", property)?;
+        }
+        for component in &self.zone_times {
+            write!(f, "{}", component)?;
+        }
+        writeln!(f, "END:VTIMEZONE\r")
     }
 }
 
 impl<'a> From<TimeZone<'a>> for Component<'a> {
     fn from(component: TimeZone<'a>) -> Self {
         Component {
-            name: TimeZone::COMPONENT_NAME.into(),
+            name: "VTIMEZONE".into(),
             properties: component.properties,
             subcomponents: component
                 .zone_times
@@ -373,52 +401,15 @@ impl<'a> From<TimeZone<'a>> for Component<'a> {
 
 /// The STRANDARD or DAYLIGHT sub-component of VTIMEZONE.
 ///
-///  Each "VTIMEZONE" calendar component consists of a collection of one or more
+/// Each "VTIMEZONE" calendar component consists of a collection of one or more
 /// sub-components that describe the rule for a particular observance (either a
 /// Standard Time or a Daylight Saving Time observance). (see [RFC5545 3.6.5. Time Zone Component Component](https://tools.ietf.org/html/rfc5545#page-63))
 #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
-pub enum ZoneTime<'a> {
+enum ZoneTime<'a> {
     /// Standard Time
     Standard(Standard<'a>),
     /// Daylight Saving Time
     Daylight(Daylight<'a>)
-}
-
-impl<'a> ZoneTime<'a> {
-    /// Creates a new "STANDARD" sub-component. The "DTSTART", "TZOFFSETFROM"
-    /// and "TZOFFSETTO" properties are required. The "STANDARD" sub-component
-    /// consists of a collection of properties that describe Standard Time.
-    pub fn standard<T, F>(dtstart: DateTime, tz_offset_from: F, tz_offset_to: T) -> Self
-    where
-        F: Into<Text<'a>>,
-        T: Into<Text<'a>>
-    {
-        ZoneTime::Standard(Standard::new(dtstart, tz_offset_from, tz_offset_to))
-    }
-
-    /// Creates a new "DAYLIGHT" sub-component. The "DTSTART", "TZOFFSETFROM"
-    /// and "TZOFFSETTO" properties are required. The "DAYLIGHT" sub-component
-    /// consists of a collection of properties that describe Daylight Saving
-    /// Time.
-    pub fn daylight<T, F>(dtstart: DateTime, tz_offset_from: F, tz_offset_to: T) -> Self
-    where
-        F: Into<Text<'a>>,
-        T: Into<Text<'a>>
-    {
-        ZoneTime::Daylight(Daylight::new(dtstart, tz_offset_from, tz_offset_to))
-    }
-
-    /// Adds a property to the zone time. The RFC5545 specifies which
-    /// properties can be added to a zone time.
-    pub fn push<P>(&mut self, property: P)
-    where
-        P: Into<Property<'a>>
-    {
-        match self {
-            ZoneTime::Daylight(p) => p.push(property),
-            ZoneTime::Standard(p) => p.push(property)
-        }
-    }
 }
 
 impl<'a> fmt::Display for ZoneTime<'a> {
@@ -447,8 +438,9 @@ impl<'a> From<ZoneTime<'a>> for Component<'a> {
 pub struct Standard<'a>(Vec<Property<'a>>);
 
 impl<'a> Standard<'a> {
-    /// Creates a new "STANDARD" sub-component. The properties "DTSTART",
-    /// "TZOFFSETFROM" and "TZOFFSETTO" are required.
+    /// Creates a new "STANDARD" sub-component. The "DTSTART", "TZOFFSETFROM"
+    /// and "TZOFFSETTO" properties are required. The "STANDARD" sub-component
+    /// consists of a collection of properties that describe Standard Time.
     pub fn new<T, F>(dtstart: DateTime, tz_offset_from: F, tz_offset_to: T) -> Self
     where
         F: Into<Text<'a>>,
@@ -496,8 +488,10 @@ impl<'a> From<Standard<'a>> for Component<'a> {
 pub struct Daylight<'a>(Vec<Property<'a>>);
 
 impl<'a> Daylight<'a> {
-    /// Creates a new "DAYLIGHT" sub-component. The properties "DTSTART",
-    /// "TZOFFSETFROM" and "TZOFFSETTO" are required.
+    /// Creates a new "DAYLIGHT" sub-component. The "DTSTART", "TZOFFSETFROM"
+    /// and "TZOFFSETTO" properties are required. The "DAYLIGHT" sub-component
+    /// consists of a collection of properties that describe Daylight Saving
+    /// Time.
     pub fn new<T, F>(dtstart: DateTime, tz_offset_from: F, tz_offset_to: T) -> Self
     where
         F: Into<Text<'a>>,
@@ -660,17 +654,6 @@ impl<'c> IcalComponentDisplay<'c> for FreeBusy<'c> {
     const COMPONENT_NAME: &'static str = "VFREEBUSY";
     fn properties(&self) -> Iter<Property<'c>> {
         self.0.iter()
-    }
-}
-
-impl<'c> IcalComponentDisplay<'c> for TimeZone<'c> {
-    type C = ZoneTime<'c>;
-    const COMPONENT_NAME: &'static str = "VTIMEZONE";
-    fn properties(&self) -> Iter<Property<'c>> {
-        self.properties.iter()
-    }
-    fn subcomponents(&self) -> Iter<Self::C> {
-        self.zone_times.iter()
     }
 }
 

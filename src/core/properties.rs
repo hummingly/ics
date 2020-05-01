@@ -383,7 +383,7 @@ impl<'a> DtEnd<'a> {
     /// reference.
     pub fn with_timezone(value: DateTime, tzid: TzIDParam<'a>) -> Self {
         let mut end = Self {
-            value: value,
+            value,
             parameters: BTreeMap::new()
         };
         end.add(tzid);

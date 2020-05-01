@@ -73,4 +73,3 @@ pub use ical::Journal;
 pub use ical::Standard;
 pub use ical::TimeZone;
 pub use ical::ToDo;
-pub use ical::ZoneTime;

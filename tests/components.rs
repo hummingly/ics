@@ -6,7 +6,7 @@ use ics::properties::{
     LastModified, Organizer, Priority, RRule, Status, Summary, Transp, Trigger, TzName, URL
 };
 use ics::values::{Date, Month};
-use ics::{Alarm, Event, FreeBusy, Journal, TimeZone, ToDo, ZoneTime};
+use ics::{Alarm, Daylight, Event, FreeBusy, Journal, Standard, TimeZone, ToDo};
 
 #[test]
 fn event() {
@@ -173,7 +173,7 @@ fn time() {
                     END:DAYLIGHT\r\n\
                     END:VTIMEZONE\r\n";
 
-    let mut standard = ZoneTime::standard(
+    let mut standard = Standard::new(
         Date::new(2007, Month::November, 4)
             .and_then(|d| d.and_hms(2, 0, 0))
             .unwrap(),
@@ -181,7 +181,7 @@ fn time() {
         "-0500"
     );
     standard.push(TzName::new("EST"));
-    let mut daylight = ZoneTime::daylight(
+    let mut daylight = Daylight::new(
         Date::new(2007, Month::March, 11)
             .and_then(|d| d.and_hms(2, 0, 0))
             .unwrap(),
@@ -190,13 +190,13 @@ fn time() {
     );
     daylight.push(TzName::new("EDT"));
 
-    let mut timezone = TimeZone::new("America/New_York", standard);
+    let mut timezone = TimeZone::from_standard("America/New_York", standard);
     timezone.push(LastModified::new(
         Date::new(2005, Month::August, 9)
             .and_then(|d| d.and_hms(5, 0, 0))
             .unwrap()
     ));
-    timezone.add_zonetime(daylight);
+    timezone.add_daylight(daylight);
 
     assert_eq!(timezone.to_string(), expected);
 }
