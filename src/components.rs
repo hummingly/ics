@@ -31,19 +31,19 @@ use std::fmt;
 pub struct Component<'a> {
     pub(crate) name: Cow<'a, str>,
     pub(crate) properties: Vec<Property<'a>>,
-    pub(crate) subcomponents: Vec<Component<'a>>,
+    pub(crate) subcomponents: Vec<Component<'a>>
 }
 
 impl<'a> Component<'a> {
     /// Creates a new component with the given name.
     pub fn new<S>(name: S) -> Self
     where
-        S: Into<Cow<'a, str>>,
+        S: Into<Cow<'a, str>>
     {
         Component {
             name: name.into(),
             properties: Vec::new(),
-            subcomponents: Vec::new(),
+            subcomponents: Vec::new()
         }
     }
 
@@ -51,7 +51,7 @@ impl<'a> Component<'a> {
     /// times. Each occurrence will be shown as single content line.
     pub fn add_property<P>(&mut self, property: P)
     where
-        P: Into<Property<'a>>,
+        P: Into<Property<'a>>
     {
         self.properties.push(property.into());
     }
@@ -59,7 +59,7 @@ impl<'a> Component<'a> {
     /// Adds a sub-component to this component.
     pub fn add_component<C>(&mut self, component: C)
     where
-        C: Into<Component<'a>>,
+        C: Into<Component<'a>>
     {
         self.subcomponents.push(component.into());
     }
@@ -88,7 +88,7 @@ impl<'a> fmt::Display for Component<'a> {
 pub struct Property<'a> {
     pub(crate) key: Cow<'a, str>,
     pub(crate) value: Cow<'a, str>,
-    pub(crate) parameters: Parameters<'a>,
+    pub(crate) parameters: Parameters<'a>
 }
 
 impl<'a> Property<'a> {
@@ -96,19 +96,19 @@ impl<'a> Property<'a> {
     pub fn new<K, V>(key: K, value: V) -> Self
     where
         K: Into<Cow<'a, str>>,
-        V: Into<Cow<'a, str>>,
+        V: Into<Cow<'a, str>>
     {
         Property {
             key: key.into(),
             value: value.into(),
-            parameters: BTreeMap::new(),
+            parameters: BTreeMap::new()
         }
     }
 
     /// Adds a parameter to a property.
     pub fn add<P>(&mut self, parameter: P)
     where
-        P: Into<Parameter<'a>>,
+        P: Into<Parameter<'a>>
     {
         let parameter = parameter.into();
         self.parameters.insert(parameter.key, parameter.value);
@@ -162,7 +162,7 @@ impl<'a> fmt::Display for Property<'a> {
 #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Parameter<'a> {
     pub(crate) key: Cow<'a, str>,
-    pub(crate) value: Cow<'a, str>,
+    pub(crate) value: Cow<'a, str>
 }
 
 impl<'a> Parameter<'a> {
@@ -170,11 +170,11 @@ impl<'a> Parameter<'a> {
     pub fn new<K, V>(key: K, value: V) -> Self
     where
         K: Into<Cow<'a, str>>,
-        V: Into<Cow<'a, str>>,
+        V: Into<Cow<'a, str>>
     {
         Parameter {
             key: key.into(),
-            value: value.into(),
+            value: value.into()
         }
     }
 }
