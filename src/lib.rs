@@ -49,13 +49,12 @@
 
 #[macro_use]
 mod macros;
-mod core;
+pub mod components;
+mod contentline;
 mod ical;
+pub mod parameters;
+pub mod properties;
 mod util;
-
-pub use core::components;
-pub use core::parameters;
-pub use core::properties;
 
 pub use ical::Alarm;
 pub use ical::Daylight;
