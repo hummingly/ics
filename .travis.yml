@@ -1,7 +1,5 @@
 language: rust
 cache: cargo
-install:
-  - rustup install nightly --profile default
 before_script:
   - cargo update || true
 rust:
@@ -11,9 +9,8 @@ rust:
   - 1.26.0
 matrix:
   include:
-    - rust: nightly
+    - rust: stable
       script:
-        - cargo +nightly fmt -- --check
         - cargo test --no-default-features --verbose
   allow_failures:
     - rust: nightly
