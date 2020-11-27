@@ -141,12 +141,12 @@ mod rfc7986 {
     property!(Color, "COLOR");
     property_with_parameter!(Conference, "CONFERENCE", "URI");
 
-    /// IMAGE Property
+    /// `IMAGE` Property
     ///
-    /// Newer properties that have a different value type than TEXT have to
-    /// include the "VALUE" parameter. This property already contains the
-    /// "VALUE" parameter, do not add this parameter manually. Depending on
-    /// the constructor the value can be either "URI" or "BINARY".
+    /// Newer properties that have a different value type than `TEXT` have to
+    /// include the `VALUE` parameter. This property already contains the
+    /// `VALUE` parameter, do not add this parameter manually. Depending on
+    /// the constructor the value can be either `URI` or `BINARY`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
     pub struct Image<'a> {
         value: Cow<'a, str>,
@@ -154,8 +154,8 @@ mod rfc7986 {
     }
 
     impl<'a> Image<'a> {
-        /// Creates a new IMAGE Property with the given value. The value type is
-        /// "URI".
+        /// Creates a new `IMAGE` Property with the given value. The value type
+        /// is `URI`.
         pub fn uri<S>(value: S) -> Self
         where
             S: Into<Cow<'a, str>>
@@ -166,9 +166,9 @@ mod rfc7986 {
             }
         }
 
-        /// Creates a new IMAGE Property with the given value. The value type is
-        /// "BINARY" which is why the "ENCODING" parameter with the value
-        /// "BASE64" is also added.
+        /// Creates a new `IMAGE` Property with the given value.
+        /// The value type is `BINARY` which is why the `ENCODING` parameter
+        /// with the value `BASE64` is also added.
         pub fn binary<S>(value: S) -> Self
         where
             S: Into<Cow<'a, str>>
@@ -190,7 +190,7 @@ mod rfc7986 {
 
         /// Adds several parameters at once to the property. For creating
         /// several parameters at once, consult the documentation of
-        /// the `parameters!` macro.
+        /// the [`parameters!`] macro.
         pub fn append(&mut self, mut parameters: Parameters<'a>) {
             self.parameters.append(&mut parameters);
         }

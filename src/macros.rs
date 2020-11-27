@@ -1,4 +1,4 @@
-/// Macro to create several parameters at once.
+/// Macro to create several `Parameter`s at once.
 ///
 /// # Example
 /// ```
@@ -48,7 +48,7 @@ mod test {
 // Creation and conversion from builder types to Property
 macro_rules! property {
     ($(#[$outer:meta])* $type:ident, $name:expr) => {
-        #[doc=$name]#[doc = " Property"]
+        #[doc = "`"]#[doc=$name]#[doc = "` Property"]
         ///
         $(#[$outer])*
         #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
@@ -58,9 +58,7 @@ macro_rules! property {
         }
 
         impl<'a> $type<'a> {
-            #[doc = "Creates a new "]
-            #[doc=$name]
-            #[doc = " Property with the given value."]
+            #[doc = "Creates a new `"]#[doc=$name]#[doc = "` Property with the given value."]
             pub fn new<S>(value: S) -> Self
             where
                 S: Into<Cow<'a, str>>
@@ -82,7 +80,7 @@ macro_rules! property {
 
             /// Adds several parameters at once to the property. For creating
             /// several parameters at once, consult the documentation of
-            /// the `parameters!` macro.
+            /// the [`parameters!`] macro.
             pub fn append(&mut self, mut parameters: Parameters<'a>) {
                 self.parameters.append(&mut parameters);
             }
@@ -97,7 +95,7 @@ macro_rules! property_with_constructor {
         $(#[$outer:meta])* $type:ident, $name:expr,
         $($(#[$inner:meta])* fn $const_ident:ident() { $value:expr });*
     ) => {
-        #[doc=$name]#[doc = " Property"]
+        #[doc = "`"]#[doc=$name]#[doc = "` Property"]
         ///
         $(#[$outer])*
         #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
@@ -107,9 +105,7 @@ macro_rules! property_with_constructor {
         }
 
         impl<'a> $type<'a> {
-            #[doc = "Creates a new "]
-            #[doc=$name]
-            #[doc = " Property with the given value."]
+            #[doc = "Creates a new `"]#[doc=$name]#[doc = "` Property with the given value."]
             pub fn new<S>(value: S) -> Self
             where
                 S: Into<Cow<'a, str>>
@@ -140,7 +136,7 @@ macro_rules! property_with_constructor {
 
             /// Adds several parameters at once to the property. For creating
             /// several parameters at once, consult the documentation of
-            /// the `parameters!` macro.
+            /// the [`parameters!`] macro.
             pub fn append(&mut self, mut parameters: Parameters<'a>) {
                 self.parameters.append(&mut parameters);
             }
@@ -156,9 +152,10 @@ macro_rules! property_with_constructor {
 #[cfg(feature = "rfc7986")]
 macro_rules! property_with_parameter {
     ($type:ident, $name:expr, $value:expr) => {
-        #[doc=$name]#[doc = " Property\n\n"]
-        #[doc = "Newer properties that have a different value type than TEXT have to include the \"VALUE\" parameter. This property already contains \"VALUE:"]
-        #[doc=$value]#[doc=", do not add this parameter manually."]
+        #[doc = "`"]#[doc=$name]#[doc = "` Property"]
+        ///
+        /// Newer properties that have a different value type than `TEXT` have to include the `VALUE` parameter.
+        #[doc = "This property already contains `VALUE:"]#[doc=$value]#[doc="`. Do not add this parameter manually."]
         #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
         pub struct $type<'a> {
             value: Cow<'a, str>,
@@ -166,9 +163,7 @@ macro_rules! property_with_parameter {
         }
 
         impl<'a> $type<'a> {
-            #[doc = "Creates a new "]
-            #[doc=$name]
-            #[doc = " Property with the given value."]
+            #[doc = "Creates a new `"]#[doc=$name]#[doc = "` Property with the given value."]
             pub fn new<S>(value: S) -> Self
             where
                 S: Into<Cow<'a, str>>
@@ -190,7 +185,7 @@ macro_rules! property_with_parameter {
 
             /// Adds several parameters at once to the property. For creating
             /// several parameters at once, consult the documentation of
-            /// the `parameters!` macro.
+            /// the [`parameters!`] macro.
             pub fn append(&mut self, mut parameters: Parameters<'a>) {
                 self.parameters.append(&mut parameters);
             }
@@ -203,7 +198,7 @@ macro_rules! property_with_parameter {
 // Creation and conversion from builder types to Parameter
 macro_rules! parameter {
     ($(#[$outer:meta])* $type:ident, $name:expr) => {
-        #[doc=$name]#[doc = " Parameter"]
+        #[doc = "`"]#[doc=$name]#[doc = "` Parameter"]
         ///
         $(#[$outer])*
         #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
@@ -212,9 +207,7 @@ macro_rules! parameter {
         }
 
         impl<'a> $type<'a> {
-            #[doc = "Creates a new "]
-            #[doc=$name]
-            #[doc = " Parameter with the given value."]
+            #[doc = "Creates a new `"]#[doc=$name]#[doc = "` Parameter with the given value."]
             pub fn new<S>(value: S) -> Self
             where
                 S: Into<Cow<'a, str>>
@@ -234,7 +227,7 @@ macro_rules! parameter_with_const {
         $(#[$outer:meta])* $type:ident, $name:expr,
         $($(#[$inner:meta])* const $const_ident:ident = $value:expr);*
     ) => {
-        #[doc=$name]#[doc = " Parameter"]
+        #[doc = "`"]#[doc=$name]#[doc = "` Parameter"]
         ///
         $(#[$outer])*
         #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
@@ -243,9 +236,7 @@ macro_rules! parameter_with_const {
         }
 
         impl<'a> $type<'a> {
-            #[doc = "Creates a new "]
-            #[doc=$name]
-            #[doc = " Parameter with the given value."]
+            #[doc = "Creates a new `"]#[doc=$name]#[doc = "` Parameter with the given value."]
             pub fn new<S>(value: S) -> Self
             where
                 S: Into<Cow<'a, str>>

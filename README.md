@@ -17,14 +17,14 @@ To use this library add the library as a dependency in your `Cargo.toml`:
 
 ```toml
 [dependencies]
-ics = "0.4"
+ics = "0.5"
 ```
 
 Optionally you can disable default features.
 
 ```toml
 [dependencies.ics]
-version = "0.4"
+version = "0.5"
 default-features = false
 ```
 

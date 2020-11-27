@@ -1,6 +1,30 @@
 # Changelog
 
-## Version 0.4.3
+## Version 0.5.1
+
+### Documentation
+
+- Fix dependency version in README
+
+## Version 0.5.0
+
+### Breaking Changes
+
+- Removed `ZoneTime` struct
+- Removed `TimeZone::new()` and `TimeZone::add_zone_time()`
+
+### API
+
+- Added `Standard` and `Daylight` component
+- Replaced `ZoneTime` with `Standard` and `Daylight` in `TimeZone` API
+  - `TimeZone::new()` -> `TimeZone::standard()` and `TimeZone::daylight()`
+  - `TimeZone::add_zonetime()` -> `TimeZone::add_standard()` and `TimeZone::add_daylight()`
+
+### Documentation
+
+- Some linking and nicer formatting!
+
+## Version 0.4.4
 
 ### Bug Fix
 
@@ -10,6 +34,8 @@
 
 - Improved memory consumption and reduced some iterations in escape_text
 - Flattened source folder structure
+
+## Version 0.4.3 (yanked)
 
 ## Version 0.4.2
 
