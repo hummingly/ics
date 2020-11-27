@@ -16,14 +16,20 @@ where
     S: Into<Cow<'a, str>>
 {
     let input = input.into();
-    let escaped_chars = |c| c == ',' || c == ';' || c == '\\' || c == '\r';
-    if input.contains(escaped_chars) {
-        let size = input.len()
-            + input
-                .bytes()
-                .filter(|&c| c == b',' || c == b';' || c == b'\\')
-                .count();
-        let mut output = String::with_capacity(size);
+    let mut escaped_chars_count = 0;
+    let mut has_carriage_return_char = false;
+
+    for b in input.bytes() {
+        if b == b',' || b == b';' || b == b'\\' {
+            escaped_chars_count += 1;
+        } else if b == b'\r' {
+            has_carriage_return_char = true;
+        }
+    }
+
+    if has_carriage_return_char || escaped_chars_count > 0 {
+        let escaped_chars = |c| c == ',' || c == ';' || c == '\\' || c == '\r';
+        let mut output = String::with_capacity(input.len() + escaped_chars_count);
         let mut last_end = 0;
         for (start, part) in input.match_indices(escaped_chars) {
             output.push_str(&input[last_end..start]);
