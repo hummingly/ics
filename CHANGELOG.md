@@ -1,17 +1,15 @@
 # Changelog
 
-## Version 0.5.0 (Unreleased)
+## Version 0.4.3
 
-### Breaking Changes
+### Bug Fix
 
-- Changed `ZoneTime` an enum.
-- `ICalendar`'s constructor additionally requires one component. This is important for creating correct icalendar files.
+- A single carriage return character (the old macOS new line character) was not properly converted to a new line character (line feed).
 
-### API
+### Misc
 
-- Added `Standard` and `Daylight` component
-- Added component parameter to `ICalendar::new`
-  - `ICalendar::new(uid, datestamp)` -> `ICalendar::new(uid, datestamp, component)`
+- Improved memory consumption and reduced some iterations in escape_text
+- Flattened source folder structure
 
 ## Version 0.4.2
 
@@ -58,34 +56,34 @@
 
 ## Version 0.3.2
 
-### Bug Fix:
+### Bug Fix
 
 - `NAME` property was not properly capitalized
 
 ## Version 0.3.1
 
-### Documentation:
+### Documentation
 
 - Improved method descriptions of `ICalendar struct`
 
-### Misc:
+### Misc
 
 - Simplified fold algorithm
 
 ## Version 0.3.0
 
-### API:
+### API
 
 - Added convenience method for saving `ICalendar` object in a writer (i.e. files)
 - Removed `fast_text` feature
 
-### Documentation:
+### Documentation
 
 - Added minimum rustc version to README
 - Fixed typos
 - Added the `?` operator in examples to make it more idiomatic
 
-### Misc:
+### Misc
 
 - Refactored a lot of macros
 - Improved fold algorithm (more robust)
@@ -95,7 +93,7 @@
 
 ## Version 0.2.3
 
-### Misc:
+### Misc
 
 - Moved content line methods to components into module
 - Replaced is_char_boundary with next_boundary
@@ -103,21 +101,21 @@
 
 ## Version 0.2.2
 
-### Documentation:
+### Documentation
 
 - Fixes inconsistency
 - Adds note about RFC7986 support
 
 ## Version 0.2.1
 
-### Documentation:
+### Documentation
 
 - Finishes the documentation on features
 - Improves/extends the main example
 
 ## Version 0.2.0
 
-### API:
+### API
 
 - Removes the `Into<Cow<str>>` implementation from Parameter enums
 - Properties and Parameters as defined in [RFC7986](https://tools.ietf.org/html/rfc7986) were added under a feature flag `rfc7986` which is enabled by default.
@@ -136,7 +134,7 @@
 
 ## Version 0.1.1
 
-### Misc:
+### Misc
 
 - Fixes badges on `README` and documentation
 
