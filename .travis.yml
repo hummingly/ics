@@ -10,6 +10,8 @@ rust:
 matrix:
   include:
     - rust: stable
+      script:
         - cargo test --no-default-features --verbose
   allow_failures:
     - rust: nightly
+  
