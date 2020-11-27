@@ -15,14 +15,14 @@ pub fn escape_text<'a, S>(input: S) -> Cow<'a, str>
 where
     S: Into<Cow<'a, str>>
 {
-    let mut input = input.into();
-    if input.contains("\r\n") {
-        input = input.replace("\r\n", "\n").into();
-    }
-
-    let escaped_chars = |c| c == ',' || c == ';' || c == '\\';
-    if input.contains(|c| c == '\r' || escaped_chars(c)) {
-        let size = input.len() + input.chars().filter(|&c| escaped_chars(c)).count();
+    let input = input.into();
+    let escaped_chars = |c| c == ',' || c == ';' || c == '\\' || c == '\r';
+    if input.contains(escaped_chars) {
+        let size = input.len()
+            + input
+                .bytes()
+                .filter(|&c| c == b',' || c == b';' || c == b'\\')
+                .count();
         let mut output = String::with_capacity(size);
         let mut last_end = 0;
         for (start, part) in input.match_indices(escaped_chars) {
@@ -32,7 +32,11 @@ where
                 ";" => output.push_str("\\;"),
                 "\\" => output.push_str("\\\\"),
                 // \r was in old MacOS versions the newline character
-                "\r" => output.push_str("\n"),
+                "\r" => {
+                    if input.get(start + 1..start + 2) != Some("\n") {
+                        output.push_str("\n")
+                    }
+                }
                 _ => unreachable!()
             }
             last_end = start + part.len();
@@ -50,8 +54,8 @@ mod escape_text_tests {
 
     #[test]
     fn escaped_chars() {
-        let s = ",\r\n;:\\ \n \r\n";
-        let expected = "\\,\n\\;:\\\\ \n \n";
+        let s = ",\r\n;:\\ \r\n\rö";
+        let expected = "\\,\n\\;:\\\\ \n\nö";
         assert_eq!(expected, escape_text(s));
     }
 
