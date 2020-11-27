@@ -191,9 +191,8 @@ const CAPACITY: usize = CONTENT_LINE_MAX_LEN * 2;
 const LINE_SPLIT: &[u8; 3] = b"\r\n ";
 
 pub struct LineWriter<W: Write> {
-    // TODO: Try using a pointer to avoid Box?
     buffer: Box<[u8; CAPACITY]>,
-    len: u8,
+    len: usize,
     writer: W
 }
 
@@ -214,12 +213,6 @@ impl<W: Write> LineWriter<W> {
         write!(self, "{}", name)
     }
 
-    pub fn write_name_unchecked(&mut self, name: &str) {
-        debug_assert!(name.len() <= CAPACITY);
-        self.buffer[..name.len()].copy_from_slice(name.as_bytes());
-        self.len = name.len() as u8;
-    }
-
     #[inline]
     pub fn write_parameter<K, V>(&mut self, key: K, value: V) -> Result<(), Error>
     where
@@ -229,34 +222,12 @@ impl<W: Write> LineWriter<W> {
         write!(self, ";{}={}", key, value)
     }
 
-    pub fn write_parameter_unchecked(&mut self, key: &str, value: &str) {
-        debug_assert!(key.len() + value.len() + 2 <= CAPACITY - self.len as usize);
-        let mut len = usize::from(self.len);
-        self.buffer[len] = b';';
-        len += 1;
-        self.buffer[len..len + key.len()].copy_from_slice(key.as_bytes());
-        len += key.len();
-        self.buffer[len] = b'=';
-        len += 1;
-        self.buffer[len..len + value.len()].copy_from_slice(value.as_bytes());
-        self.len = (len + value.len()) as u8;
-    }
-
     #[inline]
     pub fn write_value<V>(&mut self, value: V) -> Result<(), Error>
     where
         V: fmt::Display
     {
         write!(self, ":{}", value)
-    }
-
-    pub fn write_value_unchecked(&mut self, value: &str) {
-        debug_assert!(value.len() + 1 <= CAPACITY - self.len as usize);
-        let mut len = usize::from(self.len);
-        self.buffer[len] = b':';
-        len += 1;
-        self.buffer[len..len + value.len()].copy_from_slice(value.as_bytes());
-        self.len = (len + value.len()) as u8;
     }
 
     pub fn write_line_ending(&mut self) -> Result<(), Error> {
@@ -303,16 +274,23 @@ impl<W: Write> LineWriter<W> {
     }
 
     fn flush_line(&mut self) -> Result<(), Error> {
-        let len = usize::from(self.len);
-        if len > 0 {
-            match lazy_fold(&mut self.writer, &self.buffer[..len]) {
+        if self.len > 0 {
+            match lazy_fold(&mut self.writer, &self.buffer[..self.len]) {
                 Ok(0) => Ok(()),
-                Ok(rest) => self.writer.write_all(&self.buffer[len - rest..len]),
+                Ok(rest) => self
+                    .writer
+                    .write_all(&self.buffer[self.len - rest..self.len]),
                 Err(error) => Err(error)
             }?;
             self.len = 0;
         }
         Ok(())
+    }
+
+    fn extend_from_slice(&mut self, bytes: &[u8]) {
+        let end = self.len + bytes.len();
+        self.buffer[self.len..end].copy_from_slice(bytes);
+        self.len = end;
     }
 }
 
@@ -334,30 +312,26 @@ impl<W: Write> Write for LineWriter<W> {
             return Ok(());
         }
 
-        let mut start = usize::from(self.len);
-        if start + buf.len() < CAPACITY {
-            let new_len = start + buf.len();
-            self.len = new_len as u8;
-            self.buffer[start..new_len].copy_from_slice(buf);
+        if self.len + buf.len() < CAPACITY {
+            self.extend_from_slice(buf);
         } else {
-            let mut end = CAPACITY - start;
-            self.len = CAPACITY as u8;
             loop {
-                self.buffer[start..CAPACITY].copy_from_slice(&buf[..end]);
+                let end = CAPACITY - self.len;
+                self.buffer[self.len..CAPACITY].copy_from_slice(&buf[..end]);
                 match lazy_fold(&mut self.writer, self.buffer.as_ref()) {
                     Ok(rest) => {
                         self.buffer.copy_within(CAPACITY - rest..CAPACITY, 0);
+                        self.len = rest;
                         buf = &buf[end..];
-                        end = CAPACITY - rest;
                         if buf.len() < end {
-                            let new_len = rest + buf.len();
-                            self.buffer[rest..new_len].copy_from_slice(buf);
-                            self.len = new_len as u8;
+                            self.extend_from_slice(buf);
                             break;
                         }
-                        start = rest;
                     }
-                    Err(err) => return Err(err)
+                    Err(err) => {
+                        self.len = CAPACITY;
+                        return Err(err);
+                    }
                 }
             }
         }
@@ -432,7 +406,7 @@ mod test {
             &self,
             line_writer: &mut LineWriter<W>
         ) -> Result<(), std::io::Error> {
-            line_writer.write_name_unchecked(&self.name);
+            line_writer.write_name(&self.name)?;
             for (key, value) in &self.parameters {
                 line_writer.write_parameter(key, value)?;
             }
