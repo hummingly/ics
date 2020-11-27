@@ -38,7 +38,7 @@ fn is_base64_encoded(binary: &[u8]) -> Result<(), ParseBinaryError> {
             [b'=', b'='] => true,
             [b, b'='] => is_base64(b),
             [b1, b2] => is_base64(b1) && is_base64(b2),
-            _ => false,
+            _ => false
         } {
             Ok(())
         } else {
@@ -74,9 +74,9 @@ impl<'b> TryFrom<&'b [u8]> for Binary<'b> {
             Ok(()) => match std::str::from_utf8(value) {
                 Ok(value) => Ok(Binary(Cow::Borrowed(value))),
                 // base64 encoded bytes are all ascii
-                _ => unreachable!(),
+                _ => unreachable!()
             },
-            _ => Err(ParseBinaryError::InvalidEncoding),
+            _ => Err(ParseBinaryError::InvalidEncoding)
         }
     }
 }
@@ -90,9 +90,9 @@ impl TryFrom<Vec<u8>> for Binary<'_> {
             Ok(()) => match String::from_utf8(value) {
                 Ok(value) => Ok(Binary(Cow::Owned(value))),
                 // base64 encoded bytes are all ascii
-                _ => unreachable!(),
+                _ => unreachable!()
             },
-            _ => Err(ParseBinaryError::InvalidEncoding),
+            _ => Err(ParseBinaryError::InvalidEncoding)
         }
     }
 }
@@ -109,7 +109,7 @@ pub enum ParseBinaryError {
     /// Invalid characters for standard Base64 encoding.
     InvalidEncoding,
     /// Padding is incorrect or not all bytes were properly encoded.
-    MissingBytes,
+    MissingBytes
 }
 
 impl ParseBinaryError {
@@ -119,7 +119,7 @@ impl ParseBinaryError {
                 "Binary data is encoded with the standard Base64 encoding \
                  ( [a..z] | [A..Z] | + | / | = (padding) )."
             }
-            ParseBinaryError::MissingBytes => "Incorrect number of bytes or missing padding.",
+            ParseBinaryError::MissingBytes => "Incorrect number of bytes or missing padding."
         }
     }
 }
@@ -167,14 +167,14 @@ impl From<String> for Text<'_> {
 
 struct EscapeByteIndices<'m> {
     offset: usize,
-    bytes: &'m [u8],
+    bytes: &'m [u8]
 }
 
 impl<'m> EscapeByteIndices<'m> {
     fn new(text: &'m str) -> EscapeByteIndices<'m> {
         EscapeByteIndices {
             offset: 0,
-            bytes: text.as_bytes(),
+            bytes: text.as_bytes()
         }
     }
 
@@ -217,7 +217,7 @@ fn write_text<W: fmt::Write>(writer: &mut W, text: &str) -> Result<(), fmt::Erro
                     writer.write_str("\n")?;
                 }
             }
-            b => writer.write_fmt(format_args!("\\{}", char::from(b)))?,
+            b => writer.write_fmt(format_args!("\\{}", char::from(b)))?
         }
         last_end = start + 1;
     }
@@ -258,7 +258,7 @@ mod escape_text_tests {
 pub struct Date {
     year: u16,
     month: u8,
-    day: u8,
+    day: u8
 }
 
 /// Local/Floating Time Marker
@@ -271,18 +271,18 @@ pub struct Time<T = Local> {
     hour: u8,
     minute: u8,
     second: u8,
-    _phantom: PhantomData<T>,
+    _phantom: PhantomData<T>
 }
 
 pub struct DateTime<T = Local> {
     date: Date,
-    time: Time<T>,
+    time: Time<T>
 }
 
 pub struct UtcOffset {
     hour: i8,
     minute: u8,
-    second: u8,
+    second: u8
 }
 
 enum DurationInner {
@@ -291,14 +291,14 @@ enum DurationInner {
     Time {
         hour: u8,
         minute: u8,
-        second: u8,
+        second: u8
     },
     DayTime {
         day: u32,
         hour: u8,
         minute: u8,
-        second: u8,
-    },
+        second: u8
+    }
 }
 
 pub enum Positive {}
@@ -306,14 +306,14 @@ pub enum Negative {}
 
 pub struct Duration<T = Positive> {
     inner: DurationInner,
-    _phantom: PhantomData<T>,
+    _phantom: PhantomData<T>
 }
 
 impl<T> Duration<T> {
     fn new(duration: DurationInner) -> Self {
         Duration {
             inner: duration,
-            _phantom: PhantomData,
+            _phantom: PhantomData
         }
     }
 
@@ -330,7 +330,7 @@ impl<T> Duration<T> {
             day,
             hour,
             minute,
-            second,
+            second
         })
     }
 
@@ -338,7 +338,7 @@ impl<T> Duration<T> {
         Duration::new(DurationInner::Time {
             hour,
             minute,
-            second,
+            second
         })
     }
 }
@@ -395,12 +395,12 @@ enum Period<T = Local> {
     /// use a Period in UTC time.
     Explicit {
         start: DateTime<T>,
-        end: DateTime<T>,
+        end: DateTime<T>
     },
     Start {
         start: DateTime<T>,
-        duration: Duration<Positive>,
-    },
+        duration: Duration<Positive>
+    }
 }
 
 // Recur
