@@ -206,19 +206,12 @@ impl<W: Write> LineWriter<W> {
     }
 
     #[inline]
-    pub fn write_name<N>(&mut self, name: N) -> Result<(), Error>
-    where
-        N: fmt::Display
-    {
+    pub fn write_name(&mut self, name: &str) -> Result<(), Error> {
         write!(self, "{}", name)
     }
 
     #[inline]
-    pub fn write_parameter<K, V>(&mut self, key: K, value: V) -> Result<(), Error>
-    where
-        K: fmt::Display,
-        V: fmt::Display
-    {
+    pub fn write_parameter(&mut self, key: &str, value: &str) -> Result<(), Error> {
         write!(self, ";{}={}", key, value)
     }
 
@@ -315,14 +308,17 @@ impl<W: Write> Write for LineWriter<W> {
         if self.len + buf.len() < CAPACITY {
             self.extend_from_slice(buf);
         } else {
+            let mut end = CAPACITY - self.len;
             loop {
-                let end = CAPACITY - self.len;
                 self.buffer[self.len..CAPACITY].copy_from_slice(&buf[..end]);
                 match lazy_fold(&mut self.writer, self.buffer.as_ref()) {
                     Ok(rest) => {
+                        // SAFETY: The rest value can never be bigger than CAPACITY because the
+                        // input self.buffer is is CAPACITY bytes long!
                         self.buffer.copy_within(CAPACITY - rest..CAPACITY, 0);
                         self.len = rest;
                         buf = &buf[end..];
+                        end = CAPACITY - self.len;
                         if buf.len() < end {
                             self.extend_from_slice(buf);
                             break;
@@ -343,12 +339,12 @@ impl<W: Write> Write for LineWriter<W> {
 /// bytes
 fn lazy_fold<W: Write>(writer: &mut W, content: &[u8]) -> Result<usize, Error> {
     let len = content.len();
-    let mut boundary = next_boundary(&content, CONTENT_LINE_MAX_LEN).unwrap_or(len);
+    let mut boundary = next_boundary(&content, 0).unwrap_or(len);
     writer.write_all(&content[..boundary])?;
 
     while boundary < len {
         writer.write_all(LINE_SPLIT)?;
-        boundary = match next_boundary(&content, boundary + CONTENT_LINE_MAX_LEN) {
+        boundary = match next_boundary(&content, boundary) {
             Some(next_boundary) => {
                 writer.write_all(&content[boundary..next_boundary])?;
                 next_boundary
@@ -359,13 +355,73 @@ fn lazy_fold<W: Write>(writer: &mut W, content: &[u8]) -> Result<usize, Error> {
     Ok(0)
 }
 
-fn next_boundary(input: &[u8], index: usize) -> Option<usize> {
-    if index >= input.len() {
+fn next_boundary(input: &[u8], lower_bound: usize) -> Option<usize> {
+    let upper_bound = lower_bound + CONTENT_LINE_MAX_LEN;
+    if upper_bound >= input.len() {
         return None;
     }
-    match input[..=index].iter().rposition(|&i| i < 128 || i >= 192) {
+
+    fn is_char_boundary(&b: &u8) -> bool {
+        // In std::is_char_boundary bit magic is used in the form of (b as i8) >= -0x40
+        // but this is more understandable for me.
+        b < 128 || b >= 192
+    }
+
+    match input[lower_bound..=upper_bound]
+        .iter()
+        .rposition(is_char_boundary)
+    {
         Some(0) | None => None,
-        boundary => boundary
+        Some(boundary) => Some(lower_bound + boundary)
+    }
+}
+
+#[cfg(test)]
+mod tests_fold {
+    use super::LineWriter;
+    use std::io::Write;
+
+    fn write(content: &[u8]) -> Result<String, std::io::Error> {
+        let mut writer = LineWriter::new(Vec::with_capacity(content.len()));
+        writer.write_all(content)?;
+        writer.flush()?;
+        Ok(String::from_utf8_lossy(&writer.writer).to_string())
+    }
+
+    #[test]
+    fn no_linebreak() {
+        let content = "No line break today.";
+        let output = write(content.as_bytes()).unwrap();
+
+        assert_eq!(output, content);
+    }
+
+    #[test]
+    fn over_limit() {
+        let content = "Content lines that have a fixed length over 75 bytes should be line folded with CRLF and whitespace.";
+        let expected = "Content lines that have a fixed length over 75 bytes should be line folded \r\n with CRLF and whitespace.";
+        let output = write(content.as_bytes()).unwrap();
+
+        assert_eq!(output, expected);
+    }
+
+    #[test]
+    fn multibytes() {
+        let content = "Content lines shouldn't be folded in the middle of a UTF-8 character! 老虎.";
+        let expected =
+            "Content lines shouldn't be folded in the middle of a UTF-8 character! 老\r\n 虎.";
+        let output = write(content.as_bytes()).unwrap();
+
+        assert_eq!(output, expected);
+    }
+
+    #[test]
+    fn multi_lines() {
+        let content = "The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. ";
+        let expected = "The quick brown fox jumps over the lazy dog. The quick brown fox jumps over\r\n  the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown\r\n  fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. ";
+        let output = write(content.as_bytes()).unwrap();
+
+        assert_eq!(output, expected);
     }
 }
 
