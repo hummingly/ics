@@ -6,7 +6,7 @@ rust:
   - stable
   - beta
   - nightly
-  - 1.26.0
+  - 1.37.0
 matrix:
   include:
     - rust: stable

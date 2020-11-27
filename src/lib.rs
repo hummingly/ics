@@ -45,7 +45,7 @@
 //! }
 //! ```
 
-#![forbid(unsafe_code, missing_docs)]
+// #![forbid(unsafe_code, missing_docs)]
 
 #[macro_use]
 mod macros;
@@ -55,6 +55,8 @@ mod ical;
 pub mod parameters;
 pub mod properties;
 mod util;
+mod value;
+mod writer;
 
 pub use ical::Alarm;
 pub use ical::Daylight;
