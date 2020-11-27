@@ -15,15 +15,21 @@ pub fn escape_text<'a, S>(input: S) -> Cow<'a, str>
 where
     S: Into<Cow<'a, str>>
 {
-    let mut input = input.into();
-    if input.contains("\r\n") {
-        input = input.replace("\r\n", "\n").into();
+    let input = input.into();
+    let mut escaped_chars_count = 0;
+    let mut has_carriage_return_char = false;
+
+    for b in input.bytes() {
+        if b == b',' || b == b';' || b == b'\\' {
+            escaped_chars_count += 1;
+        } else if b == b'\r' {
+            has_carriage_return_char = true;
+        }
     }
 
-    let escaped_chars = |c| c == ',' || c == ';' || c == '\\';
-    if input.contains(|c| c == '\r' || escaped_chars(c)) {
-        let size = input.len() + input.chars().filter(|&c| escaped_chars(c)).count();
-        let mut output = String::with_capacity(size);
+    if has_carriage_return_char || escaped_chars_count > 0 {
+        let escaped_chars = |c| c == ',' || c == ';' || c == '\\' || c == '\r';
+        let mut output = String::with_capacity(input.len() + escaped_chars_count);
         let mut last_end = 0;
         for (start, part) in input.match_indices(escaped_chars) {
             output.push_str(&input[last_end..start]);
@@ -32,7 +38,11 @@ where
                 ";" => output.push_str("\\;"),
                 "\\" => output.push_str("\\\\"),
                 // \r was in old MacOS versions the newline character
-                "\r" => output.push_str("\n"),
+                "\r" => {
+                    if input.get(start + 1..start + 2) != Some("\n") {
+                        output.push_str("\n")
+                    }
+                }
                 _ => unreachable!()
             }
             last_end = start + part.len();
