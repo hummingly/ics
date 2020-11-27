@@ -65,7 +65,5 @@ pub use ical::Journal;
 pub use ical::Standard;
 pub use ical::TimeZone;
 pub use ical::ToDo;
-pub use ical::ZoneTime;
 
-// TODO: Move to core::contentline module
 pub use util::escape_text;

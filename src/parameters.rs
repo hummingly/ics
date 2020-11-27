@@ -134,19 +134,19 @@ impl<'a> Default for Role<'a> {
     }
 }
 
-/// ENCODING Parameter
+/// `ENCODING` Parameter
 #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub enum Encoding {
-    /// Text Encoding defined in RFC2045
-    Bit8,
-    /// Binary Encoding Format defined in RFC4648
+    /// `8BIT` encoding defined in RFC2045 (Text)
+    Byte,
+    /// `BASE64` encoding Format defined in RFC4648 (Binary)
     Base64
 }
 
 impl Encoding {
     fn into_value<'a>(self) -> Cow<'a, str> {
         match self {
-            Encoding::Bit8 => Cow::Borrowed("8BIT"),
+            Encoding::Byte => Cow::Borrowed("8BIT"),
             Encoding::Base64 => Cow::Borrowed("BASE64")
         }
     }
@@ -163,14 +163,14 @@ impl<'a> From<Encoding> for Parameter<'a> {
 
 impl Default for Encoding {
     fn default() -> Self {
-        Encoding::Bit8
+        Encoding::Byte
     }
 }
 
-/// RANGE Parameter
+/// `RANGE` Parameter
 #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub enum Range {
-    /// "THISANDFUTURE" (Default Value)
+    /// `THISANDFUTURE` (Default Value)
     ThisAndFuture
 }
 
@@ -195,12 +195,12 @@ impl Default for Range {
     }
 }
 
-/// RELATED Parameter
+/// `RELATED` Parameter
 #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub enum Related {
-    /// Trigger off of start
+    /// Trigger off of `START`
     Start,
-    /// Trigger off of end
+    /// Trigger off of `END`
     End
 }
 
@@ -231,9 +231,9 @@ impl Default for Related {
 /// RSVP Parameter
 #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub enum RSVP {
-    /// "TRUE"
+    /// `TRUE`
     True,
-    /// "FALSE" (Default Value)
+    /// `FALSE` (Default Value)
     False
 }
 

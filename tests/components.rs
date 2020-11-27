@@ -5,7 +5,7 @@ use ics::properties::{
     Attach, Attendee, Categories, Class, Completed, Description, DtEnd, DtStart, Due, FreeBusyTime,
     LastModified, Organizer, Priority, RRule, Status, Summary, Transp, Trigger, TzName, URL
 };
-use ics::{escape_text, Alarm, Event, FreeBusy, Journal, TimeZone, ToDo, ZoneTime};
+use ics::{escape_text, Alarm, Daylight, Event, FreeBusy, Journal, Standard, TimeZone, ToDo};
 
 #[test]
 fn event() {
@@ -128,14 +128,14 @@ fn time() {
                     END:DAYLIGHT\r\n\
                     END:VTIMEZONE\r\n";
 
-    let mut standard = ZoneTime::standard("20071104T020000", "-0400", "-0500");
+    let mut standard = Standard::new("20071104T020000", "-0400", "-0500");
     standard.push(TzName::new("EST"));
-    let mut daylight = ZoneTime::daylight("20070311T020000", "-0500", "-0400");
+    let mut daylight = Daylight::new("20070311T020000", "-0500", "-0400");
     daylight.push(TzName::new("EDT"));
 
-    let mut timezone = TimeZone::new("America/New_York", standard);
+    let mut timezone = TimeZone::standard("America/New_York", standard);
     timezone.push(LastModified::new("20050809T050000Z"));
-    timezone.add_zonetime(daylight);
+    timezone.add_daylight(daylight);
 
     assert_eq!(timezone.to_string(), expected);
 }
