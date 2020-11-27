@@ -1,5 +1,11 @@
 # Changelog
 
+## Version 0.5.4
+
+### Bug Fix
+
+- Changed a check so a malformed String cannot cause an infinite loop.
+
 ## Version 0.5.3
 
 ### Documentation

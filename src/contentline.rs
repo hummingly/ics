@@ -9,14 +9,14 @@ const LINE_BREAK: &str = "\r\n ";
 
 pub fn fold<W: fmt::Write>(writer: &mut W, content: &str) -> fmt::Result {
     let len = content.len();
-    let first_boundary = next_boundary(&content, LIMIT).unwrap_or(len);
-    write!(writer, "{}", &content[0..first_boundary])?;
+    let first_boundary = next_boundary(&content, 0).unwrap_or(len);
+    writer.write_str(&content[0..first_boundary])?;
     let mut boundary = first_boundary;
 
     while boundary < len {
-        write!(writer, "{}", LINE_BREAK)?;
-        let next_boundary = next_boundary(&content, boundary + LIMIT).unwrap_or(len);
-        write!(writer, "{}", &content[boundary..next_boundary])?;
+        writer.write_str(LINE_BREAK)?;
+        let next_boundary = next_boundary(&content, boundary).unwrap_or(len);
+        writer.write_str(&content[boundary..next_boundary])?;
         boundary = next_boundary;
     }
     Ok(())
@@ -24,16 +24,17 @@ pub fn fold<W: fmt::Write>(writer: &mut W, content: &str) -> fmt::Result {
 
 // TODO: unfold algorithm
 
-fn next_boundary(input: &str, index: usize) -> Option<usize> {
-    if index >= input.len() {
+fn next_boundary(input: &str, lower_bound: usize) -> Option<usize> {
+    let upper_bound = lower_bound + LIMIT;
+    if upper_bound >= input.len() {
         return None;
     }
-    match input.as_bytes()[..=index]
+    match input.as_bytes()[lower_bound..=upper_bound]
         .iter()
         .rposition(|&i| i < 128 || i >= 192)
     {
         Some(0) | None => None,
-        index => index
+        Some(index) => Some(lower_bound + index)
     }
 }
 
