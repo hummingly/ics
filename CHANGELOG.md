@@ -1,10 +1,12 @@
 # Changelog
 
-## Version 0.5.1
+## Version 0.5.3
 
 ### Documentation
 
 - Fix dependency version in README
+
+## Version 0.5.1 - 0.5.2 (yanked)
 
 ## Version 0.5.0
 
