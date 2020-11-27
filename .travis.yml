@@ -9,11 +9,7 @@ rust:
   - 1.26.0
 matrix:
   include:
-    - rust: nightly
-      before_script:
-        - rustup component add rustfmt --toolchain nightly
-      script:
-        - cargo +nightly fmt -- --check
+    - rust: stable
         - cargo test --no-default-features --verbose
   allow_failures:
     - rust: nightly
