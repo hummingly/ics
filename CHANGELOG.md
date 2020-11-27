@@ -1,5 +1,11 @@
 # Changelog
 
+## Version 0.5.1
+
+### Documentation
+
+- Fix dependency version in README
+
 ## Version 0.5.0
 
 ### Breaking Changes
