@@ -1,5 +1,5 @@
 #![allow(dead_code)]
-use std::{borrow::Cow, convert::TryFrom, error::Error, fmt, marker::PhantomData};
+use std::{borrow::Cow, convert::TryFrom, error::Error, fmt, io, marker::PhantomData};
 
 pub type Integer = i32;
 
@@ -168,13 +168,16 @@ impl From<String> for Text<'_> {
 
 impl fmt::Display for Text<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write_text(f, &self.0)
+        write_escaped_text(f, &self.0)
     }
 }
 
-fn write_text<W: fmt::Write>(writer: &mut W, text: &str) -> Result<(), fmt::Error> {
+pub fn write_escaped_text<W>(writer: &mut W, text: &str) -> Result<(), fmt::Error>
+where
+    W: fmt::Write
+{
     let mut last_end = 0;
-    for (start, part) in EscapeByteIndices::new(text) {
+    for (start, part) in EscapeByteIndices::new(text.as_bytes()) {
         writer.write_str(&text[last_end..start])?;
         match part {
             b'\r' => {
@@ -183,7 +186,7 @@ fn write_text<W: fmt::Write>(writer: &mut W, text: &str) -> Result<(), fmt::Erro
                 // WARNING: Do not implement this with slicing instead of str::get. Indexing
                 // outside a char boundary will panic!
                 if text.get(start + 1..start + 2) != Some("\n") {
-                    writer.write_char('\n')?;
+                    writer.write_str("\n")?;
                 }
             }
             b => writer.write_fmt(format_args!("\\{}", char::from(b)))?
@@ -193,17 +196,37 @@ fn write_text<W: fmt::Write>(writer: &mut W, text: &str) -> Result<(), fmt::Erro
     writer.write_str(&text[last_end..])
 }
 
+pub(crate) fn write_escaped_bytes<W>(writer: &mut W, bytes: &[u8]) -> Result<(), io::Error>
+where
+    W: io::Write
+{
+    let mut last_end = 0;
+    for (start, part) in EscapeByteIndices::new(bytes) {
+        writer.write_all(&bytes[last_end..start])?;
+        match part {
+            b'\r' => {
+                // Replace old macOS newline character with a line feed character otherwise
+                // discard carriage return character for Windows OS.
+                let index = start + 1;
+                if index <= bytes.len() && bytes[index] == b'\n' {
+                    writer.write_all(b"\n")?;
+                }
+            }
+            b => writer.write_all(&[b'\\', b])?
+        }
+        last_end = start + 1;
+    }
+    writer.write_all(&bytes[last_end..])
+}
+
 struct EscapeByteIndices<'m> {
     offset: usize,
     bytes: &'m [u8]
 }
 
 impl<'m> EscapeByteIndices<'m> {
-    fn new(text: &'m str) -> EscapeByteIndices<'m> {
-        EscapeByteIndices {
-            offset: 0,
-            bytes: text.as_bytes()
-        }
+    fn new(bytes: &'m [u8]) -> EscapeByteIndices<'m> {
+        EscapeByteIndices { offset: 0, bytes }
     }
 }
 

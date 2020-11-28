@@ -1,8 +1,6 @@
 #![allow(dead_code)]
-use std::{
-    fmt,
-    io::{Error, Write}
-};
+use crate::value::write_escaped_bytes;
+use std::io::{Error, Write};
 
 pub const LINE_MAX_LEN: usize = 75;
 const CAPACITY: usize = LINE_MAX_LEN * 2;
@@ -51,9 +49,13 @@ impl<W: Write> LineWriter<W> {
     #[inline]
     pub fn write_value<V>(&mut self, value: V) -> Result<(), Error>
     where
-        V: fmt::Display
+        V: std::fmt::Display
     {
         write!(self, ":{}", value)
+    }
+
+    pub fn write_escaped_text(&mut self, text: &str) -> Result<(), Error> {
+        write_escaped_bytes(self, text.as_bytes())
     }
 
     pub fn write_line_ending(&mut self) -> Result<(), Error> {
@@ -99,6 +101,11 @@ impl<W: Write> LineWriter<W> {
         writeln!(self.writer, "END:{}\r", component)
     }
 
+    pub(crate) fn into_inner(mut self) -> Result<W, Error> {
+        self.flush_line()?;
+        Ok(self.writer)
+    }
+
     fn flush_line(&mut self) -> Result<(), Error> {
         if self.len > 0 {
             match lazy_fold(&mut self.writer, &self.buffer[..self.len]) {
@@ -109,11 +116,6 @@ impl<W: Write> LineWriter<W> {
             self.len = 0;
         }
         Ok(())
-    }
-
-    pub(crate) fn into_inner(mut self) -> Result<W, Error> {
-        self.flush_line()?;
-        Ok(self.writer)
     }
 
     fn extend_from_slice(&mut self, bytes: &[u8]) {
