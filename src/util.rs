@@ -34,16 +34,16 @@ where
         for (start, part) in input.match_indices(escaped_chars) {
             output.push_str(&input[last_end..start]);
             match part {
-                "," => output.push_str("\\,"),
-                ";" => output.push_str("\\;"),
-                "\\" => output.push_str("\\\\"),
                 // \r was in old MacOS versions the newline character
                 "\r" => {
                     if input.get(start + 1..start + 2) != Some("\n") {
                         output.push_str("\n")
                     }
                 }
-                _ => unreachable!()
+                c => {
+                    output.push('\\');
+                    output.push_str(c)
+                }
             }
             last_end = start + part.len();
         }
@@ -60,8 +60,8 @@ mod escape_text_tests {
 
     #[test]
     fn escaped_chars() {
-        let s = ",\r\n;:\\ \r\n\rö";
-        let expected = "\\,\n\\;:\\\\ \n\nö";
+        let s = ",\r\n;:\\ \r\n\rö\r";
+        let expected = "\\,\n\\;:\\\\ \n\nö\n";
         assert_eq!(expected, escape_text(s));
     }
 

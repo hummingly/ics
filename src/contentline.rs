@@ -7,16 +7,15 @@ use std::fmt;
 pub const LIMIT: usize = 75;
 const LINE_BREAK: &str = "\r\n ";
 
-pub fn fold<W: fmt::Write>(writer: &mut W, content: &str) -> fmt::Result {
-    let len = content.len();
-    let first_boundary = next_boundary(&content, 0).unwrap_or(len);
-    writer.write_str(&content[0..first_boundary])?;
-    let mut boundary = first_boundary;
+pub fn fold<W: fmt::Write>(writer: &mut W, mut content: &str) -> fmt::Result {
+    let mut boundary = next_boundary(&content);
+    writer.write_str(&content[..boundary])?;
 
-    while boundary < len {
+    while boundary < content.len() {
+        content = &content[boundary..];
         writer.write_str(LINE_BREAK)?;
-        let next_boundary = next_boundary(&content, boundary).unwrap_or(len);
-        writer.write_str(&content[boundary..next_boundary])?;
+        let next_boundary = next_boundary(&content);
+        writer.write_str(&content[..next_boundary])?;
         boundary = next_boundary;
     }
     Ok(())
@@ -24,17 +23,13 @@ pub fn fold<W: fmt::Write>(writer: &mut W, content: &str) -> fmt::Result {
 
 // TODO: unfold algorithm
 
-fn next_boundary(input: &str, lower_bound: usize) -> Option<usize> {
-    let upper_bound = lower_bound + LIMIT;
-    if upper_bound >= input.len() {
-        return None;
+fn next_boundary(input: &str) -> usize {
+    if LIMIT >= input.len() {
+        return input.len();
     }
-    match input.as_bytes()[lower_bound..=upper_bound]
-        .iter()
-        .rposition(|&i| i < 128 || i >= 192)
-    {
-        Some(0) | None => None,
-        Some(index) => Some(lower_bound + index)
+    match input[..=LIMIT].bytes().rposition(|i| i < 128 || i >= 192) {
+        Some(0) | None => input.len(),
+        Some(index) => index
     }
 }
 
@@ -83,10 +78,10 @@ mod tests {
 
     #[test]
     fn multi_lines() {
-        let content = "The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. ";
+        let content = "The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy cog. The quick brown fox jumps over the lazy hog. The quick brown fox jumps over the lazy log. The quick brown fox jumps over the lazy dog. ";
         let mut line = String::with_capacity(size(content.len()));
         fold(&mut line, content).unwrap();
-        let expected = "The quick brown fox jumps over the lazy dog. The quick brown fox jumps over\r\n  the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown\r\n  fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. ";
+        let expected = "The quick brown fox jumps over the lazy dog. The quick brown fox jumps over\r\n  the lazy cog. The quick brown fox jumps over the lazy hog. The quick brown\r\n  fox jumps over the lazy log. The quick brown fox jumps over the lazy dog. ";
 
         assert_eq!(line, expected);
     }
