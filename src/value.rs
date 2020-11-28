@@ -32,7 +32,8 @@ fn is_base64_encoded(binary: &[u8]) -> Result<(), ParseBinaryError> {
 
     // At most there can be only two '=' characters at the end. This is safe to call
     // because binary.len is greater than 0 and a multiple of 4.
-    let (encoding, padding) = binary.split_at(binary.len() - 2);
+    let mid = binary.len() - 2;
+    let (encoding, padding) = (&binary[..mid], &binary[mid..]);
     if encoding.iter().all(is_base64) {
         if match padding {
             [b'=', b'='] => true,
