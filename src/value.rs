@@ -208,7 +208,7 @@ where
                 // Replace old macOS newline character with a line feed character otherwise
                 // discard carriage return character for Windows OS.
                 let index = start + 1;
-                if index <= bytes.len() && bytes[index] == b'\n' {
+                if index >= bytes.len() || bytes[index] != b'\n' {
                     writer.write_all(b"\n")?;
                 }
             }
@@ -250,32 +250,57 @@ impl Iterator for EscapeByteIndices<'_> {
 
 #[cfg(test)]
 mod tests {
-    use super::Text;
+    use super::{write_escaped_bytes, write_escaped_text};
+
+    fn write_text(text: &str) -> Result<String, std::fmt::Error> {
+        let mut buffer = String::with_capacity(text.len());
+        write_escaped_text(&mut buffer, text)?;
+        Ok(buffer)
+    }
+
+    fn write_bytes(text: &str) -> Result<String, std::io::Error> {
+        let mut buffer = Vec::with_capacity(text.len());
+        write_escaped_bytes(&mut buffer, text.as_bytes())?;
+        Ok(String::from_utf8(buffer).unwrap())
+    }
 
     #[test]
-    fn escaped_chars() {
-        let s = ",\r\n;:\\ \r\n\rö";
-        let expected = "\\,\n\\;:\\\\ \n\nö";
-        assert_eq!(expected, Text::from(s).to_string());
+    fn escaped_chars_only() {
+        let s = ",\r\n;\r:\\";
+        let expected = "\\,\n\\;\n:\\\\";
+
+        assert_eq!(expected, write_text(s).unwrap());
+        assert_eq!(expected, write_bytes(s).unwrap());
+    }
+
+    #[test]
+    fn non_unix_newlines() {
+        // To handle newlines, implementations have to check the next byte. However,
+        // incorrect indexing on a multi-byte character like 'ö' will panic in the text
+        // version.
+        let s = "\r\n\rö\r";
+        let expected = "\n\nö\n";
+
+        // assert_eq!(expected, write_text(s).unwrap());
+        assert_eq!(expected, write_bytes(s).unwrap());
     }
 
     #[test]
     fn no_escaped_chars() {
         let s = "This is a simple sentence.";
-        assert_eq!(s, Text::from(s).to_string());
+
+        assert_eq!(s, write_text(s).unwrap());
+        assert_eq!(s, write_bytes(s).unwrap());
     }
 
     // test run with default features enabled but should be correct regardless
     #[test]
-    fn escape_property() {
-        use components::Property;
+    fn long_sentence() {
+        let s = "Hello, World! Today is a beautiful day to test: Escape Methods.\n Characters like ; or \\ must be escaped.\r\n";
+        let expected = "Hello\\, World! Today is a beautiful day to test: Escape Methods.\n Characters like \\; or \\\\ must be escaped.\n";
 
-        let expected_value = "Hello\\, World! Today is a beautiful day to test: Escape Methods.\n Characters like \\; or \\\\ must be escaped.\n";
-        let property = Property::new(
-            "COMMENT",
-            Text::from("Hello, World! Today is a beautiful day to test: Escape Methods.\n Characters like ; or \\ must be escaped.\r\n").to_string()
-        );
-        assert_eq!(expected_value, property.value);
+        assert_eq!(expected, write_text(s).unwrap());
+        assert_eq!(expected, write_bytes(s).unwrap());
     }
 }
 
