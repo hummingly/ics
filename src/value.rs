@@ -165,38 +165,6 @@ impl From<String> for Text<'_> {
     }
 }
 
-struct EscapeByteIndices<'m> {
-    offset: usize,
-    bytes: &'m [u8]
-}
-
-impl<'m> EscapeByteIndices<'m> {
-    fn new(text: &'m str) -> EscapeByteIndices<'m> {
-        EscapeByteIndices {
-            offset: 0,
-            bytes: text.as_bytes()
-        }
-    }
-
-    fn is_escaped_byte(b: u8) -> bool {
-        b == b',' || b == b';' || b == b'\\' || b == b'\r'
-    }
-}
-
-impl Iterator for EscapeByteIndices<'_> {
-    type Item = (usize, u8);
-
-    fn next(&mut self) -> Option<Self::Item> {
-        for &b in &self.bytes[self.offset..] {
-            self.offset += 1;
-            if Self::is_escaped_byte(b) {
-                return Some((self.offset - 1, b));
-            }
-        }
-        None
-    }
-}
-
 impl fmt::Display for Text<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write_text(f, &self.0)
@@ -214,7 +182,7 @@ fn write_text<W: fmt::Write>(writer: &mut W, text: &str) -> Result<(), fmt::Erro
                 // WARNING: Do not implement this with slicing instead of str::get. Indexing
                 // outside a char boundary will panic!
                 if text.get(start + 1..start + 2) != Some("\n") {
-                    writer.write_str("\n")?;
+                    writer.write_char('\n')?;
                 }
             }
             b => writer.write_fmt(format_args!("\\{}", char::from(b)))?
@@ -224,8 +192,40 @@ fn write_text<W: fmt::Write>(writer: &mut W, text: &str) -> Result<(), fmt::Erro
     writer.write_str(&text[last_end..])
 }
 
+struct EscapeByteIndices<'m> {
+    offset: usize,
+    bytes: &'m [u8]
+}
+
+impl<'m> EscapeByteIndices<'m> {
+    fn new(text: &'m str) -> EscapeByteIndices<'m> {
+        EscapeByteIndices {
+            offset: 0,
+            bytes: text.as_bytes()
+        }
+    }
+}
+
+impl Iterator for EscapeByteIndices<'_> {
+    type Item = (usize, u8);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        fn is_escaped_byte(b: u8) -> bool {
+            b == b',' || b == b';' || b == b'\\' || b == b'\r'
+        }
+
+        for &b in &self.bytes[self.offset..] {
+            self.offset += 1;
+            if is_escaped_byte(b) {
+                return Some((self.offset - 1, b));
+            }
+        }
+        None
+    }
+}
+
 #[cfg(test)]
-mod escape_text_tests {
+mod tests {
     use super::Text;
 
     #[test]
