@@ -12,7 +12,7 @@ matrix:
     - rust: stable
       script:
         - cargo test --no-default-features --verbose
-        - cargo run --example event
-        - cargo run --example event
+        - cargo run --example event --verbose
+        - cargo run --example event --verbose
   allow_failures:
     - rust: nightly

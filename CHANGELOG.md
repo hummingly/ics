@@ -1,5 +1,11 @@
 # Changelog
 
+## Version 0.5.5
+
+### Misc
+
+- Internal improvements should make optimization easier for the compiler.
+
 ## Version 0.5.4
 
 ### Bug Fix
