@@ -22,6 +22,7 @@
 //! ```
 //! For more information on properties, please refer to the specification [RFC5545 3.7. Calendar Properties](https://tools.ietf.org/html/rfc5545#section-3.7) and [RFC7986 5. Properties](https://tools.ietf.org/html/rfc7986#section-5).
 use crate::components::{Parameter, Parameters, Property};
+use crate::value::Integer;
 use std::borrow::Cow;
 use std::collections::BTreeMap;
 
@@ -43,8 +44,8 @@ property!(Comment, "COMMENT");
 property!(Description, "DESCRIPTION");
 property!(Geo, "GEO");
 property!(Location, "LOCATION");
-property!(PercentComplete, "PERCENT-COMPLETE");
-property!(Priority, "PRIORITY");
+property_integer!(PercentComplete, "PERCENT-COMPLETE");
+property_integer!(Priority, "PRIORITY");
 property!(Resources, "RESOURCES");
 property_with_constructor!(
     /// [Format definitions of statuses](https://tools.ietf.org/html/rfc5545#section-3.8.1.11)
@@ -102,12 +103,12 @@ property_with_constructor!(
     fn display() { "DISPLAY" };
     fn email() { "EMAIL" }
 );
-property!(Repeat, "REPEAT");
+property_integer!(Repeat, "REPEAT");
 property!(Trigger, "TRIGGER");
 property!(Created, "CREATED");
 property!(DtStamp, "DTSTAMP");
 property!(LastModified, "LAST-MODIFIED");
-property!(Sequence, "SEQUENCE");
+property_integer!(Sequence, "SEQUENCE");
 property!(RequestStatus, "REQUEST-STATUS");
 
 impl<'a> Default for Class<'a> {
@@ -122,10 +123,38 @@ impl<'a> Default for Transp<'a> {
     }
 }
 
-impl_default_prop!(CalScale, "GREGORIAN");
-impl_default_prop!(Priority, "0");
-impl_default_prop!(Repeat, "0");
-impl_default_prop!(Sequence, "0");
+impl<'a> Default for CalScale<'a> {
+    fn default() -> Self {
+        Self {
+            value: Cow::Borrowed("GREGORIAN"),
+            parameters: BTreeMap::new()
+        }
+    }
+}
+impl<'a> Default for Priority<'a> {
+    fn default() -> Self {
+        Self {
+            value: 0,
+            parameters: BTreeMap::new()
+        }
+    }
+}
+impl<'a> Default for Repeat<'a> {
+    fn default() -> Self {
+        Self {
+            value: 0,
+            parameters: BTreeMap::new()
+        }
+    }
+}
+impl<'a> Default for Sequence<'a> {
+    fn default() -> Self {
+        Self {
+            value: 0,
+            parameters: BTreeMap::new()
+        }
+    }
+}
 
 #[cfg(feature = "rfc7986")]
 pub use self::rfc7986::*;

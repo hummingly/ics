@@ -260,19 +260,6 @@ macro_rules! parameter_with_const {
     };
 }
 
-macro_rules! impl_default_prop {
-    ($type:ident, $default:expr) => {
-        impl<'a> Default for $type<'a> {
-            fn default() -> Self {
-                Self {
-                    value: $default.into(),
-                    parameters: BTreeMap::new()
-                }
-            }
-        }
-    };
-}
-
 macro_rules! impl_from_prop {
     ($type:ident, $name:expr) => {
         impl<'a> From<$type<'a>> for Property<'a> {
@@ -294,6 +281,57 @@ macro_rules! impl_from_param {
                 Parameter {
                     key: $name.into(),
                     value: builder.value
+                }
+            }
+        }
+    };
+}
+
+// Creation and conversion from builder types to Property
+#[allow(unused_macros)]
+macro_rules! property_integer {
+    ($(#[$outer:meta])* $type:ident, $name:expr) => {
+        #[doc = "`"]#[doc=$name]#[doc = "` Property"]
+        ///
+        $(#[$outer])*
+        #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
+        pub struct $type<'a> {
+            value: Integer,
+            parameters: Parameters<'a>
+        }
+
+        impl<'a> $type<'a> {
+            #[doc = "Creates a new `"]#[doc=$name]#[doc = "` Property with the given value."]
+            pub fn new(value: Integer) -> Self {
+                Self {
+                    value,
+                    parameters: BTreeMap::new()
+                }
+            }
+
+            /// Adds a parameter to the property.
+            pub fn add<P>(&mut self, parameter: P)
+            where
+                P: Into<Parameter<'a>>
+            {
+                let param = parameter.into();
+                self.parameters.insert(param.key, param.value);
+            }
+
+            /// Adds several parameters at once to the property. For creating
+            /// several parameters at once, consult the documentation of
+            /// the [`parameters!`] macro.
+            pub fn append(&mut self, mut parameters: Parameters<'a>) {
+                self.parameters.append(&mut parameters);
+            }
+        }
+
+        impl<'a> From<$type<'a>> for Property<'a> {
+            fn from(builder: $type<'a>) -> Self {
+                Property {
+                    key: $name.into(),
+                    value: Cow::Owned(builder.value.to_string()),
+                    parameters: builder.parameters
                 }
             }
         }
