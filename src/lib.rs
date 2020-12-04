@@ -59,14 +59,8 @@ mod util;
 mod value;
 mod writer;
 
-pub use ical::Alarm;
-pub use ical::Daylight;
-pub use ical::Event;
-pub use ical::FreeBusy;
-pub use ical::ICalendar;
-pub use ical::Journal;
-pub use ical::Standard;
-pub use ical::TimeZone;
-pub use ical::ToDo;
+pub use crate::ical::{
+    Alarm, Daylight, Event, FreeBusy, ICalendar, Journal, Standard, TimeZone, ToDo
+};
 
-pub use util::escape_text;
+pub use crate::util::escape_text;
