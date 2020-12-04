@@ -6,44 +6,43 @@ pub const LINE_MAX_LEN: usize = 75;
 const CAPACITY: usize = LINE_MAX_LEN * 2;
 const LINE_SPLIT: &[u8; 3] = b"\r\n ";
 
-pub trait LineWrite {
-    fn write_content_line<W: Write>(&self, line_writer: &mut LineWriter<W>) -> Result<(), Error>;
+pub trait PropertyWrite {
+    fn write<W: Write>(&self, line: &mut ContentLine<'_, W>) -> Result<(), Error>;
 }
 
-pub struct LineWriter<W: Write> {
-    buffer: Box<[u8; CAPACITY]>,
-    len: usize,
-    writer: W
-}
+pub struct ContentLine<'w, W: Write>(&'w mut Writer<W>);
 
-impl<W: Write> LineWriter<W> {
-    pub(crate) fn new(writer: W) -> LineWriter<W> {
-        LineWriter {
-            buffer: Box::new([0; CAPACITY]),
-            len: 0,
-            writer
-        }
+impl<W: Write> ContentLine<'_, W> {
+    pub(crate) fn new<'w>(writer: &'w mut Writer<W>) -> ContentLine<'w, W> {
+        ContentLine(writer)
     }
 
+    pub(crate) fn end_line(&mut self) -> Result<(), Error> {
+        self.0.flush_line()?;
+        self.0.writer.write_all(b"\r\n")
+    }
+}
+
+impl<W: Write> ContentLine<'_, W> {
     pub fn write_name(&mut self, name: &str) -> Result<(), Error> {
-        write!(self, "{}", name)
+        write!(self.0, "{}", name)
     }
 
     pub fn write_name_unchecked(&mut self, name: &str) {
-        self.extend_from_slice(name.as_bytes());
+        self.0.extend_from_slice(name.as_bytes());
     }
 
-    pub fn write_parameter(&mut self, key: &str, value: &str) -> Result<(), Error> {
-        write!(self, ";{}={}", key, value)
+    pub fn write_parameter_pair(&mut self, key: &str, value: &str) -> Result<(), Error> {
+        write!(self.0, ";{}={}", key, value)
     }
 
-    pub fn write_parameter_unchecked(&mut self, key: &str, value: &str) {
-        self.buffer[self.len] = b';';
-        self.len += 1;
-        self.extend_from_slice(key.as_bytes());
-        self.buffer[self.len] = b'=';
-        self.len += 1;
-        self.extend_from_slice(value.as_bytes());
+    pub fn write_parameter_pair_unchecked(&mut self, key: &str, value: &str) {
+        self.0.buffer[self.0.len] = b';';
+        self.0.len += 1;
+        self.0.extend_from_slice(key.as_bytes());
+        self.0.buffer[self.0.len] = b'=';
+        self.0.len += 1;
+        self.0.extend_from_slice(value.as_bytes());
     }
 
     #[inline]
@@ -51,54 +50,27 @@ impl<W: Write> LineWriter<W> {
     where
         V: std::fmt::Display
     {
-        write!(self, ":{}", value)
+        write!(self.0, ":{}", value)
     }
 
-    pub fn write_escaped_text(&mut self, text: &str) -> Result<(), Error> {
-        write_escaped_bytes(self, text.as_bytes())
+    pub fn write_value_text(&mut self, text: &str) -> Result<(), Error> {
+        write_escaped_bytes(self.0, text.as_bytes())
     }
+}
 
-    pub fn write_line_ending(&mut self) -> Result<(), Error> {
-        self.flush_line()?;
-        self.writer.write_all(b"\r\n")
-    }
+pub(crate) struct Writer<W: Write> {
+    buffer: Box<[u8; CAPACITY]>,
+    len: usize,
+    writer: W
+}
 
-    pub(crate) fn write_begin(&mut self, component: &str) -> Result<(), Error> {
-        if component.len() <= LINE_MAX_LEN - "BEGIN:".len() {
-            self.write_begin_unchecked(component)
-        } else {
-            writeln!(self, "BEGIN:{}", component)?;
-            self.write_line_ending()
+impl<W: Write> Writer<W> {
+    pub(crate) fn new(writer: W) -> Writer<W> {
+        Writer {
+            buffer: Box::new([0; CAPACITY]),
+            len: 0,
+            writer
         }
-    }
-
-    /// Write BEGIN limiter without folding
-    ///
-    /// Components part of the specification have names that are shorter than
-    /// `LIMIT - "BEGIN:".len()`. This is why checking for line breaks in a
-    /// single line is redundant.
-    pub(crate) fn write_begin_unchecked(&mut self, component: &str) -> Result<(), Error> {
-        debug_assert!(component.len() <= LINE_MAX_LEN - "BEGIN:".len());
-        writeln!(self.writer, "BEGIN:{}\r", component)
-    }
-
-    pub(crate) fn write_end(&mut self, component: &str) -> Result<(), Error> {
-        if component.len() <= LINE_MAX_LEN - "END:".len() {
-            self.write_end_unchecked(component)
-        } else {
-            writeln!(self, "END:{}", component)?;
-            self.write_line_ending()
-        }
-    }
-
-    /// Write END limiter without folding
-    ///
-    /// Components part of the specification have names that are shorter than
-    /// `LIMIT - "END:".len()`. This is why checking for line breaks in a
-    /// single line is redundant.
-    pub(crate) fn write_end_unchecked(&mut self, component: &str) -> Result<(), Error> {
-        debug_assert!(component.len() <= LINE_MAX_LEN - "END:".len());
-        writeln!(self.writer, "END:{}\r", component)
     }
 
     pub(crate) fn into_inner(mut self) -> Result<W, Error> {
@@ -125,7 +97,52 @@ impl<W: Write> LineWriter<W> {
     }
 }
 
-impl<W: Write> Write for LineWriter<W> {
+impl<W: Write> Writer<W> {
+    pub(crate) fn write_begin(&mut self, component: &str) -> Result<(), Error> {
+        if component.len() <= LINE_MAX_LEN - "BEGIN:".len() {
+            self.write_begin_unchecked(component)
+        } else {
+            writeln!(self, "BEGIN:{}", component)?;
+            self.end_line()
+        }
+    }
+
+    /// Write BEGIN limiter without folding
+    ///
+    /// Components part of the specification have names that are shorter than
+    /// `LIMIT - "BEGIN:".len()`. This is why checking for line breaks in a
+    /// single line is redundant.
+    pub(crate) fn write_begin_unchecked(&mut self, component: &str) -> Result<(), Error> {
+        debug_assert!(component.len() <= LINE_MAX_LEN - "BEGIN:".len());
+        writeln!(self.writer, "BEGIN:{}\r", component)
+    }
+
+    pub(crate) fn write_end(&mut self, component: &str) -> Result<(), Error> {
+        if component.len() <= LINE_MAX_LEN - "END:".len() {
+            self.write_end_unchecked(component)
+        } else {
+            writeln!(self, "END:{}", component)?;
+            self.end_line()
+        }
+    }
+
+    /// Write END limiter without folding
+    ///
+    /// Components part of the specification have names that are shorter than
+    /// `LIMIT - "END:".len()`. This is why checking for line breaks in a
+    /// single line is redundant.
+    pub(crate) fn write_end_unchecked(&mut self, component: &str) -> Result<(), Error> {
+        debug_assert!(component.len() <= LINE_MAX_LEN - "END:".len());
+        writeln!(self.writer, "END:{}\r", component)
+    }
+
+    pub(crate) fn end_line(&mut self) -> Result<(), Error> {
+        self.flush_line()?;
+        self.writer.write_all(b"\r\n")
+    }
+}
+
+impl<W: Write> Write for Writer<W> {
     fn write(&mut self, buf: &[u8]) -> Result<usize, Error> {
         match self.write_all(buf) {
             Ok(_) => Ok(buf.len()),
@@ -212,11 +229,11 @@ fn next_boundary(input: &[u8]) -> Option<usize> {
 
 #[cfg(test)]
 mod tests {
-    use super::LineWriter;
+    use super::Writer;
     use std::io::Write;
 
     fn write(content: &[u8]) -> Result<String, std::io::Error> {
-        let mut writer = LineWriter::new(Vec::with_capacity(content.len()));
+        let mut writer = Writer::new(Vec::with_capacity(content.len()));
         writer.write_all(content)?;
         writer.flush()?;
         Ok(String::from_utf8_lossy(&writer.writer).to_string())

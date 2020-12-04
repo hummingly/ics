@@ -1,23 +1,24 @@
 #![allow(dead_code)]
-use crate::contentline::{LineWrite, LineWriter};
+use crate::contentline::{ContentLine, PropertyWrite, Writer};
 use std::io::{Error, Write};
 
-pub struct CalendarWriter<W: Write>(LineWriter<W>);
+pub struct CalendarWriter<W: Write>(Writer<W>);
 
 impl<W: Write> CalendarWriter<W> {
     pub fn new(writer: W, version: String, product_id: String) -> Result<CalendarWriter<W>, Error> {
-        let mut line_writer = LineWriter::new(writer);
+        let mut line_writer = Writer::new(writer);
         line_writer.write_begin_unchecked("VCALENDAR")?;
         write!(line_writer, "VERSION:{}", version)?;
-        line_writer.write_line_ending()?;
+        line_writer.end_line()?;
         write!(line_writer, "PRODID:{}", product_id)?;
-        line_writer.write_line_ending()?;
+        line_writer.end_line()?;
         Ok(CalendarWriter(line_writer))
     }
 
-    #[inline]
-    fn write<C: LineWrite>(&mut self, content_line: &C) -> Result<(), Error> {
-        content_line.write_content_line(&mut self.0)
+    fn write<P: PropertyWrite>(&mut self, property: &P) -> Result<(), Error> {
+        let mut line = ContentLine::new(&mut self.0);
+        property.write(&mut line)?;
+        line.end_line()
     }
 
     pub fn write_event<F>(&mut self, uid: &str, dt_stamp: &str, write_fn: F) -> Result<(), Error>
@@ -71,24 +72,25 @@ impl<W: Write> CalendarWriter<W> {
     }
 }
 
-pub struct EventWriter<'w, W: Write>(&'w mut LineWriter<W>);
+pub struct EventWriter<'w, W: Write>(&'w mut Writer<W>);
 
-impl<'w, W: Write> EventWriter<'w, W> {
-    fn new(
-        writer: &'w mut LineWriter<W>,
+impl<W: Write> EventWriter<'_, W> {
+    fn new<'w>(
+        writer: &'w mut Writer<W>,
         uid: &str,
         dt_stamp: &str
     ) -> Result<EventWriter<'w, W>, Error> {
         writeln!(writer, "UID:{}", uid)?;
-        writer.write_line_ending()?;
+        writer.end_line()?;
         writeln!(writer, "DTSTAMP:{}", dt_stamp)?;
-        writer.write_line_ending()?;
+        writer.end_line()?;
         Ok(EventWriter(writer))
     }
 
-    #[inline]
-    fn write<C: LineWrite>(&mut self, content_line: &C) -> Result<(), Error> {
-        content_line.write_content_line(&mut self.0)
+    fn write<P: PropertyWrite>(&mut self, property: &P) -> Result<(), Error> {
+        let mut line = ContentLine::new(&mut self.0);
+        property.write(&mut line)?;
+        line.end_line()
     }
 
     pub fn write_alarm<F>(&mut self, write_fn: F) -> Result<(), Error>
@@ -102,24 +104,25 @@ impl<'w, W: Write> EventWriter<'w, W> {
     }
 }
 
-pub struct TodoWriter<'w, W: Write>(&'w mut LineWriter<W>);
+pub struct TodoWriter<'w, W: Write>(&'w mut Writer<W>);
 
-impl<'w, W: Write> TodoWriter<'w, W> {
-    fn new(
-        writer: &'w mut LineWriter<W>,
+impl<W: Write> TodoWriter<'_, W> {
+    fn new<'w>(
+        writer: &'w mut Writer<W>,
         uid: &str,
         dt_stamp: &str
     ) -> Result<TodoWriter<'w, W>, Error> {
         writeln!(writer, "UID:{}", uid)?;
-        writer.write_line_ending()?;
+        writer.end_line()?;
         writeln!(writer, "DTSTAMP:{}", dt_stamp)?;
-        writer.write_line_ending()?;
+        writer.end_line()?;
         Ok(TodoWriter(writer))
     }
 
-    #[inline]
-    fn write<C: LineWrite>(&mut self, content_line: &C) -> Result<(), Error> {
-        content_line.write_content_line(&mut self.0)
+    fn write<P: PropertyWrite>(&mut self, property: &P) -> Result<(), Error> {
+        let mut line = ContentLine::new(&mut self.0);
+        property.write(&mut line)?;
+        line.end_line()
     }
 
     pub fn write_alarm<F>(&mut self, write_fn: F) -> Result<(), Error>
@@ -133,53 +136,55 @@ impl<'w, W: Write> TodoWriter<'w, W> {
     }
 }
 
-pub struct JournalWriter<'w, W: Write>(&'w mut LineWriter<W>);
+pub struct JournalWriter<'w, W: Write>(&'w mut Writer<W>);
 
-impl<'w, W: Write> JournalWriter<'w, W> {
-    fn new(
-        writer: &'w mut LineWriter<W>,
+impl<W: Write> JournalWriter<'_, W> {
+    fn new<'w>(
+        writer: &'w mut Writer<W>,
         uid: &str,
         dt_stamp: &str
     ) -> Result<JournalWriter<'w, W>, Error> {
         writeln!(writer, "UID:{}", uid)?;
-        writer.write_line_ending()?;
+        writer.end_line()?;
         writeln!(writer, "DTSTAMP:{}", dt_stamp)?;
-        writer.write_line_ending()?;
+        writer.end_line()?;
         Ok(JournalWriter(writer))
     }
 
-    #[inline]
-    fn write<C: LineWrite>(&mut self, content_line: &C) -> Result<(), Error> {
-        content_line.write_content_line(&mut self.0)
+    fn write<P: PropertyWrite>(&mut self, property: &P) -> Result<(), Error> {
+        let mut line = ContentLine::new(&mut self.0);
+        property.write(&mut line)?;
+        line.end_line()
     }
 }
 
-pub struct FreeBusyWriter<'w, W: Write>(&'w mut LineWriter<W>);
+pub struct FreeBusyWriter<'w, W: Write>(&'w mut Writer<W>);
 
-impl<'w, W: Write> FreeBusyWriter<'w, W> {
-    fn new(
-        writer: &'w mut LineWriter<W>,
+impl<W: Write> FreeBusyWriter<'_, W> {
+    fn new<'w>(
+        writer: &'w mut Writer<W>,
         uid: &str,
         dt_stamp: &str
     ) -> Result<FreeBusyWriter<'w, W>, Error> {
         writeln!(writer, "UID:{}", uid)?;
-        writer.write_line_ending()?;
+        writer.end_line()?;
         writeln!(writer, "DTSTAMP:{}", dt_stamp)?;
-        writer.write_line_ending()?;
+        writer.end_line()?;
         Ok(FreeBusyWriter(writer))
     }
 }
 
-pub struct AlarmWriter<'w, W: Write>(&'w mut LineWriter<W>);
+pub struct AlarmWriter<'w, W: Write>(&'w mut Writer<W>);
 
-impl<'w, W: Write> AlarmWriter<'w, W> {
-    fn new(writer: &'w mut LineWriter<W>) -> Result<AlarmWriter<'w, W>, Error> {
+impl<W: Write> AlarmWriter<'_, W> {
+    fn new<'w>(writer: &'w mut Writer<W>) -> Result<AlarmWriter<'w, W>, Error> {
         // TODO: Required properties
         Ok(AlarmWriter(writer))
     }
 
-    #[inline]
-    fn write<C: LineWrite>(&mut self, content_line: &C) -> Result<(), Error> {
-        content_line.write_content_line(&mut self.0)
+    fn write<P: PropertyWrite>(&mut self, property: &P) -> Result<(), Error> {
+        let mut line = ContentLine::new(&mut self.0);
+        property.write(&mut line)?;
+        line.end_line()
     }
 }
