@@ -75,7 +75,7 @@ mod escape_text_tests {
     // test run with default features enabled but should be correct regardless
     #[test]
     fn escape_property() {
-        use components::Property;
+        use crate::components::Property;
 
         let expected_value = "Hello\\, World! Today is a beautiful day to test: Escape Methods.\n Characters like \\; or \\\\ must be escaped.\n";
         let property = Property::new(

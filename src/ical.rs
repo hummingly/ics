@@ -1,5 +1,5 @@
-use components::{Component, Property};
-use properties::{
+use crate::components::{Component, Property};
+use crate::properties::{
     Action, Description, DtStamp, DtStart, ProdID, Summary, Trigger, TzID, TzOffsetFrom,
     TzOffsetTo, Version, UID
 };
