@@ -17,7 +17,7 @@ impl<W: Write> ContentLine<'_, W> {
         ContentLine(writer)
     }
 
-    pub(crate) fn end_line(&mut self) -> Result<(), Error> {
+    pub(crate) fn end_line(self) -> Result<(), Error> {
         self.0.flush_line()?;
         self.0.writer.write_all(b"\r\n")
     }

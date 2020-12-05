@@ -335,5 +335,15 @@ macro_rules! property_integer {
                 }
             }
         }
+
+        impl<'a> PropertyWrite for $type<'a> {
+            fn write<W: io::Write>(&self, line: &mut ContentLine<'_, W>) -> Result<(), io::Error> {
+               line.write_name_unchecked($name);
+               for (key, value) in &self.parameters {
+                   line.write_parameter_pair(key, value)?;
+               }
+               line.write_value(self.value)
+            }
+        }
     };
 }

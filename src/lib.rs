@@ -51,7 +51,7 @@
 #[macro_use]
 mod macros;
 pub mod components;
-mod contentline;
+pub mod contentline;
 mod ical;
 pub mod parameters;
 pub mod properties;

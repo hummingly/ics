@@ -22,9 +22,11 @@
 //! ```
 //! For more information on properties, please refer to the specification [RFC5545 3.7. Calendar Properties](https://tools.ietf.org/html/rfc5545#section-3.7) and [RFC7986 5. Properties](https://tools.ietf.org/html/rfc7986#section-5).
 use crate::components::{Parameter, Parameters, Property};
+use crate::contentline::{ContentLine, PropertyWrite};
 use crate::value::Integer;
 use std::borrow::Cow;
 use std::collections::BTreeMap;
+use std::io;
 
 property!(CalScale, "CALSCALE");
 property!(Method, "METHOD");
