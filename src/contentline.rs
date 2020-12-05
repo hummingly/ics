@@ -19,7 +19,7 @@ impl<W: Write> ContentLine<'_, W> {
 
     pub(crate) fn end_line(self) -> Result<(), Error> {
         self.0.flush_line()?;
-        self.0.writer.write_all(b"\r\n")
+        self.0.inner.write_all(b"\r\n")
     }
 }
 
@@ -61,7 +61,7 @@ impl<W: Write> ContentLine<'_, W> {
 pub(crate) struct Writer<W: Write> {
     buffer: Box<[u8; CAPACITY]>,
     len: usize,
-    writer: W
+    inner: W
 }
 
 impl<W: Write> Writer<W> {
@@ -69,20 +69,20 @@ impl<W: Write> Writer<W> {
         Writer {
             buffer: Box::new([0; CAPACITY]),
             len: 0,
-            writer
+            inner: writer
         }
     }
 
     pub(crate) fn into_inner(mut self) -> Result<W, Error> {
         self.flush_line()?;
-        Ok(self.writer)
+        Ok(self.inner)
     }
 
     fn flush_line(&mut self) -> Result<(), Error> {
         if self.len > 0 {
-            match lazy_fold(&mut self.writer, &self.buffer[..self.len]) {
+            match lazy_fold(&mut self.inner, &self.buffer[..self.len]) {
                 Ok(0) => Ok(()),
-                Ok(n) => self.writer.write_all(&self.buffer[self.len - n..self.len]),
+                Ok(n) => self.inner.write_all(&self.buffer[self.len - n..self.len]),
                 Err(error) => Err(error)
             }?;
             self.len = 0;
@@ -114,7 +114,7 @@ impl<W: Write> Writer<W> {
     /// single line is redundant.
     pub(crate) fn write_begin_unchecked(&mut self, component: &str) -> Result<(), Error> {
         debug_assert!(component.len() <= LINE_MAX_LEN - "BEGIN:".len());
-        writeln!(self.writer, "BEGIN:{}\r", component)
+        writeln!(self.inner, "BEGIN:{}\r", component)
     }
 
     pub(crate) fn write_end(&mut self, component: &str) -> Result<(), Error> {
@@ -133,12 +133,12 @@ impl<W: Write> Writer<W> {
     /// single line is redundant.
     pub(crate) fn write_end_unchecked(&mut self, component: &str) -> Result<(), Error> {
         debug_assert!(component.len() <= LINE_MAX_LEN - "END:".len());
-        writeln!(self.writer, "END:{}\r", component)
+        writeln!(self.inner, "END:{}\r", component)
     }
 
     pub(crate) fn end_line(&mut self) -> Result<(), Error> {
         self.flush_line()?;
-        self.writer.write_all(b"\r\n")
+        self.inner.write_all(b"\r\n")
     }
 }
 
@@ -152,7 +152,7 @@ impl<W: Write> Write for Writer<W> {
 
     fn flush(&mut self) -> Result<(), Error> {
         self.flush_line()?;
-        self.writer.flush()
+        self.inner.flush()
     }
 
     fn write_all(&mut self, mut buf: &[u8]) -> Result<(), Error> {
@@ -166,7 +166,7 @@ impl<W: Write> Write for Writer<W> {
             let mut end = CAPACITY - self.len;
             loop {
                 self.buffer[self.len..CAPACITY].copy_from_slice(&buf[..end]);
-                match lazy_fold(&mut self.writer, self.buffer.as_ref()) {
+                match lazy_fold(&mut self.inner, self.buffer.as_ref()) {
                     Ok(n) => {
                         // SAFETY: The n value can never be bigger than CAPACITY because the input
                         // self.buffer is CAPACITY bytes long!
@@ -236,7 +236,7 @@ mod tests {
         let mut writer = Writer::new(Vec::with_capacity(content.len()));
         writer.write_all(content)?;
         writer.flush()?;
-        Ok(String::from_utf8_lossy(&writer.writer).to_string())
+        Ok(String::from_utf8_lossy(&writer.inner).to_string())
     }
 
     #[test]
