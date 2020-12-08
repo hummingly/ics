@@ -1,5 +1,7 @@
 #![allow(dead_code)]
-use std::{borrow::Cow, convert::TryFrom, error::Error, fmt, io, marker::PhantomData};
+use std::{
+    borrow::Cow, convert::TryFrom, error::Error, fmt, io, marker::PhantomData, str::FromStr
+};
 
 pub type Integer = i32;
 
@@ -15,46 +17,25 @@ impl fmt::Display for Boolean {
 }
 
 #[derive(Debug, Clone)]
-pub struct Binary<'b>(Cow<'b, str>);
+pub struct Binary<'b>(Cow<'b, [u8]>);
 
-fn is_base64_encoded(binary: &[u8]) -> Result<(), ParseBinaryError> {
-    if binary.is_empty() {
-        return Ok(());
-    }
-
-    if binary.len() % 4 > 0 {
-        return Err(ParseBinaryError::MissingBytes);
-    }
-
-    fn is_base64(&b: &u8) -> bool {
-        b.is_ascii_alphanumeric() || b == b'+' || b == b'/'
-    }
-
-    // At most there can be only two '=' characters at the end. This is safe to call
-    // because binary.len is greater than 0 and a multiple of 4.
-    let mid = binary.len() - 2;
-    let (encoding, padding) = (&binary[..mid], &binary[mid..]);
-    if encoding.iter().all(is_base64) {
-        if match padding {
-            [b'=', b'='] => true,
-            [b, b'='] => is_base64(b),
-            [b1, b2] => is_base64(b1) && is_base64(b2),
-            _ => false
-        } {
-            Ok(())
-        } else {
-            Err(ParseBinaryError::InvalidEncoding)
-        }
-    } else {
-        Err(ParseBinaryError::InvalidEncoding)
+impl<'b> From<&'b [u8]> for Binary<'b> {
+    fn from(value: &'b [u8]) -> Self {
+        Binary(Cow::Borrowed(value))
     }
 }
 
-impl<'b> TryFrom<&'b str> for Binary<'b> {
+impl From<Vec<u8>> for Binary<'_> {
+    fn from(value: Vec<u8>) -> Self {
+        Binary(Cow::Owned(value))
+    }
+}
+
+impl TryFrom<&str> for Binary<'_> {
     type Error = ParseBinaryError;
 
-    fn try_from(value: &'b str) -> Result<Self, Self::Error> {
-        is_base64_encoded(value.as_bytes()).map(|_| Binary(Cow::Borrowed(value)))
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        Binary::from_str(value)
     }
 }
 
@@ -62,46 +43,133 @@ impl TryFrom<String> for Binary<'_> {
     type Error = ParseBinaryError;
 
     fn try_from(value: String) -> Result<Self, Self::Error> {
-        is_base64_encoded(value.as_bytes()).map(|_| Binary(Cow::Owned(value)))
+        Binary::from_str(&value)
     }
 }
 
-impl<'b> TryFrom<&'b [u8]> for Binary<'b> {
-    type Error = ParseBinaryError;
+impl FromStr for Binary<'_> {
+    type Err = ParseBinaryError;
 
-    fn try_from(value: &'b [u8]) -> Result<Self, Self::Error> {
-        match is_base64_encoded(value) {
-            // unsafe std::str::from_utf8_unchecked if this turns out as bottle neck
-            Ok(()) => match std::str::from_utf8(value) {
-                Ok(value) => Ok(Binary(Cow::Borrowed(value))),
-                // base64 encoded bytes are all ascii
-                _ => unreachable!()
-            },
-            _ => Err(ParseBinaryError::InvalidEncoding)
-        }
-    }
-}
-
-impl TryFrom<Vec<u8>> for Binary<'_> {
-    type Error = ParseBinaryError;
-
-    fn try_from(value: Vec<u8>) -> Result<Self, Self::Error> {
-        match is_base64_encoded(&value) {
-            // unsafe String::from_utf8_unchecked if this turns out as bottle neck
-            Ok(()) => match String::from_utf8(value) {
-                Ok(value) => Ok(Binary(Cow::Owned(value))),
-                // base64 encoded bytes are all ascii
-                _ => unreachable!()
-            },
-            _ => Err(ParseBinaryError::InvalidEncoding)
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match decode_base64(s) {
+            Ok(bytes) => Ok(Binary(Cow::Owned(bytes))),
+            Err(error) => Err(error)
         }
     }
 }
 
 impl fmt::Display for Binary<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str(&self.0)
+        encode_base64(f, &self.0)
     }
+}
+
+/// Format bytes using the Base64 standard encoding.
+fn encode_base64<W: fmt::Write>(output: &mut W, bytes: &[u8]) -> fmt::Result {
+    // Mask for extracting 6 bits from a byte.
+    const BIT_MASK: u8 = 0b0011_1111;
+
+    const BASE_64: [char; 64] = [
+        'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R',
+        'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
+        'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1',
+        '2', '3', '4', '5', '6', '7', '8', '9', '+', '/'
+    ];
+
+    if bytes.is_empty() {
+        return Ok(());
+    }
+
+    let mut chunks = bytes.chunks_exact(3);
+    while let Some(chunk) = chunks.next() {
+        // Since we cannot use unsafe and get chunks as arrays, we need to give the
+        // compiler a hint.
+        assert_eq!(chunk.len(), 3);
+        output.write_char(BASE_64[usize::from(chunk[0] >> 2)])?;
+        output.write_char(BASE_64[usize::from(chunk[0] << 4 & BIT_MASK | chunk[1] >> 4)])?;
+        output.write_char(BASE_64[usize::from(chunk[1] << 2 & BIT_MASK | chunk[2] >> 6)])?;
+        output.write_char(BASE_64[usize::from(chunk[2] & BIT_MASK)])?;
+    }
+
+    match chunks.remainder() {
+        [first] => {
+            output.write_char(BASE_64[usize::from(first >> 2)])?;
+            output.write_char(BASE_64[usize::from(first << 4 & BIT_MASK)])?;
+            output.write_str("==")
+        }
+        [first, second] => {
+            output.write_char(BASE_64[usize::from(first >> 2)])?;
+            output.write_char(BASE_64[usize::from(first << 4 & BIT_MASK | second >> 4)])?;
+            output.write_char(BASE_64[usize::from(second << 2 & BIT_MASK)])?;
+            output.write_char('=')
+        }
+        _ => Ok(())
+    }
+}
+
+/// Decodes a Base64 encoded string into bytes.
+fn decode_base64(input: &str) -> Result<Vec<u8>, ParseBinaryError> {
+    fn decode_chunk(output: &mut Vec<u8>, chunk: &[u8]) -> Result<(), ParseBinaryError> {
+        // Since we cannot use unsafe and get chunks as arrays, we need to give the
+        // compiler a hint.
+        assert_eq!(chunk.len(), 4);
+        let first = to_base64_byte(chunk[0])?;
+        let second = to_base64_byte(chunk[1])?;
+        output.push(first << 2 | second >> 4);
+        let third = to_base64_byte(chunk[2])?;
+        output.push(second << 4 | third >> 2);
+        let fourth = to_base64_byte(chunk[3])?;
+        output.push(third << 6 | fourth);
+        Ok(())
+    }
+
+    fn to_base64_byte(c: u8) -> Result<u8, ParseBinaryError> {
+        match c {
+            b'A'..=b'Z' => Ok(c - b'A'),
+            b'a'..=b'z' => Ok(c - (b'a' - 26)),
+            b'0'..=b'9' => Ok(c - (b'0' - 52)),
+            b'+' => Ok(62),
+            b'/' => Ok(63),
+            b'=' => Err(ParseBinaryError::InvalidPadding),
+            _ => Err(ParseBinaryError::InvalidEncoding)
+        }
+    }
+
+    if input.is_empty() {
+        return Ok(Vec::new());
+    }
+
+    if input.len() % 4 > 0 {
+        return Err(ParseBinaryError::MissingBytes);
+    }
+
+    let input = input.as_bytes();
+    let mut output = Vec::with_capacity(input.len() / 4 * 3);
+
+    let mid = input.len() - 4;
+    let (encoding, padding) = (&input[..mid], &input[mid..]);
+
+    for chunk in encoding.chunks_exact(4) {
+        decode_chunk(&mut output, chunk)?;
+    }
+
+    match padding {
+        &[first, second, third, b'='] => {
+            let first = to_base64_byte(first)?;
+            let second = to_base64_byte(second)?;
+            output.push(first << 2 | second >> 4);
+            match to_base64_byte(third) {
+                Ok(third) => {
+                    output.push(second << 4 | third >> 2);
+                    Ok(())
+                }
+                Err(ParseBinaryError::InvalidPadding) => Ok(()),
+                Err(error) => Err(error)
+            }
+        }
+        chunk => decode_chunk(&mut output, chunk)
+    }?;
+    Ok(output)
 }
 
 /// Parsing errors for standard Base64 encoded Binary.
@@ -109,7 +177,9 @@ impl fmt::Display for Binary<'_> {
 pub enum ParseBinaryError {
     /// Invalid characters for standard Base64 encoding.
     InvalidEncoding,
-    /// Padding is incorrect or not all bytes were properly encoded.
+    // Padding bytes were set too early or incorrectly.
+    InvalidPadding,
+    /// Incorrect number of bytes were encoded.
     MissingBytes
 }
 
@@ -120,7 +190,8 @@ impl ParseBinaryError {
                 "Binary data is encoded with the standard Base64 encoding \
                  ( [a..z] | [A..Z] | + | / | = (padding) )."
             }
-            ParseBinaryError::MissingBytes => "Incorrect number of bytes or missing padding."
+            ParseBinaryError::MissingBytes => "Incorrect number of bytes were encoded.",
+            ParseBinaryError::InvalidPadding => "Padding bytes were set too early or incorrectly."
         }
     }
 }
