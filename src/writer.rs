@@ -5,68 +5,75 @@ use std::io::{Error, Write};
 pub struct CalendarWriter<W: Write>(Writer<W>);
 
 impl<W: Write> CalendarWriter<W> {
-    pub fn new(writer: W, version: String, product_id: String) -> Result<CalendarWriter<W>, Error> {
-        let mut line_writer = Writer::new(writer);
-        line_writer.write_begin_unchecked("VCALENDAR")?;
-        write!(line_writer, "VERSION:{}", version)?;
-        line_writer.end_line()?;
-        write!(line_writer, "PRODID:{}", product_id)?;
-        line_writer.end_line()?;
-        Ok(CalendarWriter(line_writer))
+    pub fn new(inner: W, version: String, product_id: String) -> Result<CalendarWriter<W>, Error> {
+        let mut writer = Writer::new(inner);
+        writer.write_begin_unchecked("VCALENDAR")?;
+        write!(writer, "VERSION:{}", version)?;
+        writer.end_line()?;
+        write!(writer, "PRODID:{}", product_id)?;
+        writer.end_line()?;
+        Ok(CalendarWriter(writer))
     }
 
-    fn write<P: PropertyWrite>(&mut self, property: &P) -> Result<(), Error> {
+    pub fn write<P>(&mut self, property: &P) -> Result<(), Error>
+    where
+        P: PropertyWrite
+    {
         let mut line = ContentLine::new(&mut self.0);
         property.write(&mut line)?;
         line.end_line()
     }
 
-    pub fn write_event<F>(&mut self, uid: &str, dt_stamp: &str, write_fn: F) -> Result<(), Error>
+    pub fn write_component<F>(&mut self, name: &str, body: F) -> Result<(), Error>
     where
-        F: for<'f> FnOnce(&mut EventWriter<'f, W>) -> Result<(), Error>
+        F: FnOnce(&mut Self) -> Result<(), Error>
+    {
+        self.0.write_begin(name)?;
+        body(self)?;
+        self.0.write_end(name)
+    }
+
+    pub fn write_event<F>(&mut self, uid: &str, dt_stamp: &str, body: F) -> Result<(), Error>
+    where
+        F: FnOnce(&mut EventWriter<'_, W>) -> Result<(), Error>
     {
         self.0.write_begin_unchecked("VEVENT")?;
         let mut writer = EventWriter::new(&mut self.0, uid, dt_stamp)?;
-        write_fn(&mut writer)?;
+        body(&mut writer)?;
         self.0.write_end_unchecked("VEVENT")
     }
 
-    pub fn write_todo<F>(&mut self, uid: &str, dt_stamp: &str, write_fn: F) -> Result<(), Error>
+    pub fn write_todo<F>(&mut self, uid: &str, dt_stamp: &str, body: F) -> Result<(), Error>
     where
-        F: for<'f> FnOnce(&mut TodoWriter<'f, W>) -> Result<(), Error>
+        F: FnOnce(&mut TodoWriter<'_, W>) -> Result<(), Error>
     {
         self.0.write_begin_unchecked("VTODO")?;
         let mut writer = TodoWriter::new(&mut self.0, uid, dt_stamp)?;
-        write_fn(&mut writer)?;
+        body(&mut writer)?;
         self.0.write_end_unchecked("VTODO")
     }
 
-    pub fn write_journal<F>(&mut self, uid: &str, dt_stamp: &str, write_fn: F) -> Result<(), Error>
+    pub fn write_journal<F>(&mut self, uid: &str, dt_stamp: &str, body: F) -> Result<(), Error>
     where
-        F: for<'f> FnOnce(&mut JournalWriter<'f, W>) -> Result<(), Error>
+        F: FnOnce(&mut JournalWriter<'_, W>) -> Result<(), Error>
     {
         self.0.write_begin_unchecked("VJOURNAL")?;
         let mut writer = JournalWriter::new(&mut self.0, uid, dt_stamp)?;
-        write_fn(&mut writer)?;
+        body(&mut writer)?;
         self.0.write_end_unchecked("VJOURNAL")
     }
 
-    pub fn write_free_busy<F>(
-        &mut self,
-        uid: &str,
-        dt_stamp: &str,
-        write_fn: F
-    ) -> Result<(), Error>
+    pub fn write_free_busy<F>(&mut self, uid: &str, dt_stamp: &str, body: F) -> Result<(), Error>
     where
-        F: for<'f> FnOnce(&mut FreeBusyWriter<'f, W>) -> Result<(), Error>
+        F: FnOnce(&mut FreeBusyWriter<'_, W>) -> Result<(), Error>
     {
         self.0.write_begin_unchecked("VFREEBUSY")?;
         let mut writer = FreeBusyWriter::new(&mut self.0, uid, dt_stamp)?;
-        write_fn(&mut writer)?;
+        body(&mut writer)?;
         self.0.write_end_unchecked("VFREEBUSY")
     }
 
-    pub fn finish(mut self) -> Result<W, Error> {
+    pub fn close(mut self) -> Result<W, Error> {
         self.0.write_end_unchecked("VCALENDAR")?;
         self.0.into_inner()
     }
@@ -119,7 +126,7 @@ impl<W: Write> TodoWriter<'_, W> {
         Ok(TodoWriter(writer))
     }
 
-    fn write<P: PropertyWrite>(&mut self, property: &P) -> Result<(), Error> {
+    pub fn write<P: PropertyWrite>(&mut self, property: &P) -> Result<(), Error> {
         let mut line = ContentLine::new(&mut self.0);
         property.write(&mut line)?;
         line.end_line()
@@ -151,7 +158,7 @@ impl<W: Write> JournalWriter<'_, W> {
         Ok(JournalWriter(writer))
     }
 
-    fn write<P: PropertyWrite>(&mut self, property: &P) -> Result<(), Error> {
+    pub fn write<P: PropertyWrite>(&mut self, property: &P) -> Result<(), Error> {
         let mut line = ContentLine::new(&mut self.0);
         property.write(&mut line)?;
         line.end_line()
@@ -172,6 +179,12 @@ impl<W: Write> FreeBusyWriter<'_, W> {
         writer.end_line()?;
         Ok(FreeBusyWriter(writer))
     }
+
+    pub fn write<P: PropertyWrite>(&mut self, property: &P) -> Result<(), Error> {
+        let mut line = ContentLine::new(&mut self.0);
+        property.write(&mut line)?;
+        line.end_line()
+    }
 }
 
 pub struct AlarmWriter<'w, W: Write>(&'w mut Writer<W>);
@@ -182,7 +195,7 @@ impl<W: Write> AlarmWriter<'_, W> {
         Ok(AlarmWriter(writer))
     }
 
-    fn write<P: PropertyWrite>(&mut self, property: &P) -> Result<(), Error> {
+    pub fn write<P: PropertyWrite>(&mut self, property: &P) -> Result<(), Error> {
         let mut line = ContentLine::new(&mut self.0);
         property.write(&mut line)?;
         line.end_line()

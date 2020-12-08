@@ -17,6 +17,10 @@ impl<W: Write> ContentLine<'_, W> {
         ContentLine(writer)
     }
 
+    pub(crate) fn write_name_unchecked(&mut self, name: &str) {
+        self.0.extend_from_slice(name.as_bytes());
+    }
+
     pub(crate) fn end_line(self) -> Result<(), Error> {
         self.0.flush_line()?;
         self.0.inner.write_all(b"\r\n")
@@ -28,21 +32,8 @@ impl<W: Write> ContentLine<'_, W> {
         write!(self.0, "{}", name)
     }
 
-    pub fn write_name_unchecked(&mut self, name: &str) {
-        self.0.extend_from_slice(name.as_bytes());
-    }
-
     pub fn write_parameter_pair(&mut self, key: &str, value: &str) -> Result<(), Error> {
         write!(self.0, ";{}={}", key, value)
-    }
-
-    pub fn write_parameter_pair_unchecked(&mut self, key: &str, value: &str) {
-        self.0.buffer[self.0.len] = b';';
-        self.0.len += 1;
-        self.0.extend_from_slice(key.as_bytes());
-        self.0.buffer[self.0.len] = b'=';
-        self.0.len += 1;
-        self.0.extend_from_slice(value.as_bytes());
     }
 
     #[inline]
@@ -74,7 +65,7 @@ impl<W: Write> Writer<W> {
     }
 
     pub(crate) fn into_inner(mut self) -> Result<W, Error> {
-        self.flush_line()?;
+        self.flush()?;
         Ok(self.inner)
     }
 
