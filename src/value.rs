@@ -126,8 +126,8 @@ fn decode_base64(input: &str) -> Result<Vec<u8>, ParseBinaryError> {
     fn to_base64_byte(c: u8) -> Result<u8, ParseBinaryError> {
         match c {
             b'A'..=b'Z' => Ok(c - b'A'),
-            b'a'..=b'z' => Ok(c - (b'a' - 26)),
-            b'0'..=b'9' => Ok(c - (b'0' - 52)),
+            b'a'..=b'z' => Ok(c - b'a' + 26),
+            b'0'..=b'9' => Ok(c - b'0' + 52),
             b'+' => Ok(62),
             b'/' => Ok(63),
             b'=' => Err(ParseBinaryError::InvalidPadding),
