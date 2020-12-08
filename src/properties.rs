@@ -113,19 +113,19 @@ property!(LastModified, "LAST-MODIFIED");
 property_integer!(Sequence, "SEQUENCE");
 property!(RequestStatus, "REQUEST-STATUS");
 
-impl<'a> Default for Class<'a> {
+impl Default for Class<'_> {
     fn default() -> Self {
         Self::public()
     }
 }
 
-impl<'a> Default for Transp<'a> {
+impl Default for Transp<'_> {
     fn default() -> Self {
         Self::opaque()
     }
 }
 
-impl<'a> Default for CalScale<'a> {
+impl Default for CalScale<'_> {
     fn default() -> Self {
         Self {
             value: Cow::Borrowed("GREGORIAN"),
@@ -133,7 +133,7 @@ impl<'a> Default for CalScale<'a> {
         }
     }
 }
-impl<'a> Default for Priority<'a> {
+impl Default for Priority<'_> {
     fn default() -> Self {
         Self {
             value: 0,
@@ -141,7 +141,8 @@ impl<'a> Default for Priority<'a> {
         }
     }
 }
-impl<'a> Default for Repeat<'a> {
+
+impl Default for Repeat<'_> {
     fn default() -> Self {
         Self {
             value: 0,
@@ -149,7 +150,8 @@ impl<'a> Default for Repeat<'a> {
         }
     }
 }
-impl<'a> Default for Sequence<'a> {
+
+impl Default for Sequence<'_> {
     fn default() -> Self {
         Self {
             value: 0,
@@ -230,7 +232,7 @@ mod rfc7986 {
     impl<'a> From<Image<'a>> for Property<'a> {
         fn from(builder: Image<'a>) -> Self {
             Property {
-                key: "IMAGE".into(),
+                key: Cow::Borrowed("IMAGE"),
                 value: builder.value,
                 parameters: builder.parameters
             }

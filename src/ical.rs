@@ -97,7 +97,7 @@ impl<'a> ICalendar<'a> {
     }
 }
 
-impl<'a> fmt::Display for ICalendar<'a> {
+impl fmt::Display for ICalendar<'_> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", self.0)
     }
@@ -137,7 +137,10 @@ impl<'a> Event<'a> {
 
     /// Adds a property to the event. RFC5545 and RFC7986 specify which
     /// properties can be added to an event.
-    pub fn push<P: Into<Property<'a>>>(&mut self, property: P) {
+    pub fn push<P>(&mut self, property: P)
+    where
+        P: Into<Property<'a>>
+    {
         self.properties.push(property.into());
     }
 
@@ -147,7 +150,7 @@ impl<'a> Event<'a> {
     }
 }
 
-impl<'a> fmt::Display for Event<'a> {
+impl fmt::Display for Event<'_> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         writeln!(f, "BEGIN:VEVENT\r")?;
         for property in &self.properties {
@@ -210,7 +213,7 @@ impl<'a> ToDo<'a> {
     }
 }
 
-impl<'a> fmt::Display for ToDo<'a> {
+impl fmt::Display for ToDo<'_> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         writeln!(f, "BEGIN:VTODO\r")?;
         for property in &self.properties {
@@ -263,7 +266,7 @@ impl<'a> Journal<'a> {
     }
 }
 
-impl<'a> fmt::Display for Journal<'a> {
+impl fmt::Display for Journal<'_> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         writeln!(f, "BEGIN:VJOURNAL\r")?;
         for property in &self.0 {
@@ -314,7 +317,7 @@ impl<'a> FreeBusy<'a> {
     }
 }
 
-impl<'a> fmt::Display for FreeBusy<'a> {
+impl fmt::Display for FreeBusy<'_> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         writeln!(f, "BEGIN:VFREEBUSY\r")?;
         for property in &self.0 {
@@ -394,7 +397,7 @@ impl<'a> TimeZone<'a> {
     }
 }
 
-impl<'a> fmt::Display for TimeZone<'a> {
+impl fmt::Display for TimeZone<'_> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         writeln!(f, "BEGIN:VTIMEZONE\r")?;
         for property in &self.properties {
@@ -429,7 +432,7 @@ enum ZoneTime<'a> {
     Daylight(Daylight<'a>)
 }
 
-impl<'a> fmt::Display for ZoneTime<'a> {
+impl fmt::Display for ZoneTime<'_> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             ZoneTime::Daylight(p) => write!(f, "{}", p),
@@ -480,7 +483,7 @@ impl<'a> Standard<'a> {
     }
 }
 
-impl<'a> fmt::Display for Standard<'a> {
+impl fmt::Display for Standard<'_> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         writeln!(f, "BEGIN:STANDARD\r")?;
         for property in &self.0 {
@@ -534,7 +537,7 @@ impl<'a> Daylight<'a> {
     }
 }
 
-impl<'a> fmt::Display for Daylight<'a> {
+impl fmt::Display for Daylight<'_> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         writeln!(f, "BEGIN:DAYLIGHT\r")?;
         for property in &self.0 {
@@ -607,7 +610,7 @@ impl<'a> Alarm<'a> {
     }
 }
 
-impl<'a> fmt::Display for Alarm<'a> {
+impl fmt::Display for Alarm<'_> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         writeln!(f, "BEGIN:VALARM\r")?;
         for property in &self.0 {

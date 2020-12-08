@@ -64,7 +64,7 @@ impl<'a> Component<'a> {
     }
 }
 
-impl<'a> fmt::Display for Component<'a> {
+impl fmt::Display for Component<'_> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         writeln!(f, "BEGIN:{}\r", self.name)?;
         for property in &self.properties {
@@ -139,7 +139,7 @@ impl<'a> Property<'a> {
     }
 }
 
-impl<'a> fmt::Display for Property<'a> {
+impl fmt::Display for Property<'_> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let len = self.content_len();
         if len <= contentline::LIMIT {
@@ -178,7 +178,7 @@ impl<'a> Parameter<'a> {
     }
 }
 
-impl<'a> fmt::Display for Parameter<'a> {
+impl fmt::Display for Parameter<'_> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}={}", self.key, self.value)
     }

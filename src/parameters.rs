@@ -104,31 +104,31 @@ parameter_with_const!(
     const UTC_OFFSET = "UTC-OFFSET"
 );
 
-impl<'a> Default for CUType<'a> {
+impl Default for CUType<'_> {
     fn default() -> Self {
         Self::INDIVIDUAL
     }
 }
 
-impl<'a> Default for FBType<'a> {
+impl Default for FBType<'_> {
     fn default() -> Self {
         Self::BUSY
     }
 }
 
-impl<'a> Default for PartStat<'a> {
+impl Default for PartStat<'_> {
     fn default() -> Self {
         PartStat::NEEDS_ACTION
     }
 }
 
-impl<'a> Default for RelType<'a> {
+impl Default for RelType<'_> {
     fn default() -> Self {
         Self::PARENT
     }
 }
 
-impl<'a> Default for Role<'a> {
+impl Default for Role<'_> {
     fn default() -> Self {
         Self::REQ_PARTICIPANT
     }
@@ -143,20 +143,14 @@ pub enum Encoding {
     Base64
 }
 
-impl Encoding {
-    fn into_value<'a>(self) -> Cow<'a, str> {
-        match self {
-            Encoding::Byte => Cow::Borrowed("8BIT"),
-            Encoding::Base64 => Cow::Borrowed("BASE64")
-        }
-    }
-}
-
-impl<'a> From<Encoding> for Parameter<'a> {
+impl From<Encoding> for Parameter<'_> {
     fn from(builder: Encoding) -> Self {
         Parameter {
-            key: "ENCODING".into(),
-            value: builder.into_value()
+            key: Cow::Borrowed("ENCODING"),
+            value: Cow::Borrowed(match builder {
+                Encoding::Byte => "8BIT",
+                Encoding::Base64 => "BASE64"
+            })
         }
     }
 }
@@ -174,17 +168,11 @@ pub enum Range {
     ThisAndFuture
 }
 
-impl Range {
-    fn into_value<'a>(self) -> Cow<'a, str> {
-        Cow::Borrowed("THISANDFUTURE")
-    }
-}
-
-impl<'a> From<Range> for Parameter<'a> {
-    fn from(builder: Range) -> Self {
+impl From<Range> for Parameter<'_> {
+    fn from(_builder: Range) -> Self {
         Parameter {
-            key: "RANGE".into(),
-            value: builder.into_value()
+            key: Cow::Borrowed("RANGE"),
+            value: Cow::Borrowed("THISANDFUTURE")
         }
     }
 }
@@ -204,20 +192,14 @@ pub enum Related {
     End
 }
 
-impl Related {
-    fn into_value<'a>(self) -> Cow<'a, str> {
-        match self {
-            Related::Start => Cow::Borrowed("START"),
-            Related::End => Cow::Borrowed("END")
-        }
-    }
-}
-
-impl<'a> From<Related> for Parameter<'a> {
+impl From<Related> for Parameter<'_> {
     fn from(builder: Related) -> Self {
         Parameter {
-            key: "RELATED".into(),
-            value: builder.into_value()
+            key: Cow::Borrowed("RELATED"),
+            value: Cow::Borrowed(match builder {
+                Related::Start => "START",
+                Related::End => "END"
+            })
         }
     }
 }
@@ -237,20 +219,14 @@ pub enum RSVP {
     False
 }
 
-impl RSVP {
-    fn into_value<'a>(self) -> Cow<'a, str> {
-        match self {
-            RSVP::True => Cow::Borrowed("TRUE"),
-            RSVP::False => Cow::Borrowed("FALSE")
-        }
-    }
-}
-
-impl<'a> From<RSVP> for Parameter<'a> {
+impl From<RSVP> for Parameter<'_> {
     fn from(builder: RSVP) -> Self {
         Parameter {
-            key: "RSVP".into(),
-            value: builder.into_value()
+            key: Cow::Borrowed("RSVP"),
+            value: Cow::Borrowed(match builder {
+                RSVP::True => "TRUE",
+                RSVP::False => "FALSE"
+            })
         }
     }
 }
@@ -291,7 +267,7 @@ mod rfc7986 {
     );
     parameter!(Label, "LABEL");
 
-    impl<'a> Default for Display<'a> {
+    impl Default for Display<'_> {
         fn default() -> Self {
             Self::BADGE
         }
