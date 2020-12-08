@@ -121,7 +121,10 @@ macro_rules! property_with_constructor {
                 ///
                 #[doc = "Property Value: "]#[doc = $value]
                 pub fn $const_ident() -> Self {
-                    Self::new($value)
+                    Self {
+                        value: Cow::Borrowed($value),
+                        parameters: BTreeMap::new()
+                    }
                 }
             )*
 
@@ -155,7 +158,7 @@ macro_rules! property_with_parameter {
         #[doc = "`"]#[doc=$name]#[doc = "` Property"]
         ///
         /// Newer properties that have a different value type than `TEXT` have to include the `VALUE` parameter.
-        #[doc = "This property already contains `VALUE:"]#[doc=$value]#[doc="`. Do not add this parameter manually."]
+        #[doc = "The `VALUE` parameter is set to `"]#[doc=$value]#[doc = "`. Do not add this parameter manually."]
         #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
         pub struct $type<'a> {
             value: Cow<'a, str>,
@@ -202,9 +205,7 @@ macro_rules! parameter {
         ///
         $(#[$outer])*
         #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
-        pub struct $type<'a> {
-            value: Cow<'a, str>
-        }
+        pub struct $type<'a>(Cow<'a, str>);
 
         impl<'a> $type<'a> {
             #[doc = "Creates a new `"]#[doc=$name]#[doc = "` Parameter with the given value."]
@@ -212,9 +213,7 @@ macro_rules! parameter {
             where
                 S: Into<Cow<'a, str>>
             {
-                Self {
-                    value: value.into()
-                }
+                Self(value.into())
             }
         }
 
@@ -231,9 +230,7 @@ macro_rules! parameter_with_const {
         ///
         $(#[$outer])*
         #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
-        pub struct $type<'a> {
-            value: Cow<'a, str>
-        }
+        pub struct $type<'a>(Cow<'a, str>);
 
         impl<'a> $type<'a> {
             #[doc = "Creates a new `"]#[doc=$name]#[doc = "` Parameter with the given value."]
@@ -241,18 +238,14 @@ macro_rules! parameter_with_const {
             where
                 S: Into<Cow<'a, str>>
             {
-                Self {
-                    value: value.into()
-                }
+                Self(value.into())
             }
 
             $(
                 $(#[$inner])*
                 ///
                 #[doc = "Parameter Value: "]#[doc = $value]
-                pub const $const_ident: Self = Self {
-                    value: Cow::Borrowed($value)
-                };
+                pub const $const_ident: Self = Self(Cow::Borrowed($value));
             )*
         }
 
@@ -265,7 +258,7 @@ macro_rules! impl_from_prop {
         impl<'a> From<$type<'a>> for Property<'a> {
             fn from(builder: $type<'a>) -> Self {
                 Property {
-                    key: $name.into(),
+                    key: Cow::Borrowed($name),
                     value: builder.value,
                     parameters: builder.parameters
                 }
@@ -279,8 +272,8 @@ macro_rules! impl_from_param {
         impl<'a> From<$type<'a>> for Parameter<'a> {
             fn from(builder: $type<'a>) -> Self {
                 Parameter {
-                    key: $name.into(),
-                    value: builder.value
+                    key: Cow::Borrowed($name),
+                    value: builder.0
                 }
             }
         }
@@ -329,14 +322,14 @@ macro_rules! property_integer {
         impl<'a> From<$type<'a>> for Property<'a> {
             fn from(builder: $type<'a>) -> Self {
                 Property {
-                    key: $name.into(),
+                    key: Cow::Borrowed($name),
                     value: Cow::Owned(builder.value.to_string()),
                     parameters: builder.parameters
                 }
             }
         }
 
-        impl<'a> PropertyWrite for $type<'a> {
+        impl PropertyWrite for $type<'_> {
             fn write<W: io::Write>(&self, line: &mut ContentLine<'_, W>) -> Result<(), io::Error> {
                line.write_name_unchecked($name);
                for (key, value) in &self.parameters {

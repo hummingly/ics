@@ -29,7 +29,7 @@ impl<'a> ICalendar<'a> {
         P: Into<Cow<'a, str>>
     {
         ICalendar(Component {
-            name: "VCALENDAR".into(),
+            name: Cow::Borrowed("VCALENDAR"),
             properties: vec![Version::new(version).into(), ProdID::new(prodid).into()],
             subcomponents: Vec::new()
         })
@@ -166,7 +166,7 @@ impl fmt::Display for Event<'_> {
 impl<'a> From<Event<'a>> for Component<'a> {
     fn from(component: Event<'a>) -> Self {
         Component {
-            name: "VEVENT".into(),
+            name: Cow::Borrowed("VEVENT"),
             properties: component.properties,
             subcomponents: component.alarms.into_iter().map(Component::from).collect()
         }
@@ -229,7 +229,7 @@ impl fmt::Display for ToDo<'_> {
 impl<'a> From<ToDo<'a>> for Component<'a> {
     fn from(component: ToDo<'a>) -> Self {
         Component {
-            name: "VTODO".into(),
+            name: Cow::Borrowed("VTODO"),
             properties: component.properties,
             subcomponents: component.alarms.into_iter().map(Component::from).collect()
         }
@@ -279,7 +279,7 @@ impl fmt::Display for Journal<'_> {
 impl<'a> From<Journal<'a>> for Component<'a> {
     fn from(component: Journal<'a>) -> Self {
         Component {
-            name: "VJOURNAL".into(),
+            name: Cow::Borrowed("VJOURNAL"),
             properties: component.0,
             subcomponents: Vec::new()
         }
@@ -330,7 +330,7 @@ impl fmt::Display for FreeBusy<'_> {
 impl<'a> From<FreeBusy<'a>> for Component<'a> {
     fn from(component: FreeBusy<'a>) -> Self {
         Component {
-            name: "VFREEBUSY".into(),
+            name: Cow::Borrowed("VFREEBUSY"),
             properties: component.0,
             subcomponents: Vec::new()
         }
@@ -404,7 +404,10 @@ impl fmt::Display for TimeZone<'_> {
             write!(f, "{}", property)?;
         }
         for component in &self.zone_times {
-            write!(f, "{}", component)?;
+            match component {
+                ZoneTime::Daylight(p) => write!(f, "{}", p),
+                ZoneTime::Standard(p) => write!(f, "{}", p)
+            }?;
         }
         writeln!(f, "END:VTIMEZONE\r")
     }
@@ -413,7 +416,7 @@ impl fmt::Display for TimeZone<'_> {
 impl<'a> From<TimeZone<'a>> for Component<'a> {
     fn from(component: TimeZone<'a>) -> Self {
         Component {
-            name: "VTIMEZONE".into(),
+            name: Cow::Borrowed("VTIMEZONE"),
             properties: component.properties,
             subcomponents: component
                 .zone_times
@@ -430,15 +433,6 @@ enum ZoneTime<'a> {
     Standard(Standard<'a>),
     /// Daylight Saving Time
     Daylight(Daylight<'a>)
-}
-
-impl fmt::Display for ZoneTime<'_> {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            ZoneTime::Daylight(p) => write!(f, "{}", p),
-            ZoneTime::Standard(p) => write!(f, "{}", p)
-        }
-    }
 }
 
 impl<'a> From<ZoneTime<'a>> for Component<'a> {
@@ -496,7 +490,7 @@ impl fmt::Display for Standard<'_> {
 impl<'a> From<Standard<'a>> for Component<'a> {
     fn from(component: Standard<'a>) -> Self {
         Component {
-            name: "STANDARD".into(),
+            name: Cow::Borrowed("STANDARD"),
             properties: component.0,
             subcomponents: Vec::new()
         }
@@ -550,7 +544,7 @@ impl fmt::Display for Daylight<'_> {
 impl<'a> From<Daylight<'a>> for Component<'a> {
     fn from(component: Daylight<'a>) -> Self {
         Component {
-            name: "DAYLIGHT".into(),
+            name: Cow::Borrowed("DAYLIGHT"),
             properties: component.0,
             subcomponents: Vec::new()
         }
@@ -623,7 +617,7 @@ impl fmt::Display for Alarm<'_> {
 impl<'a> From<Alarm<'a>> for Component<'a> {
     fn from(component: Alarm<'a>) -> Self {
         Component {
-            name: "VALARM".into(),
+            name: Cow::Borrowed("VALARM"),
             properties: component.0,
             subcomponents: Vec::new()
         }
