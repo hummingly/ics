@@ -15,17 +15,17 @@ const VTIMEZONE: &str = "VTIMEZONE";
 const STANDARD: &str = "STANDARD";
 const DAYLIGHT: &str = "DAYLIGHT";
 
-pub struct CalendarWriter<W: Write>(Writer<W>);
+pub struct ICalendarWriter<W: Write>(Writer<W>);
 
-impl<W: Write> CalendarWriter<W> {
-    pub fn new(inner: W, version: &str, product_id: &str) -> Result<CalendarWriter<W>, Error> {
+impl<W: Write> ICalendarWriter<W> {
+    pub fn new(inner: W, version: &str, product_id: &str) -> Result<ICalendarWriter<W>, Error> {
         let mut writer = Writer::new(inner);
         writer.write_begin_unchecked(VCALENDAR)?;
         write!(writer, "VERSION:{}", version)?;
         writer.end_line()?;
         write!(writer, "PRODID:{}", product_id)?;
         writer.end_line()?;
-        Ok(CalendarWriter(writer))
+        Ok(ICalendarWriter(writer))
     }
 
     pub fn write<P>(&mut self, property: &P) -> Result<(), Error>
@@ -48,50 +48,50 @@ impl<W: Write> CalendarWriter<W> {
 
     pub fn write_event<F>(&mut self, uid: &str, dt_stamp: &str, body: F) -> Result<(), Error>
     where
-        F: FnOnce(&mut EventWriter<'_, W>) -> Result<(), Error>
+        F: FnOnce(&mut Event<'_, W>) -> Result<(), Error>
     {
         self.0.write_begin_unchecked(VEVENT)?;
-        let mut writer = EventWriter::new(&mut self.0, uid, dt_stamp)?;
+        let mut writer = Event::new(&mut self.0, uid, dt_stamp)?;
         body(&mut writer)?;
         self.0.write_end_unchecked(VEVENT)
     }
 
     pub fn write_todo<F>(&mut self, uid: &str, dt_stamp: &str, body: F) -> Result<(), Error>
     where
-        F: FnOnce(&mut TodoWriter<'_, W>) -> Result<(), Error>
+        F: FnOnce(&mut ToDo<'_, W>) -> Result<(), Error>
     {
         self.0.write_begin_unchecked(VTODO)?;
-        let mut writer = TodoWriter::new(&mut self.0, uid, dt_stamp)?;
+        let mut writer = ToDo::new(&mut self.0, uid, dt_stamp)?;
         body(&mut writer)?;
         self.0.write_end_unchecked(VTODO)
     }
 
     pub fn write_journal<F>(&mut self, uid: &str, dt_stamp: &str, body: F) -> Result<(), Error>
     where
-        F: FnOnce(&mut JournalWriter<'_, W>) -> Result<(), Error>
+        F: FnOnce(&mut Journal<'_, W>) -> Result<(), Error>
     {
         self.0.write_begin_unchecked(VJOURNAL)?;
-        let mut writer = JournalWriter::new(&mut self.0, uid, dt_stamp)?;
+        let mut writer = Journal::new(&mut self.0, uid, dt_stamp)?;
         body(&mut writer)?;
         self.0.write_end_unchecked(VJOURNAL)
     }
 
     pub fn write_freebusy<F>(&mut self, uid: &str, dt_stamp: &str, body: F) -> Result<(), Error>
     where
-        F: FnOnce(&mut FreeBusyWriter<'_, W>) -> Result<(), Error>
+        F: FnOnce(&mut FreeBusy<'_, W>) -> Result<(), Error>
     {
         self.0.write_begin_unchecked(VFREEBUSY)?;
-        let mut writer = FreeBusyWriter::new(&mut self.0, uid, dt_stamp)?;
+        let mut writer = FreeBusy::new(&mut self.0, uid, dt_stamp)?;
         body(&mut writer)?;
         self.0.write_end_unchecked(VFREEBUSY)
     }
 
     pub fn write_timezone<F>(&mut self, tzid: &TzID, body: F) -> Result<(), Error>
     where
-        F: FnOnce(&mut TimeZoneWriter<'_, W>) -> Result<(), Error>
+        F: FnOnce(&mut TimeZone<'_, W>) -> Result<(), Error>
     {
         self.0.write_begin_unchecked(VTIMEZONE)?;
-        let mut writer = TimeZoneWriter::new(&mut self.0, tzid)?;
+        let mut writer = TimeZone::new(&mut self.0, tzid)?;
         body(&mut writer)?;
         self.0.write_end_unchecked(VTIMEZONE)
     }
@@ -102,9 +102,9 @@ impl<W: Write> CalendarWriter<W> {
     }
 }
 
-pub struct EventWriter<'w, W: Write>(&'w mut Writer<W>);
+pub struct Event<'w, W: Write>(&'w mut Writer<W>);
 
-impl<'w, W: Write> EventWriter<'w, W> {
+impl<'w, W: Write> Event<'w, W> {
     fn new(writer: &'w mut Writer<W>, uid: &str, dt_stamp: &str) -> Result<Self, Error> {
         write!(writer, "UID:{}", uid)?;
         writer.end_line()?;
@@ -114,7 +114,7 @@ impl<'w, W: Write> EventWriter<'w, W> {
     }
 }
 
-impl<W: Write> EventWriter<'_, W> {
+impl<W: Write> Event<'_, W> {
     pub fn write<P>(&mut self, property: &P) -> Result<(), Error>
     where
         P: PropertyWrite
@@ -131,20 +131,20 @@ impl<W: Write> EventWriter<'_, W> {
         body: F
     ) -> Result<(), Error>
     where
-        F: FnOnce(&mut AlarmWriter<'_, W>) -> Result<(), Error>
+        F: FnOnce(&mut Alarm<'_, W>) -> Result<(), Error>
     {
         self.0.write_begin_unchecked(VALARM)?;
-        let mut alarm = AlarmWriter::new(self.0, action, trigger)?;
+        let mut alarm = Alarm::new(self.0, action, trigger)?;
         body(&mut alarm)?;
         self.0.write_end_unchecked(VALARM)
     }
 
     pub fn write_audio_alarm<F>(&mut self, trigger: &Trigger<'_>, body: F) -> Result<(), Error>
     where
-        F: FnOnce(&mut AlarmWriter<'_, W>) -> Result<(), Error>
+        F: FnOnce(&mut Alarm<'_, W>) -> Result<(), Error>
     {
         self.0.write_begin_unchecked(VALARM)?;
-        let mut alarm = AlarmWriter::audio(self.0, trigger)?;
+        let mut alarm = Alarm::audio(self.0, trigger)?;
         body(&mut alarm)?;
         self.0.write_end_unchecked(VALARM)
     }
@@ -156,10 +156,10 @@ impl<W: Write> EventWriter<'_, W> {
         body: F
     ) -> Result<(), Error>
     where
-        F: FnOnce(&mut AlarmWriter<'_, W>) -> Result<(), Error>
+        F: FnOnce(&mut Alarm<'_, W>) -> Result<(), Error>
     {
         self.0.write_begin_unchecked(VALARM)?;
-        let mut alarm = AlarmWriter::display(self.0, trigger, description)?;
+        let mut alarm = Alarm::display(self.0, trigger, description)?;
         body(&mut alarm)?;
         self.0.write_end_unchecked(VALARM)
     }
@@ -172,18 +172,18 @@ impl<W: Write> EventWriter<'_, W> {
         body: F
     ) -> Result<(), Error>
     where
-        F: FnOnce(&mut AlarmWriter<'_, W>) -> Result<(), Error>
+        F: FnOnce(&mut Alarm<'_, W>) -> Result<(), Error>
     {
         self.0.write_begin_unchecked(VALARM)?;
-        let mut alarm = AlarmWriter::email(self.0, trigger, description, summary)?;
+        let mut alarm = Alarm::email(self.0, trigger, description, summary)?;
         body(&mut alarm)?;
         self.0.write_end_unchecked(VALARM)
     }
 }
 
-pub struct TodoWriter<'w, W: Write>(&'w mut Writer<W>);
+pub struct ToDo<'w, W: Write>(&'w mut Writer<W>);
 
-impl<'w, W: Write> TodoWriter<'w, W> {
+impl<'w, W: Write> ToDo<'w, W> {
     fn new(writer: &'w mut Writer<W>, uid: &str, dt_stamp: &str) -> Result<Self, Error> {
         write!(writer, "UID:{}", uid)?;
         writer.end_line()?;
@@ -193,7 +193,7 @@ impl<'w, W: Write> TodoWriter<'w, W> {
     }
 }
 
-impl<W: Write> TodoWriter<'_, W> {
+impl<W: Write> ToDo<'_, W> {
     pub fn write<P>(&mut self, property: &P) -> Result<(), Error>
     where
         P: PropertyWrite
@@ -210,20 +210,20 @@ impl<W: Write> TodoWriter<'_, W> {
         body: F
     ) -> Result<(), Error>
     where
-        F: FnOnce(&mut AlarmWriter<'_, W>) -> Result<(), Error>
+        F: FnOnce(&mut Alarm<'_, W>) -> Result<(), Error>
     {
         self.0.write_begin_unchecked(VALARM)?;
-        let mut alarm = AlarmWriter::new(self.0, action, trigger)?;
+        let mut alarm = Alarm::new(self.0, action, trigger)?;
         body(&mut alarm)?;
         self.0.write_end_unchecked(VALARM)
     }
 
     pub fn write_audio_alarm<F>(&mut self, trigger: &Trigger<'_>, body: F) -> Result<(), Error>
     where
-        F: FnOnce(&mut AlarmWriter<'_, W>) -> Result<(), Error>
+        F: FnOnce(&mut Alarm<'_, W>) -> Result<(), Error>
     {
         self.0.write_begin_unchecked(VALARM)?;
-        let mut alarm = AlarmWriter::audio(self.0, trigger)?;
+        let mut alarm = Alarm::audio(self.0, trigger)?;
         body(&mut alarm)?;
         self.0.write_end_unchecked(VALARM)
     }
@@ -235,10 +235,10 @@ impl<W: Write> TodoWriter<'_, W> {
         body: F
     ) -> Result<(), Error>
     where
-        F: FnOnce(&mut AlarmWriter<'_, W>) -> Result<(), Error>
+        F: FnOnce(&mut Alarm<'_, W>) -> Result<(), Error>
     {
         self.0.write_begin_unchecked(VALARM)?;
-        let mut alarm = AlarmWriter::display(self.0, trigger, description)?;
+        let mut alarm = Alarm::display(self.0, trigger, description)?;
         body(&mut alarm)?;
         self.0.write_end_unchecked(VALARM)
     }
@@ -251,18 +251,18 @@ impl<W: Write> TodoWriter<'_, W> {
         body: F
     ) -> Result<(), Error>
     where
-        F: FnOnce(&mut AlarmWriter<'_, W>) -> Result<(), Error>
+        F: FnOnce(&mut Alarm<'_, W>) -> Result<(), Error>
     {
         self.0.write_begin_unchecked(VALARM)?;
-        let mut alarm = AlarmWriter::email(self.0, trigger, description, summary)?;
+        let mut alarm = Alarm::email(self.0, trigger, description, summary)?;
         body(&mut alarm)?;
         self.0.write_end_unchecked(VALARM)
     }
 }
 
-pub struct JournalWriter<'w, W: Write>(&'w mut Writer<W>);
+pub struct Journal<'w, W: Write>(&'w mut Writer<W>);
 
-impl<'w, W: Write> JournalWriter<'w, W> {
+impl<'w, W: Write> Journal<'w, W> {
     fn new(writer: &'w mut Writer<W>, uid: &str, dt_stamp: &str) -> Result<Self, Error> {
         write!(writer, "UID:{}", uid)?;
         writer.end_line()?;
@@ -272,7 +272,7 @@ impl<'w, W: Write> JournalWriter<'w, W> {
     }
 }
 
-impl<W: Write> JournalWriter<'_, W> {
+impl<W: Write> Journal<'_, W> {
     pub fn write<P>(&mut self, property: &P) -> Result<(), Error>
     where
         P: PropertyWrite
@@ -283,9 +283,9 @@ impl<W: Write> JournalWriter<'_, W> {
     }
 }
 
-pub struct FreeBusyWriter<'w, W: Write>(&'w mut Writer<W>);
+pub struct FreeBusy<'w, W: Write>(&'w mut Writer<W>);
 
-impl<'w, W: Write> FreeBusyWriter<'w, W> {
+impl<'w, W: Write> FreeBusy<'w, W> {
     fn new(writer: &'w mut Writer<W>, uid: &str, dt_stamp: &str) -> Result<Self, Error> {
         write!(writer, "UID:{}", uid)?;
         writer.end_line()?;
@@ -295,7 +295,7 @@ impl<'w, W: Write> FreeBusyWriter<'w, W> {
     }
 }
 
-impl<W: Write> FreeBusyWriter<'_, W> {
+impl<W: Write> FreeBusy<'_, W> {
     pub fn write<P>(&mut self, property: &P) -> Result<(), Error>
     where
         P: PropertyWrite
@@ -306,9 +306,9 @@ impl<W: Write> FreeBusyWriter<'_, W> {
     }
 }
 
-pub struct TimeZoneWriter<'w, W: Write>(&'w mut Writer<W>);
+pub struct TimeZone<'w, W: Write>(&'w mut Writer<W>);
 
-impl<'w, W: Write> TimeZoneWriter<'w, W> {
+impl<'w, W: Write> TimeZone<'w, W> {
     fn new(writer: &'w mut Writer<W>, tzid: &TzID) -> Result<Self, Error> {
         let mut timezone = Self(writer);
         timezone.write(tzid)?;
@@ -316,7 +316,7 @@ impl<'w, W: Write> TimeZoneWriter<'w, W> {
     }
 }
 
-impl<W: Write> TimeZoneWriter<'_, W> {
+impl<W: Write> TimeZone<'_, W> {
     pub fn write<P>(&mut self, property: &P) -> Result<(), Error>
     where
         P: PropertyWrite
@@ -334,10 +334,10 @@ impl<W: Write> TimeZoneWriter<'_, W> {
         body: F
     ) -> Result<(), Error>
     where
-        F: FnOnce(&mut StandardWriter<'_, W>) -> Result<(), Error>
+        F: FnOnce(&mut Standard<'_, W>) -> Result<(), Error>
     {
         self.0.write_begin_unchecked(STANDARD)?;
-        let mut standard = StandardWriter::new(self.0, dtstart, tz_offset_from, tz_offset_to)?;
+        let mut standard = Standard::new(self.0, dtstart, tz_offset_from, tz_offset_to)?;
         body(&mut standard)?;
         self.0.write_end_unchecked(STANDARD)
     }
@@ -350,18 +350,18 @@ impl<W: Write> TimeZoneWriter<'_, W> {
         body: F
     ) -> Result<(), Error>
     where
-        F: FnOnce(&mut DaylightWriter<'_, W>) -> Result<(), Error>
+        F: FnOnce(&mut Daylight<'_, W>) -> Result<(), Error>
     {
         self.0.write_begin_unchecked(DAYLIGHT)?;
-        let mut daylight = DaylightWriter::new(self.0, dtstart, tz_offset_from, tz_offset_to)?;
+        let mut daylight = Daylight::new(self.0, dtstart, tz_offset_from, tz_offset_to)?;
         body(&mut daylight)?;
         self.0.write_end_unchecked(DAYLIGHT)
     }
 }
 
-pub struct AlarmWriter<'w, W: Write>(&'w mut Writer<W>);
+pub struct Alarm<'w, W: Write>(&'w mut Writer<W>);
 
-impl<'w, W: Write> AlarmWriter<'w, W> {
+impl<'w, W: Write> Alarm<'w, W> {
     fn new(
         writer: &'w mut Writer<W>,
         action: &Action<'_>,
@@ -407,7 +407,7 @@ impl<'w, W: Write> AlarmWriter<'w, W> {
     }
 }
 
-impl<W: Write> AlarmWriter<'_, W> {
+impl<W: Write> Alarm<'_, W> {
     pub fn write<P>(&mut self, property: &P) -> Result<(), Error>
     where
         P: PropertyWrite
@@ -418,9 +418,9 @@ impl<W: Write> AlarmWriter<'_, W> {
     }
 }
 
-pub struct StandardWriter<'w, W: Write>(&'w mut Writer<W>);
+pub struct Standard<'w, W: Write>(&'w mut Writer<W>);
 
-impl<'w, W: Write> StandardWriter<'w, W> {
+impl<'w, W: Write> Standard<'w, W> {
     fn new(
         writer: &'w mut Writer<W>,
         dtstart: &DtStart<'_>,
@@ -435,7 +435,7 @@ impl<'w, W: Write> StandardWriter<'w, W> {
     }
 }
 
-impl<W: Write> StandardWriter<'_, W> {
+impl<W: Write> Standard<'_, W> {
     pub fn write<P>(&mut self, property: &P) -> Result<(), Error>
     where
         P: PropertyWrite
@@ -446,9 +446,9 @@ impl<W: Write> StandardWriter<'_, W> {
     }
 }
 
-pub struct DaylightWriter<'w, W: Write>(&'w mut Writer<W>);
+pub struct Daylight<'w, W: Write>(&'w mut Writer<W>);
 
-impl<'w, W: Write> DaylightWriter<'w, W> {
+impl<'w, W: Write> Daylight<'w, W> {
     fn new(
         writer: &'w mut Writer<W>,
         dtstart: &DtStart<'_>,
@@ -463,7 +463,7 @@ impl<'w, W: Write> DaylightWriter<'w, W> {
     }
 }
 
-impl<W: Write> DaylightWriter<'_, W> {
+impl<W: Write> Daylight<'_, W> {
     pub fn write<P>(&mut self, property: &P) -> Result<(), Error>
     where
         P: PropertyWrite

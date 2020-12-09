@@ -34,7 +34,7 @@ fn event() -> std::io::Result<()> {
                     END:VEVENT\r\n\
                     END:VCALENDAR\r\n";
 
-    let event = |event: &mut EventWriter<'_, _>| {
+    let event = |event: &mut Event<'_, _>| {
         event.write(&Organizer::new("mailto:jsmith@example.com"))?;
         event.write(&DtStart::new("19960918T143000Z"))?;
         event.write(&DtEnd::new("19960920T220000Z"))?;
@@ -48,7 +48,7 @@ fn event() -> std::io::Result<()> {
         )))
     };
 
-    let mut calendar = CalendarWriter::new(
+    let mut calendar = ICalendarWriter::new(
         Vec::with_capacity(expected.len()),
         "2.0",
         "-//xyz Corp//NONSGML PDA Calendar Version 1.0//EN"
@@ -90,7 +90,7 @@ fn todo() -> std::io::Result<()> {
                     END:VTODO\r\n\
                     END:VCALENDAR\r\n";
 
-    let todo = |todo: &mut TodoWriter<'_, _>| {
+    let todo = |todo: &mut ToDo<'_, _>| {
         todo.write(&Organizer::new("mailto:unclesam@example.com"))?;
         let mut attendee = Attendee::new("mailto:jqpublic@example.com");
         attendee.add(PartStat::ACCEPTED);
@@ -109,7 +109,7 @@ fn todo() -> std::io::Result<()> {
         })
     };
 
-    let mut calendar = CalendarWriter::new(
+    let mut calendar = ICalendarWriter::new(
         Vec::with_capacity(expected.len()),
         "2.0",
         "-//ABC Corporation//NONSGML My Product//EN"
@@ -152,7 +152,7 @@ fn journal() -> std::io::Result<()> {
                     END:VJOURNAL\r\n\
                     END:VCALENDAR\r\n";
 
-    let journal = |journal: &mut JournalWriter<'_, _>| {
+    let journal = |journal: &mut Journal<'_, _>| {
         journal.write(&Organizer::new("mailto:jsmith@example.com"))?;
         journal.write(&Status::draft())?;
         journal.write(&Class::public())?;
@@ -171,7 +171,7 @@ fn journal() -> std::io::Result<()> {
         )))
     };
 
-    let mut calendar = CalendarWriter::new(
+    let mut calendar = ICalendarWriter::new(
         Vec::with_capacity(expected.len()),
         "2.0",
         "-//ABC Corporation//NONSGML My Product//EN"
@@ -206,7 +206,7 @@ fn freebusy() -> std::io::Result<()> {
                     END:VFREEBUSY\r\n\
                     END:VCALENDAR\r\n";
 
-    let freebusy = |freebusy: &mut FreeBusyWriter<'_, _>| {
+    let freebusy = |freebusy: &mut FreeBusy<'_, _>| {
         freebusy.write(&Organizer::new("mailto:jsmith@example.com"))?;
         freebusy.write(&DtStart::new("19980313T141711Z"))?;
         freebusy.write(&DtEnd::new("19980410T141711Z"))?;
@@ -218,7 +218,7 @@ fn freebusy() -> std::io::Result<()> {
         ))
     };
 
-    let mut calendar = CalendarWriter::new(
+    let mut calendar = ICalendarWriter::new(
         Vec::with_capacity(expected.len()),
         "2.0",
         "-//RDU Software//NONSGML HandCal//EN"
@@ -271,7 +271,7 @@ fn timezone() -> std::io::Result<()> {
                     END:VEVENT\r\n\
                     END:VCALENDAR\r\n";
 
-    let timezone = |timezone: &mut TimeZoneWriter<'_, _>| {
+    let timezone = |timezone: &mut TimeZone<'_, _>| {
         timezone.write_standard(
             &DtStart::new("19981025T020000"),
             &TzOffsetFrom::new("-0400"),
@@ -286,7 +286,7 @@ fn timezone() -> std::io::Result<()> {
         )
     };
 
-    let event = |event: &mut EventWriter<'_, _>| {
+    let event = |event: &mut Event<'_, _>| {
         event.write(&Organizer::new("mailto:mrbig@example.com"))?;
 
         let mut attendee = Attendee::new("mailto:employee-A@example.com");
@@ -311,7 +311,7 @@ fn timezone() -> std::io::Result<()> {
         event.write(&Location::new("1CP Conference Room 4350"))
     };
 
-    let mut calendar = CalendarWriter::new(
+    let mut calendar = ICalendarWriter::new(
         Vec::with_capacity(expected.len()),
         "2.0",
         "-//RDU Software//NONSGML HandCal//EN"
