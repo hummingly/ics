@@ -92,19 +92,17 @@ impl<W: Write> CalendarWriter<W> {
 
 pub struct EventWriter<'w, W: Write>(&'w mut Writer<W>);
 
-impl<W: Write> EventWriter<'_, W> {
-    fn new<'w>(
-        writer: &'w mut Writer<W>,
-        uid: &str,
-        dt_stamp: &str
-    ) -> Result<EventWriter<'w, W>, Error> {
+impl<'w, W: Write> EventWriter<'w, W> {
+    fn new(writer: &'w mut Writer<W>, uid: &str, dt_stamp: &str) -> Result<Self, Error> {
         write!(writer, "UID:{}", uid)?;
         writer.end_line()?;
         write!(writer, "DTSTAMP:{}", dt_stamp)?;
         writer.end_line()?;
-        Ok(EventWriter(writer))
+        Ok(Self(writer))
     }
+}
 
+impl<W: Write> EventWriter<'_, W> {
     pub fn write<P>(&mut self, property: &P) -> Result<(), Error>
     where
         P: PropertyWrite
@@ -173,19 +171,17 @@ impl<W: Write> EventWriter<'_, W> {
 
 pub struct TodoWriter<'w, W: Write>(&'w mut Writer<W>);
 
-impl<W: Write> TodoWriter<'_, W> {
-    fn new<'w>(
-        writer: &'w mut Writer<W>,
-        uid: &str,
-        dt_stamp: &str
-    ) -> Result<TodoWriter<'w, W>, Error> {
+impl<'w, W: Write> TodoWriter<'w, W> {
+    fn new(writer: &'w mut Writer<W>, uid: &str, dt_stamp: &str) -> Result<Self, Error> {
         write!(writer, "UID:{}", uid)?;
         writer.end_line()?;
         write!(writer, "DTSTAMP:{}", dt_stamp)?;
         writer.end_line()?;
-        Ok(TodoWriter(writer))
+        Ok(Self(writer))
     }
+}
 
+impl<W: Write> TodoWriter<'_, W> {
     pub fn write<P>(&mut self, property: &P) -> Result<(), Error>
     where
         P: PropertyWrite
@@ -254,19 +250,17 @@ impl<W: Write> TodoWriter<'_, W> {
 
 pub struct JournalWriter<'w, W: Write>(&'w mut Writer<W>);
 
-impl<W: Write> JournalWriter<'_, W> {
-    fn new<'w>(
-        writer: &'w mut Writer<W>,
-        uid: &str,
-        dt_stamp: &str
-    ) -> Result<JournalWriter<'w, W>, Error> {
+impl<'w, W: Write> JournalWriter<'w, W> {
+    fn new(writer: &'w mut Writer<W>, uid: &str, dt_stamp: &str) -> Result<Self, Error> {
         write!(writer, "UID:{}", uid)?;
         writer.end_line()?;
         write!(writer, "DTSTAMP:{}", dt_stamp)?;
         writer.end_line()?;
-        Ok(JournalWriter(writer))
+        Ok(Self(writer))
     }
+}
 
+impl<W: Write> JournalWriter<'_, W> {
     pub fn write<P>(&mut self, property: &P) -> Result<(), Error>
     where
         P: PropertyWrite
@@ -279,19 +273,17 @@ impl<W: Write> JournalWriter<'_, W> {
 
 pub struct FreeBusyWriter<'w, W: Write>(&'w mut Writer<W>);
 
-impl<W: Write> FreeBusyWriter<'_, W> {
-    fn new<'w>(
-        writer: &'w mut Writer<W>,
-        uid: &str,
-        dt_stamp: &str
-    ) -> Result<FreeBusyWriter<'w, W>, Error> {
+impl<'w, W: Write> FreeBusyWriter<'w, W> {
+    fn new(writer: &'w mut Writer<W>, uid: &str, dt_stamp: &str) -> Result<Self, Error> {
         write!(writer, "UID:{}", uid)?;
         writer.end_line()?;
         write!(writer, "DTSTAMP:{}", dt_stamp)?;
         writer.end_line()?;
-        Ok(FreeBusyWriter(writer))
+        Ok(Self(writer))
     }
+}
 
+impl<W: Write> FreeBusyWriter<'_, W> {
     pub fn write<P>(&mut self, property: &P) -> Result<(), Error>
     where
         P: PropertyWrite
@@ -304,54 +296,53 @@ impl<W: Write> FreeBusyWriter<'_, W> {
 
 pub struct AlarmWriter<'w, W: Write>(&'w mut Writer<W>);
 
-impl<W: Write> AlarmWriter<'_, W> {
-    fn new<'w>(
+impl<'w, W: Write> AlarmWriter<'w, W> {
+    fn new(
         writer: &'w mut Writer<W>,
         action: &Action<'_>,
         trigger: &Trigger<'_>
-    ) -> Result<AlarmWriter<'w, W>, Error> {
-        let mut alarm = AlarmWriter(writer);
+    ) -> Result<Self, Error> {
+        let mut alarm = Self(writer);
         alarm.write(action)?;
         alarm.write(trigger)?;
         Ok(alarm)
     }
 
-    fn audio<'w>(
-        writer: &'w mut Writer<W>,
-        trigger: &Trigger<'_>
-    ) -> Result<AlarmWriter<'w, W>, Error> {
-        let mut alarm = AlarmWriter(writer);
+    fn audio(writer: &'w mut Writer<W>, trigger: &Trigger<'_>) -> Result<Self, Error> {
+        let mut alarm = Self(writer);
         alarm.write(&Action::audio())?;
         alarm.write(trigger)?;
         Ok(alarm)
     }
 
-    fn display<'w>(
+    fn display(
         writer: &'w mut Writer<W>,
         trigger: &Trigger<'_>,
         description: &Description<'_>
-    ) -> Result<AlarmWriter<'w, W>, Error> {
-        let mut alarm = AlarmWriter(writer);
+    ) -> Result<Self, Error> {
+        let mut alarm = Self(writer);
         alarm.write(&Action::display())?;
         alarm.write(trigger)?;
         alarm.write(description)?;
         Ok(alarm)
     }
 
-    fn email<'w>(
+    fn email(
         writer: &'w mut Writer<W>,
         trigger: &Trigger<'_>,
         description: &Description<'_>,
         summary: &Summary<'_>
-    ) -> Result<AlarmWriter<'w, W>, Error> {
-        let mut alarm = AlarmWriter(writer);
+    ) -> Result<Self, Error> {
+        let mut alarm = Self(writer);
         alarm.write(&Action::email())?;
         alarm.write(trigger)?;
         alarm.write(description)?;
         alarm.write(summary)?;
         Ok(alarm)
     }
+}
 
+impl<W: Write> AlarmWriter<'_, W> {
     pub fn write<P>(&mut self, property: &P) -> Result<(), Error>
     where
         P: PropertyWrite
