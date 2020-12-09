@@ -9,7 +9,7 @@ use ics::properties::{
 use ics::writer::*;
 
 #[test]
-fn icalendar_event() -> std::io::Result<()> {
+fn event() -> std::io::Result<()> {
     let expected = "BEGIN:VCALENDAR\r\n\
                     VERSION:2.0\r\n\
                     PRODID:-//xyz Corp//NONSGML PDA Calendar Version 1.0//EN\r\n\
@@ -61,7 +61,7 @@ fn icalendar_event() -> std::io::Result<()> {
 }
 
 #[test]
-fn icalendar_todo() -> std::io::Result<()> {
+fn todo() -> std::io::Result<()> {
     let expected = "BEGIN:VCALENDAR\r\n\
                     VERSION:2.0\r\n\
                     PRODID:-//ABC Corporation//NONSGML My Product//EN\r\n\
