@@ -1,6 +1,8 @@
 #![allow(dead_code)]
 use crate::contentline::{ContentLine, PropertyWrite, Writer};
-use crate::properties::{Action, Description, Summary, Trigger};
+use crate::properties::{
+    Action, Description, DtStart, Summary, Trigger, TzID, TzOffsetFrom, TzOffsetTo
+};
 use std::io::{Error, Write};
 
 const VCALENDAR: &str = "VCALENDAR";
@@ -74,7 +76,7 @@ impl<W: Write> CalendarWriter<W> {
         self.0.write_end_unchecked(VJOURNAL)
     }
 
-    pub fn write_free_busy<F>(&mut self, uid: &str, dt_stamp: &str, body: F) -> Result<(), Error>
+    pub fn write_freebusy<F>(&mut self, uid: &str, dt_stamp: &str, body: F) -> Result<(), Error>
     where
         F: FnOnce(&mut FreeBusyWriter<'_, W>) -> Result<(), Error>
     {
@@ -82,6 +84,16 @@ impl<W: Write> CalendarWriter<W> {
         let mut writer = FreeBusyWriter::new(&mut self.0, uid, dt_stamp)?;
         body(&mut writer)?;
         self.0.write_end_unchecked(VFREEBUSY)
+    }
+
+    pub fn write_timezone<F>(&mut self, tzid: &TzID, body: F) -> Result<(), Error>
+    where
+        F: FnOnce(&mut TimeZoneWriter<'_, W>) -> Result<(), Error>
+    {
+        self.0.write_begin_unchecked(VTIMEZONE)?;
+        let mut writer = TimeZoneWriter::new(&mut self.0, tzid)?;
+        body(&mut writer)?;
+        self.0.write_end_unchecked(VTIMEZONE)
     }
 
     pub fn close(mut self) -> Result<W, Error> {
@@ -294,6 +306,59 @@ impl<W: Write> FreeBusyWriter<'_, W> {
     }
 }
 
+pub struct TimeZoneWriter<'w, W: Write>(&'w mut Writer<W>);
+
+impl<'w, W: Write> TimeZoneWriter<'w, W> {
+    fn new(writer: &'w mut Writer<W>, tzid: &TzID) -> Result<Self, Error> {
+        let mut timezone = Self(writer);
+        timezone.write(tzid)?;
+        Ok(timezone)
+    }
+}
+
+impl<W: Write> TimeZoneWriter<'_, W> {
+    pub fn write<P>(&mut self, property: &P) -> Result<(), Error>
+    where
+        P: PropertyWrite
+    {
+        let mut line = ContentLine::new(&mut self.0);
+        property.write(&mut line)?;
+        line.end_line()
+    }
+
+    pub fn write_standard<F>(
+        &mut self,
+        dtstart: &DtStart<'_>,
+        tz_offset_from: &TzOffsetFrom<'_>,
+        tz_offset_to: &TzOffsetTo<'_>,
+        body: F
+    ) -> Result<(), Error>
+    where
+        F: FnOnce(&mut StandardWriter<'_, W>) -> Result<(), Error>
+    {
+        self.0.write_begin_unchecked(STANDARD)?;
+        let mut standard = StandardWriter::new(self.0, dtstart, tz_offset_from, tz_offset_to)?;
+        body(&mut standard)?;
+        self.0.write_end_unchecked(STANDARD)
+    }
+
+    pub fn write_daylight<F>(
+        &mut self,
+        dtstart: &DtStart<'_>,
+        tz_offset_from: &TzOffsetFrom<'_>,
+        tz_offset_to: &TzOffsetTo<'_>,
+        body: F
+    ) -> Result<(), Error>
+    where
+        F: FnOnce(&mut DaylightWriter<'_, W>) -> Result<(), Error>
+    {
+        self.0.write_begin_unchecked(DAYLIGHT)?;
+        let mut daylight = DaylightWriter::new(self.0, dtstart, tz_offset_from, tz_offset_to)?;
+        body(&mut daylight)?;
+        self.0.write_end_unchecked(DAYLIGHT)
+    }
+}
+
 pub struct AlarmWriter<'w, W: Write>(&'w mut Writer<W>);
 
 impl<'w, W: Write> AlarmWriter<'w, W> {
@@ -343,6 +408,62 @@ impl<'w, W: Write> AlarmWriter<'w, W> {
 }
 
 impl<W: Write> AlarmWriter<'_, W> {
+    pub fn write<P>(&mut self, property: &P) -> Result<(), Error>
+    where
+        P: PropertyWrite
+    {
+        let mut line = ContentLine::new(&mut self.0);
+        property.write(&mut line)?;
+        line.end_line()
+    }
+}
+
+pub struct StandardWriter<'w, W: Write>(&'w mut Writer<W>);
+
+impl<'w, W: Write> StandardWriter<'w, W> {
+    fn new(
+        writer: &'w mut Writer<W>,
+        dtstart: &DtStart<'_>,
+        tz_offset_from: &TzOffsetFrom<'_>,
+        tz_offset_to: &TzOffsetTo<'_>
+    ) -> Result<Self, Error> {
+        let mut standard = Self(writer);
+        standard.write(dtstart)?;
+        standard.write(tz_offset_from)?;
+        standard.write(tz_offset_to)?;
+        Ok(standard)
+    }
+}
+
+impl<W: Write> StandardWriter<'_, W> {
+    pub fn write<P>(&mut self, property: &P) -> Result<(), Error>
+    where
+        P: PropertyWrite
+    {
+        let mut line = ContentLine::new(&mut self.0);
+        property.write(&mut line)?;
+        line.end_line()
+    }
+}
+
+pub struct DaylightWriter<'w, W: Write>(&'w mut Writer<W>);
+
+impl<'w, W: Write> DaylightWriter<'w, W> {
+    fn new(
+        writer: &'w mut Writer<W>,
+        dtstart: &DtStart<'_>,
+        tz_offset_from: &TzOffsetFrom<'_>,
+        tz_offset_to: &TzOffsetTo<'_>
+    ) -> Result<Self, Error> {
+        let mut daylight = Self(writer);
+        daylight.write(dtstart)?;
+        daylight.write(tz_offset_from)?;
+        daylight.write(tz_offset_to)?;
+        Ok(daylight)
+    }
+}
+
+impl<W: Write> DaylightWriter<'_, W> {
     pub fn write<P>(&mut self, property: &P) -> Result<(), Error>
     where
         P: PropertyWrite

@@ -1,12 +1,18 @@
 extern crate ics;
 
-use ics::escape_text;
-use ics::parameters::{FmtType, PartStat};
 use ics::properties::{
     Attach, Attendee, Categories, Class, Description, DtEnd, DtStart, Due, Duration, FreeBusyTime,
-    Organizer, Repeat, Sequence, Status, Summary, Trigger, URL
+    Location, Organizer, Repeat, Sequence, Status, Summary, Trigger, TzID, URL
 };
 use ics::writer::*;
+use ics::{
+    escape_text,
+    properties::{TzName, TzOffsetFrom, TzOffsetTo}
+};
+use ics::{
+    parameters::{CUType, FmtType, PartStat, Role, TzIDParam, RSVP},
+    properties::Created
+};
 
 #[test]
 fn event() -> std::io::Result<()> {
@@ -217,13 +223,108 @@ fn freebusy() -> std::io::Result<()> {
         "2.0",
         "-//RDU Software//NONSGML HandCal//EN"
     )?;
-    calendar.write_free_busy(
+    calendar.write_freebusy(
         "0b04bd52-c396-4251-a673-1cc0b96def93",
         "19970324T120000Z",
         freebusy
     )?;
 
     let output = calendar.close()?;
+    assert_eq!(String::from_utf8_lossy(&output), expected);
+
+    Ok(())
+}
+
+#[test]
+fn timezone() -> std::io::Result<()> {
+    let expected = "BEGIN:VCALENDAR\r\n\
+                    VERSION:2.0\r\n\
+                    PRODID:-//RDU Software//NONSGML HandCal//EN\r\n\
+                    BEGIN:VTIMEZONE\r\n\
+                    TZID:America/New_York\r\n\
+                    BEGIN:STANDARD\r\n\
+                    DTSTART:19981025T020000\r\n\
+                    TZOFFSETFROM:-0400\r\n\
+                    TZOFFSETTO:-0500\r\n\
+                    TZNAME:EST\r\n\
+                    END:STANDARD\r\n\
+                    BEGIN:DAYLIGHT\r\n\
+                    DTSTART:19990404T020000\r\n\
+                    TZOFFSETFROM:-0500\r\n\
+                    TZOFFSETTO:-0400\r\n\
+                    TZNAME:EDT\r\n\
+                    END:DAYLIGHT\r\n\
+                    END:VTIMEZONE\r\n\
+                    BEGIN:VEVENT\r\n\
+                    UID:b7d2e88d-c0ac-4d26-8be2-fbe27217e698\r\n\
+                    DTSTAMP:19980309T231000Z\r\n\
+                    ORGANIZER:mailto:mrbig@example.com\r\n\
+                    ATTENDEE;CUTYPE=GROUP;ROLE=REQ-PARTICIPANT;RSVP=TRUE:mailto:employee-A@exam\r\n ple.com\r\n\
+                    DESCRIPTION:Project XYZ Review Meeting\r\n\
+                    CATEGORIES:MEETING\r\n\
+                    CLASS:PUBLIC\r\n\
+                    CREATED:19980309T130000Z\r\n\
+                    SUMMARY:XYZ Project Review\r\n\
+                    DTSTART;TZID=America/New_York:19980312T083000\r\n\
+                    DTEND;TZID=America/New_York:19980312T093000\r\n\
+                    LOCATION:1CP Conference Room 4350\r\n\
+                    END:VEVENT\r\n\
+                    END:VCALENDAR\r\n";
+
+    let timezone = |timezone: &mut TimeZoneWriter<'_, _>| {
+        timezone.write_standard(
+            &DtStart::new("19981025T020000"),
+            &TzOffsetFrom::new("-0400"),
+            &TzOffsetTo::new("-0500"),
+            |standard| standard.write(&TzName::new("EST"))
+        )?;
+        timezone.write_daylight(
+            &DtStart::new("19990404T020000"),
+            &TzOffsetFrom::new("-0500"),
+            &TzOffsetTo::new("-0400"),
+            |daylight| daylight.write(&TzName::new("EDT"))
+        )
+    };
+
+    let event = |event: &mut EventWriter<'_, _>| {
+        event.write(&Organizer::new("mailto:mrbig@example.com"))?;
+
+        let mut attendee = Attendee::new("mailto:employee-A@example.com");
+        attendee.add(RSVP::True);
+        attendee.add(Role::REQ_PARTICIPANT);
+        attendee.add(CUType::GROUP);
+        event.write(&attendee)?;
+
+        event.write(&Description::new("Project XYZ Review Meeting"))?;
+        event.write(&Categories::new("MEETING"))?;
+        event.write(&Class::public())?;
+        event.write(&Created::new("19980309T130000Z"))?;
+        event.write(&Summary::new("XYZ Project Review"))?;
+
+        let mut start = DtStart::new("19980312T083000");
+        start.add(TzIDParam::new("America/New_York"));
+        let mut end = DtEnd::new("19980312T093000");
+        end.add(TzIDParam::new("America/New_York"));
+        event.write(&start)?;
+        event.write(&end)?;
+
+        event.write(&Location::new("1CP Conference Room 4350"))
+    };
+
+    let mut calendar = CalendarWriter::new(
+        Vec::with_capacity(expected.len()),
+        "2.0",
+        "-//RDU Software//NONSGML HandCal//EN"
+    )?;
+    calendar.write_timezone(&TzID::new("America/New_York"), timezone)?;
+    calendar.write_event(
+        "b7d2e88d-c0ac-4d26-8be2-fbe27217e698",
+        "19980309T231000Z",
+        event
+    )?;
+
+    let output = calendar.close()?;
+
     assert_eq!(String::from_utf8_lossy(&output), expected);
 
     Ok(())
