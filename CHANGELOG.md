@@ -12,6 +12,10 @@
     - `Repeat`
     - `Sequence`
 
+### API
+
+- Constified some of the property constructors.
+
 ### Misc
 
 - Migrated to edition 2018

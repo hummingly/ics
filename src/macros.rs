@@ -123,7 +123,7 @@ macro_rules! property_with_constructor {
                 $(#[$inner])*
                 ///
                 #[doc = "Property Value: "]#[doc = $value]
-                pub fn $const_ident() -> Self {
+                pub const fn $const_ident() -> Self {
                     Self {
                         value: Cow::Borrowed($value),
                         parameters: Vec::new()
@@ -226,7 +226,7 @@ macro_rules! property_integer {
 
         impl<'a> $type<'a> {
             #[doc = "Creates a new `"]#[doc=$name]#[doc = "` Property with the given value."]
-            pub fn new(value: Integer) -> Self {
+            pub const fn new(value: Integer) -> Self {
                 Self {
                     value,
                     parameters: Vec::new()
