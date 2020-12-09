@@ -58,7 +58,7 @@ pub mod parameters;
 pub mod properties;
 mod util;
 mod value;
-mod writer;
+pub mod writer;
 
 pub use crate::ical::{
     Alarm, Daylight, Event, FreeBusy, ICalendar, Journal, Standard, TimeZone, ToDo
