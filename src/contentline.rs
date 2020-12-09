@@ -37,7 +37,7 @@ impl<W: Write> ContentLine<'_, W> {
     }
 
     #[inline]
-    pub fn write_value<V>(&mut self, value: V) -> Result<(), Error>
+    pub fn write_value<V>(&mut self, value: &V) -> Result<(), Error>
     where
         V: std::fmt::Display
     {

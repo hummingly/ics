@@ -87,6 +87,8 @@ macro_rules! property {
         }
 
         impl_from_prop!($type, $name);
+
+        impl_property_write!($type, $name);
     };
 }
 
@@ -146,6 +148,8 @@ macro_rules! property_with_constructor {
         }
 
         impl_from_prop!($type, $name);
+
+        impl_property_write!($type, $name);
     };
 }
 
@@ -195,6 +199,61 @@ macro_rules! property_with_parameter {
         }
 
         impl_from_prop!($type, $name);
+
+        impl_property_write!($type, $name);
+    };
+}
+
+// Creation and conversion from builder types to Property
+#[allow(unused_macros)]
+macro_rules! property_integer {
+    ($(#[$outer:meta])* $type:ident, $name:expr) => {
+        #[doc = "`"]#[doc=$name]#[doc = "` Property"]
+        ///
+        $(#[$outer])*
+        #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
+        pub struct $type<'a> {
+            value: Integer,
+            parameters: Parameters<'a>
+        }
+
+        impl<'a> $type<'a> {
+            #[doc = "Creates a new `"]#[doc=$name]#[doc = "` Property with the given value."]
+            pub fn new(value: Integer) -> Self {
+                Self {
+                    value,
+                    parameters: BTreeMap::new()
+                }
+            }
+
+            /// Adds a parameter to the property.
+            pub fn add<P>(&mut self, parameter: P)
+            where
+                P: Into<Parameter<'a>>
+            {
+                let param = parameter.into();
+                self.parameters.insert(param.key, param.value);
+            }
+
+            /// Adds several parameters at once to the property. For creating
+            /// several parameters at once, consult the documentation of
+            /// the [`parameters!`] macro.
+            pub fn append(&mut self, mut parameters: Parameters<'a>) {
+                self.parameters.append(&mut parameters);
+            }
+        }
+
+        impl<'a> From<$type<'a>> for Property<'a> {
+            fn from(builder: $type<'a>) -> Self {
+                Property {
+                    key: Cow::Borrowed($name),
+                    value: Cow::Owned(builder.value.to_string()),
+                    parameters: builder.parameters
+                }
+            }
+        }
+
+        impl_property_write!($type, $name);
     };
 }
 
@@ -267,6 +326,21 @@ macro_rules! impl_from_prop {
     };
 }
 
+#[allow(unused_macros)]
+macro_rules! impl_property_write {
+    ($type:ident, $name:expr) => {
+        impl PropertyWrite for $type<'_> {
+            fn write<W: io::Write>(&self, line: &mut ContentLine<'_, W>) -> Result<(), io::Error> {
+                line.write_name_unchecked($name);
+                for (key, value) in &self.parameters {
+                    line.write_parameter_pair(key, value)?;
+                }
+                line.write_value(&self.value)
+            }
+        }
+    };
+}
+
 macro_rules! impl_from_param {
     ($type:ident, $name:expr) => {
         impl<'a> From<$type<'a>> for Parameter<'a> {
@@ -275,67 +349,6 @@ macro_rules! impl_from_param {
                     key: Cow::Borrowed($name),
                     value: builder.0
                 }
-            }
-        }
-    };
-}
-
-// Creation and conversion from builder types to Property
-#[allow(unused_macros)]
-macro_rules! property_integer {
-    ($(#[$outer:meta])* $type:ident, $name:expr) => {
-        #[doc = "`"]#[doc=$name]#[doc = "` Property"]
-        ///
-        $(#[$outer])*
-        #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
-        pub struct $type<'a> {
-            value: Integer,
-            parameters: Parameters<'a>
-        }
-
-        impl<'a> $type<'a> {
-            #[doc = "Creates a new `"]#[doc=$name]#[doc = "` Property with the given value."]
-            pub fn new(value: Integer) -> Self {
-                Self {
-                    value,
-                    parameters: BTreeMap::new()
-                }
-            }
-
-            /// Adds a parameter to the property.
-            pub fn add<P>(&mut self, parameter: P)
-            where
-                P: Into<Parameter<'a>>
-            {
-                let param = parameter.into();
-                self.parameters.insert(param.key, param.value);
-            }
-
-            /// Adds several parameters at once to the property. For creating
-            /// several parameters at once, consult the documentation of
-            /// the [`parameters!`] macro.
-            pub fn append(&mut self, mut parameters: Parameters<'a>) {
-                self.parameters.append(&mut parameters);
-            }
-        }
-
-        impl<'a> From<$type<'a>> for Property<'a> {
-            fn from(builder: $type<'a>) -> Self {
-                Property {
-                    key: Cow::Borrowed($name),
-                    value: Cow::Owned(builder.value.to_string()),
-                    parameters: builder.parameters
-                }
-            }
-        }
-
-        impl PropertyWrite for $type<'_> {
-            fn write<W: io::Write>(&self, line: &mut ContentLine<'_, W>) -> Result<(), io::Error> {
-               line.write_name_unchecked($name);
-               for (key, value) in &self.parameters {
-                   line.write_parameter_pair(key, value)?;
-               }
-               line.write_value(self.value)
             }
         }
     };

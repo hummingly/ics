@@ -166,8 +166,10 @@ pub use self::rfc7986::*;
 #[cfg(feature = "rfc7986")]
 mod rfc7986 {
     use crate::components::{Parameter, Parameters, Property};
+    use crate::contentline::{ContentLine, PropertyWrite};
     use std::borrow::Cow;
     use std::collections::BTreeMap;
+    use std::io;
     property!(Name, "NAME");
     property_with_parameter!(RefreshInterval, "REFRESH-INTERVAL", "DURATION");
     property_with_parameter!(Source, "SOURCE", "URI");
@@ -236,6 +238,16 @@ mod rfc7986 {
                 value: builder.value,
                 parameters: builder.parameters
             }
+        }
+    }
+
+    impl PropertyWrite for Image<'_> {
+        fn write<W: io::Write>(&self, line: &mut ContentLine<'_, W>) -> Result<(), io::Error> {
+            line.write_name_unchecked("IMAGE");
+            for (key, value) in &self.parameters {
+                line.write_parameter_pair(key, value)?;
+            }
+            line.write_value(&self.value)
         }
     }
 }
