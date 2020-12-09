@@ -114,12 +114,58 @@ impl<W: Write> EventWriter<'_, W> {
         line.end_line()
     }
 
-    pub fn write_alarm<F>(&mut self, body: F) -> Result<(), Error>
+    pub fn write_alarm<F>(
+        &mut self,
+        action: &Action<'_>,
+        trigger: &Trigger<'_>,
+        body: F
+    ) -> Result<(), Error>
     where
-        F: for<'f> FnOnce(&mut AlarmWriter<'f, W>) -> Result<(), Error>
+        F: FnOnce(&mut AlarmWriter<'_, W>) -> Result<(), Error>
     {
         self.0.write_begin_unchecked(VALARM)?;
-        let mut alarm = AlarmWriter::new(self.0)?;
+        let mut alarm = AlarmWriter::new(self.0, action, trigger)?;
+        body(&mut alarm)?;
+        self.0.write_end_unchecked(VALARM)
+    }
+
+    pub fn write_audio_alarm<F>(&mut self, trigger: &Trigger<'_>, body: F) -> Result<(), Error>
+    where
+        F: FnOnce(&mut AlarmWriter<'_, W>) -> Result<(), Error>
+    {
+        self.0.write_begin_unchecked(VALARM)?;
+        let mut alarm = AlarmWriter::audio(self.0, trigger)?;
+        body(&mut alarm)?;
+        self.0.write_end_unchecked(VALARM)
+    }
+
+    pub fn write_display_alarm<F>(
+        &mut self,
+        trigger: &Trigger<'_>,
+        description: &Description<'_>,
+        body: F
+    ) -> Result<(), Error>
+    where
+        F: FnOnce(&mut AlarmWriter<'_, W>) -> Result<(), Error>
+    {
+        self.0.write_begin_unchecked(VALARM)?;
+        let mut alarm = AlarmWriter::display(self.0, trigger, description)?;
+        body(&mut alarm)?;
+        self.0.write_end_unchecked(VALARM)
+    }
+
+    pub fn write_email_alarm<F>(
+        &mut self,
+        trigger: &Trigger<'_>,
+        description: &Description<'_>,
+        summary: &Summary<'_>,
+        body: F
+    ) -> Result<(), Error>
+    where
+        F: FnOnce(&mut AlarmWriter<'_, W>) -> Result<(), Error>
+    {
+        self.0.write_begin_unchecked(VALARM)?;
+        let mut alarm = AlarmWriter::email(self.0, trigger, description, summary)?;
         body(&mut alarm)?;
         self.0.write_end_unchecked(VALARM)
     }
@@ -149,22 +195,58 @@ impl<W: Write> TodoWriter<'_, W> {
         line.end_line()
     }
 
-    pub fn write_alarm<F>(&mut self, body: F) -> Result<(), Error>
+    pub fn write_alarm<F>(
+        &mut self,
+        action: &Action<'_>,
+        trigger: &Trigger<'_>,
+        body: F
+    ) -> Result<(), Error>
     where
-        F: for<'f> FnOnce(&mut AlarmWriter<'f, W>) -> Result<(), Error>
+        F: FnOnce(&mut AlarmWriter<'_, W>) -> Result<(), Error>
     {
         self.0.write_begin_unchecked(VALARM)?;
-        let mut alarm = AlarmWriter::new(self.0)?;
+        let mut alarm = AlarmWriter::new(self.0, action, trigger)?;
         body(&mut alarm)?;
         self.0.write_end_unchecked(VALARM)
     }
 
     pub fn write_audio_alarm<F>(&mut self, trigger: &Trigger<'_>, body: F) -> Result<(), Error>
     where
-        F: for<'f> FnOnce(&mut AlarmWriter<'f, W>) -> Result<(), Error>
+        F: FnOnce(&mut AlarmWriter<'_, W>) -> Result<(), Error>
     {
         self.0.write_begin_unchecked(VALARM)?;
         let mut alarm = AlarmWriter::audio(self.0, trigger)?;
+        body(&mut alarm)?;
+        self.0.write_end_unchecked(VALARM)
+    }
+
+    pub fn write_display_alarm<F>(
+        &mut self,
+        trigger: &Trigger<'_>,
+        description: &Description<'_>,
+        body: F
+    ) -> Result<(), Error>
+    where
+        F: FnOnce(&mut AlarmWriter<'_, W>) -> Result<(), Error>
+    {
+        self.0.write_begin_unchecked(VALARM)?;
+        let mut alarm = AlarmWriter::display(self.0, trigger, description)?;
+        body(&mut alarm)?;
+        self.0.write_end_unchecked(VALARM)
+    }
+
+    pub fn write_email_alarm<F>(
+        &mut self,
+        trigger: &Trigger<'_>,
+        description: &Description<'_>,
+        summary: &Summary<'_>,
+        body: F
+    ) -> Result<(), Error>
+    where
+        F: FnOnce(&mut AlarmWriter<'_, W>) -> Result<(), Error>
+    {
+        self.0.write_begin_unchecked(VALARM)?;
+        let mut alarm = AlarmWriter::email(self.0, trigger, description, summary)?;
         body(&mut alarm)?;
         self.0.write_end_unchecked(VALARM)
     }
@@ -223,12 +305,7 @@ impl<W: Write> FreeBusyWriter<'_, W> {
 pub struct AlarmWriter<'w, W: Write>(&'w mut Writer<W>);
 
 impl<W: Write> AlarmWriter<'_, W> {
-    fn new<'w>(writer: &'w mut Writer<W>) -> Result<AlarmWriter<'w, W>, Error> {
-        // TODO: Required properties
-        Ok(AlarmWriter(writer))
-    }
-
-    fn new2<'w>(
+    fn new<'w>(
         writer: &'w mut Writer<W>,
         action: &Action<'_>,
         trigger: &Trigger<'_>
