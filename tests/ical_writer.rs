@@ -3,8 +3,8 @@ extern crate ics;
 use ics::escape_text;
 use ics::parameters::{FmtType, PartStat};
 use ics::properties::{
-    Attach, Attendee, Categories, Description, DtEnd, DtStart, Due, Duration, Organizer, Repeat,
-    Sequence, Status, Summary, Trigger
+    Attach, Attendee, Categories, Class, Description, DtEnd, DtStart, Due, Duration, Organizer,
+    Repeat, Sequence, Status, Summary, Trigger
 };
 use ics::writer::*;
 
@@ -113,6 +113,64 @@ fn todo() -> std::io::Result<()> {
         "19980130T134500Z",
         todo
     )?;
+
+    let output = calendar.close()?;
+    assert_eq!(String::from_utf8_lossy(&output), expected);
+
+    Ok(())
+}
+
+#[test]
+fn journal() -> std::io::Result<()> {
+    let expected = "BEGIN:VCALENDAR\r\n\
+                    VERSION:2.0\r\n\
+                    PRODID:-//ABC Corporation//NONSGML My Product//EN\r\n\
+                    BEGIN:VJOURNAL\r\n\
+                    UID:uid5@example.com\r\n\
+                    DTSTAMP:19970324T120000Z\r\n\
+                    ORGANIZER:mailto:jsmith@example.com\r\n\
+                    STATUS:DRAFT\r\n\
+                    CLASS:PUBLIC\r\n\
+                    CATEGORIES:Project Report,XYZ,Weekly Meeting\r\n\
+                    DESCRIPTION:Project xyz Review Meeting Minutes\n\
+                    Agenda\n\
+                    1. Review of project \r\n version 1.0 requirements.\n\
+                    2. Definition of project processes.\n\
+                    3. Review of \r\n project schedule.\n\
+                    Participants: John Smith\\, Jane Doe\\, Jim Dandy\n\
+                    -It was d\r\n ecided that the requirements need to be signed off by product marketing.\n\
+                    -P\r\n roject processes were accepted.\n\
+                    -Project schedule needs to account for sche\r\n duled holidays and employee vacation time. Check with HR for specific dates\r\n .\n\
+                    -New schedule will be distributed by Friday.\n\
+                    -Next weeks meeting is cance\r\n lled. No meeting until 3/23.\r\n\
+                    END:VJOURNAL\r\n\
+                    END:VCALENDAR\r\n";
+
+    let journal = |journal: &mut JournalWriter<'_, _>| {
+        journal.write(&Organizer::new("mailto:jsmith@example.com"))?;
+        journal.write(&Status::draft())?;
+        journal.write(&Class::public())?;
+        journal.write(&Categories::new("Project Report,XYZ,Weekly Meeting"))?;
+        journal.write(&Description::new(escape_text("Project xyz Review Meeting Minutes\n\
+            Agenda\n\
+            1. Review of project version 1.0 requirements.\n\
+            2. Definition of project processes.\n\
+            3. Review of project schedule.\n\
+            Participants: John Smith, Jane Doe, Jim Dandy\n\
+            -It was decided that the requirements need to be signed off by product marketing.\n\
+            -Project processes were accepted.\n\
+            -Project schedule needs to account for scheduled holidays and employee vacation time. Check with HR for specific dates.\n\
+            -New schedule will be distributed by Friday.\n\
+            -Next weeks meeting is cancelled. No meeting until 3/23."
+        )))
+    };
+
+    let mut calendar = CalendarWriter::new(
+        Vec::with_capacity(expected.len()),
+        "2.0",
+        "-//ABC Corporation//NONSGML My Product//EN"
+    )?;
+    calendar.write_journal("uid5@example.com", "19970324T120000Z", journal)?;
 
     let output = calendar.close()?;
     assert_eq!(String::from_utf8_lossy(&output), expected);
