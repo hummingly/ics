@@ -19,7 +19,6 @@
 //! }
 //! ```
 use std::borrow::Cow;
-use std::collections::BTreeMap;
 use std::fmt;
 
 /// A `Component` contains properties and sometimes sub-components.
@@ -100,7 +99,7 @@ impl<'a> Property<'a> {
         Property {
             key: key.into(),
             value: value.into(),
-            parameters: BTreeMap::new()
+            parameters: Vec::new()
         }
     }
 
@@ -110,7 +109,10 @@ impl<'a> Property<'a> {
         P: Into<Parameter<'a>>
     {
         let parameter = parameter.into();
-        self.parameters.insert(parameter.key, parameter.value);
+        match self.parameters.iter_mut().find(|p| p.key == parameter.key) {
+            Some(p) => *p = parameter,
+            None => self.parameters.push(parameter)
+        }
     }
 
     /// Adds several parameters at once to a property. For creating several
@@ -123,17 +125,16 @@ impl<'a> Property<'a> {
     fn content_len(&self) -> usize {
         // + 1 for the : in the property
         // + 2 for the ; and = in the parameter
-        self.parameters
-            .iter()
-            .fold(self.value.len() + self.key.len() + 1, |len, (k, v)| {
-                len + k.len() + v.len() + 2
-            })
+        self.parameters.iter().fold(
+            self.value.len() + self.key.len() + 1,
+            |len, Parameter { key, value }| len + key.len() + value.len() + 2
+        )
     }
 
     fn format<W: fmt::Write>(&self, writer: &mut W) -> fmt::Result {
         write!(writer, "{}", self.key)?;
-        for (key, value) in &self.parameters {
-            write!(writer, ";{}={}", key, value)?;
+        for parameter in &self.parameters {
+            write!(writer, ";{}", parameter)?;
         }
         write!(writer, ":{}", self.value)
     }
@@ -186,7 +187,7 @@ impl fmt::Display for Parameter<'_> {
 
 /// `Parameters` is a collection of `Parameter`s. It can be created with the
 /// `parameters!` macro.
-pub type Parameters<'a> = BTreeMap<Cow<'a, str>, Cow<'a, str>>;
+pub type Parameters<'p> = Vec<Parameter<'p>>;
 
 #[cfg(test)]
 mod tests {

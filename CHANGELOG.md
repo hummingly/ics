@@ -1,5 +1,22 @@
 # Changelog
 
+## Version 0.6 [UNRELEASED]
+
+### Breaking Changes
+
+- Minimum supported rustc is now **1.37.0**!
+- Property values are now strongly typed as specified which changes the parameter type of the constructor.
+  - `pub const fn new(value: Integer) -> Self`:
+    - `PercentComplete`
+    - `Priority`
+    - `Repeat`
+    - `Sequence`
+
+### Misc
+
+- Migrated to edition 2018
+- Replaced BTreeMap with Vec for parameters. Adding existing parameters still overrides the parameter but the order is now depending on the insertion.
+
 ## Version 0.5.5
 
 ### Misc

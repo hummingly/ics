@@ -259,7 +259,7 @@ fn timezone() -> std::io::Result<()> {
                     UID:b7d2e88d-c0ac-4d26-8be2-fbe27217e698\r\n\
                     DTSTAMP:19980309T231000Z\r\n\
                     ORGANIZER:mailto:mrbig@example.com\r\n\
-                    ATTENDEE;CUTYPE=GROUP;ROLE=REQ-PARTICIPANT;RSVP=TRUE:mailto:employee-A@exam\r\n ple.com\r\n\
+                    ATTENDEE;RSVP=TRUE;ROLE=REQ-PARTICIPANT;CUTYPE=GROUP:mailto:employee-A@exam\r\n ple.com\r\n\
                     DESCRIPTION:Project XYZ Review Meeting\r\n\
                     CATEGORIES:MEETING\r\n\
                     CLASS:PUBLIC\r\n\

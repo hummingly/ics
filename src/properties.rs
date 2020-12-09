@@ -25,7 +25,6 @@ use crate::components::{Parameter, Parameters, Property};
 use crate::contentline::{ContentLine, PropertyWrite};
 use crate::value::Integer;
 use std::borrow::Cow;
-use std::collections::BTreeMap;
 use std::io;
 
 property!(CalScale, "CALSCALE");
@@ -129,7 +128,7 @@ impl Default for CalScale<'_> {
     fn default() -> Self {
         Self {
             value: Cow::Borrowed("GREGORIAN"),
-            parameters: BTreeMap::new()
+            parameters: Vec::new()
         }
     }
 }
@@ -137,7 +136,7 @@ impl Default for Priority<'_> {
     fn default() -> Self {
         Self {
             value: 0,
-            parameters: BTreeMap::new()
+            parameters: Vec::new()
         }
     }
 }
@@ -146,7 +145,7 @@ impl Default for Repeat<'_> {
     fn default() -> Self {
         Self {
             value: 0,
-            parameters: BTreeMap::new()
+            parameters: Vec::new()
         }
     }
 }
@@ -155,7 +154,7 @@ impl Default for Sequence<'_> {
     fn default() -> Self {
         Self {
             value: 0,
-            parameters: BTreeMap::new()
+            parameters: Vec::new()
         }
     }
 }
@@ -168,7 +167,6 @@ mod rfc7986 {
     use crate::components::{Parameter, Parameters, Property};
     use crate::contentline::{ContentLine, PropertyWrite};
     use std::borrow::Cow;
-    use std::collections::BTreeMap;
     use std::io;
     property!(Name, "NAME");
     property_with_parameter!(RefreshInterval, "REFRESH-INTERVAL", "DURATION");
@@ -219,8 +217,11 @@ mod rfc7986 {
         where
             P: Into<Parameter<'a>>
         {
-            let param = parameter.into();
-            self.parameters.insert(param.key, param.value);
+            let parameter = parameter.into();
+            match self.parameters.iter_mut().find(|p| p.key == parameter.key) {
+                Some(p) => *p = parameter,
+                None => self.parameters.push(parameter)
+            }
         }
 
         /// Adds several parameters at once to the property. For creating
@@ -244,8 +245,8 @@ mod rfc7986 {
     impl PropertyWrite for Image<'_> {
         fn write<W: io::Write>(&self, line: &mut ContentLine<'_, W>) -> Result<(), io::Error> {
             line.write_name_unchecked("IMAGE");
-            for (key, value) in &self.parameters {
-                line.write_parameter_pair(key, value)?;
+            for parameter in &self.parameters {
+                line.write_parameter_pair(&parameter.key, &parameter.value)?;
             }
             line.write_value(&self.value)
         }

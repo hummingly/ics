@@ -19,11 +19,10 @@
 macro_rules! parameters {
     ($($key:expr => $value:expr);*) => {
         {
-            use std::collections::BTreeMap;
-            use $crate::components::Parameters;
-            let mut parameters: Parameters = BTreeMap::new();
+            use $crate::components::Parameter;
+            let mut parameters = Vec::new();
             $(
-                parameters.insert($key.into(), $value.into());
+                parameters.push(Parameter::new($key, $value));
             )*
             parameters
         }
@@ -32,16 +31,15 @@ macro_rules! parameters {
 
 #[cfg(test)]
 mod test {
-    use crate::components::Parameters;
-    use std::collections::BTreeMap;
+    use crate::components::Parameter;
 
     #[test]
     fn parameters() {
-        let mut b_map: Parameters = BTreeMap::new();
-        b_map.insert("VALUE".into(), "BOOLEAN".into());
-        b_map.insert("CUTYPE".into(), "GROUP".into());
-        let param = parameters!("VALUE" => "BOOLEAN"; "CUTYPE" => "GROUP");
-        assert_eq!(b_map, param);
+        let mut expected = Vec::new();
+        expected.push(Parameter::new("VALUE", "BOOLEAN"));
+        expected.push(Parameter::new("CUTYPE", "GROUP"));
+        let parameters = parameters!("VALUE" => "BOOLEAN"; "CUTYPE" => "GROUP");
+        assert_eq!(expected, parameters);
     }
 }
 
@@ -65,7 +63,7 @@ macro_rules! property {
             {
                 Self {
                     value: value.into(),
-                    parameters: BTreeMap::new()
+                    parameters: Vec::new()
                 }
             }
 
@@ -74,8 +72,11 @@ macro_rules! property {
             where
                 P: Into<Parameter<'a>>
             {
-                let param = parameter.into();
-                self.parameters.insert(param.key, param.value);
+                let parameter = parameter.into();
+                match self.parameters.iter_mut().find(|p| p.key == parameter.key) {
+                    Some(p) => *p = parameter,
+                    None => self.parameters.push(parameter)
+                }
             }
 
             /// Adds several parameters at once to the property. For creating
@@ -114,7 +115,7 @@ macro_rules! property_with_constructor {
             {
                 Self {
                     value: value.into(),
-                    parameters: BTreeMap::new()
+                    parameters: Vec::new()
                 }
             }
 
@@ -125,7 +126,7 @@ macro_rules! property_with_constructor {
                 pub fn $const_ident() -> Self {
                     Self {
                         value: Cow::Borrowed($value),
-                        parameters: BTreeMap::new()
+                        parameters: Vec::new()
                     }
                 }
             )*
@@ -135,8 +136,11 @@ macro_rules! property_with_constructor {
             where
                 P: Into<Parameter<'a>>
             {
-                let param = parameter.into();
-                self.parameters.insert(param.key, param.value);
+                let parameter = parameter.into();
+                match self.parameters.iter_mut().find(|p| p.key == parameter.key) {
+                    Some(p) => *p = parameter,
+                    None => self.parameters.push(parameter)
+                }
             }
 
             /// Adds several parameters at once to the property. For creating
@@ -186,8 +190,11 @@ macro_rules! property_with_parameter {
             where
                 P: Into<Parameter<'a>>
             {
-                let param = parameter.into();
-                self.parameters.insert(param.key, param.value);
+                let parameter = parameter.into();
+                match self.parameters.iter_mut().find(|p| p.key == parameter.key) {
+                    Some(p) => *p = parameter,
+                    None => self.parameters.push(parameter)
+                }
             }
 
             /// Adds several parameters at once to the property. For creating
@@ -222,7 +229,7 @@ macro_rules! property_integer {
             pub fn new(value: Integer) -> Self {
                 Self {
                     value,
-                    parameters: BTreeMap::new()
+                    parameters: Vec::new()
                 }
             }
 
@@ -231,8 +238,11 @@ macro_rules! property_integer {
             where
                 P: Into<Parameter<'a>>
             {
-                let param = parameter.into();
-                self.parameters.insert(param.key, param.value);
+                let parameter = parameter.into();
+                match self.parameters.iter_mut().find(|p| p.key == parameter.key) {
+                    Some(p) => *p = parameter,
+                    None => self.parameters.push(parameter)
+                }
             }
 
             /// Adds several parameters at once to the property. For creating
@@ -332,8 +342,8 @@ macro_rules! impl_property_write {
         impl PropertyWrite for $type<'_> {
             fn write<W: io::Write>(&self, line: &mut ContentLine<'_, W>) -> Result<(), io::Error> {
                 line.write_name_unchecked($name);
-                for (key, value) in &self.parameters {
-                    line.write_parameter_pair(key, value)?;
+                for parameter in &self.parameters {
+                    line.write_parameter_pair(&parameter.key, &parameter.value)?;
                 }
                 line.write_value(&self.value)
             }
