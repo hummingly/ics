@@ -3,8 +3,8 @@ extern crate ics;
 use ics::escape_text;
 use ics::parameters::{FmtType, PartStat};
 use ics::properties::{
-    Attach, Attendee, Categories, Class, Description, DtEnd, DtStart, Due, Duration, Organizer,
-    Repeat, Sequence, Status, Summary, Trigger
+    Attach, Attendee, Categories, Class, Description, DtEnd, DtStart, Due, Duration, FreeBusyTime,
+    Organizer, Repeat, Sequence, Status, Summary, Trigger, URL
 };
 use ics::writer::*;
 
@@ -126,7 +126,7 @@ fn journal() -> std::io::Result<()> {
                     VERSION:2.0\r\n\
                     PRODID:-//ABC Corporation//NONSGML My Product//EN\r\n\
                     BEGIN:VJOURNAL\r\n\
-                    UID:uid5@example.com\r\n\
+                    UID:b4035e76-699e-4cb2-85f6-724d01f18284\r\n\
                     DTSTAMP:19970324T120000Z\r\n\
                     ORGANIZER:mailto:jsmith@example.com\r\n\
                     STATUS:DRAFT\r\n\
@@ -170,7 +170,58 @@ fn journal() -> std::io::Result<()> {
         "2.0",
         "-//ABC Corporation//NONSGML My Product//EN"
     )?;
-    calendar.write_journal("uid5@example.com", "19970324T120000Z", journal)?;
+    calendar.write_journal(
+        "b4035e76-699e-4cb2-85f6-724d01f18284",
+        "19970324T120000Z",
+        journal
+    )?;
+
+    let output = calendar.close()?;
+    assert_eq!(String::from_utf8_lossy(&output), expected);
+
+    Ok(())
+}
+
+#[test]
+fn freebusy() -> std::io::Result<()> {
+    let expected = "BEGIN:VCALENDAR\r\n\
+                    VERSION:2.0\r\n\
+                    PRODID:-//RDU Software//NONSGML HandCal//EN\r\n\
+                    BEGIN:VFREEBUSY\r\n\
+                    UID:0b04bd52-c396-4251-a673-1cc0b96def93\r\n\
+                    DTSTAMP:19970324T120000Z\r\n\
+                    ORGANIZER:mailto:jsmith@example.com\r\n\
+                    DTSTART:19980313T141711Z\r\n\
+                    DTEND:19980410T141711Z\r\n\
+                    FREEBUSY:19980314T233000Z/19980315T003000Z\r\n\
+                    FREEBUSY:19980316T153000Z/19980316T163000Z\r\n\
+                    FREEBUSY:19980318T030000Z/19980318T040000Z\r\n\
+                    URL:http://www.example.com/calendar/busytime/jsmith.ifb\r\n\
+                    END:VFREEBUSY\r\n\
+                    END:VCALENDAR\r\n";
+
+    let freebusy = |freebusy: &mut FreeBusyWriter<'_, _>| {
+        freebusy.write(&Organizer::new("mailto:jsmith@example.com"))?;
+        freebusy.write(&DtStart::new("19980313T141711Z"))?;
+        freebusy.write(&DtEnd::new("19980410T141711Z"))?;
+        freebusy.write(&FreeBusyTime::new("19980314T233000Z/19980315T003000Z"))?;
+        freebusy.write(&FreeBusyTime::new("19980316T153000Z/19980316T163000Z"))?;
+        freebusy.write(&FreeBusyTime::new("19980318T030000Z/19980318T040000Z"))?;
+        freebusy.write(&URL::new(
+            "http://www.example.com/calendar/busytime/jsmith.ifb"
+        ))
+    };
+
+    let mut calendar = CalendarWriter::new(
+        Vec::with_capacity(expected.len()),
+        "2.0",
+        "-//RDU Software//NONSGML HandCal//EN"
+    )?;
+    calendar.write_free_busy(
+        "0b04bd52-c396-4251-a673-1cc0b96def93",
+        "19970324T120000Z",
+        freebusy
+    )?;
 
     let output = calendar.close()?;
     assert_eq!(String::from_utf8_lossy(&output), expected);
