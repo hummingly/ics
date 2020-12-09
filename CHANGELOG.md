@@ -4,7 +4,7 @@
 
 ### Breaking Changes
 
-- Minimum supported rustc is now **1.37.0**!
+- Minimum supported rustc is now **1.39.0**!
 - Property values are now strongly typed as specified which changes the parameter type of the constructor.
   - `pub const fn new(value: Integer) -> Self`:
     - `PercentComplete`
