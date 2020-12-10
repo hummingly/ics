@@ -96,7 +96,7 @@ macro_rules! property {
     };
 }
 
-macro_rules! property_with_constructor {
+macro_rules! property_text_with_constructor {
     (
         $(#[$outer:meta])* $type:ident, $name:expr,
         $($(#[$inner:meta])* fn $const_ident:ident() { $value:expr });*
@@ -156,9 +156,25 @@ macro_rules! property_with_constructor {
             }
         }
 
-        impl_from_prop!($type, $name);
+        impl<'a> From<$type<'a>> for Property<'a> {
+            fn from(builder: $type<'a>) -> Self {
+                Property {
+                    name: Cow::Borrowed($name),
+                    value: escape_text(builder.value),
+                    parameters: builder.parameters
+                }
+            }
+        }
 
-        impl_property_write!($type, $name);
+        impl PropertyWrite for $type<'_> {
+            fn write<W: io::Write>(&self, line: &mut ContentLine<'_, W>) -> Result<(), io::Error> {
+                line.write_name_unchecked($name);
+                for parameter in &self.parameters {
+                    line.write_parameter(parameter)?;
+                }
+                line.write_value_text(&self.value)
+            }
+        }
     };
 }
 
@@ -273,6 +289,73 @@ macro_rules! property_integer {
         }
 
         impl_property_write!($type, $name);
+    };
+}
+
+macro_rules! property_text {
+    ($(#[$outer:meta])* $type:ident, $name:expr) => {
+        #[doc = "`"]#[doc=$name]#[doc = "` Property"]
+        ///
+        $(#[$outer])*
+        #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
+        pub struct $type<'a> {
+            value: Cow<'a, str>,
+            parameters: Parameters<'a>
+        }
+
+        impl<'a> $type<'a> {
+            #[doc = "Creates a new `"]#[doc=$name]#[doc = "` Property with the given value."]
+            pub fn new<S>(value: S) -> Self
+            where
+                S: Into<Cow<'a, str>>
+            {
+                Self {
+                    value: value.into(),
+                    parameters: Vec::new()
+                }
+            }
+
+            /// Adds a parameter to the property.
+            pub fn add<P>(&mut self, parameter: P)
+            where
+                P: Into<Parameter<'a>>
+            {
+                let parameter = parameter.into();
+                match self.parameters.iter_mut().find(|p| p.name == parameter.name) {
+                    Some(p) => *p = parameter,
+                    None => self.parameters.push(parameter)
+                }
+            }
+
+            /// Adds several parameters at once to the property. For creating
+            /// several parameters at once, consult the documentation of
+            /// the [`parameters!`] macro.
+            pub fn append(&mut self, parameters: &mut Parameters<'a>) {
+                for parameter in parameters.drain(..) {
+                    self.add(parameter);
+                }
+            }
+        }
+
+        impl<'a> From<$type<'a>> for Property<'a> {
+            fn from(builder: $type<'a>) -> Self {
+                Property {
+                    name: Cow::Borrowed($name),
+                    value: escape_text(builder.value),
+                    parameters: builder.parameters
+                }
+            }
+        }
+
+        impl PropertyWrite for $type<'_> {
+            fn write<W: io::Write>(&self, line: &mut ContentLine<'_, W>) -> Result<(), io::Error> {
+                line.write_name_unchecked($name);
+                for parameter in &self.parameters {
+                    line.write_parameter(parameter)?;
+                }
+                line.write_value_text(&self.value)
+            }
+        }
     };
 }
 

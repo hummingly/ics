@@ -53,6 +53,7 @@ impl<W: Write> ContentLine<'_, W> {
     }
 
     pub fn write_value_text(&mut self, text: &str) -> Result<(), Error> {
+        self.0.write_all(b":")?;
         write_escaped_bytes(self.0, text.as_bytes())
     }
 }

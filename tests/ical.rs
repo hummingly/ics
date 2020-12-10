@@ -5,7 +5,7 @@ use ics::properties::{
     Attach, Attendee, Categories, Description, DtEnd, DtStart, Due, Duration, Organizer, Repeat,
     Sequence, Status, Summary, Trigger
 };
-use ics::{escape_text, Alarm, Event, ICalendar, ToDo};
+use ics::{Alarm, Event, ICalendar, ToDo};
 
 #[test]
 fn icalendar_event() {
@@ -34,11 +34,11 @@ fn icalendar_event() {
     event.push(Status::confirmed());
     event.push(Categories::new("CONFERENCE"));
     event.push(Summary::new("Networld+Interop Conference"));
-    event.push(Description::new(escape_text(
+    event.push(Description::new(
         "Networld+Interop Conference and Exhibit\n\
          Atlanta World Congress Center\n\
          Atlanta, Georgia"
-    )));
+    ));
 
     let mut calendar = ICalendar::new("2.0", "-//xyz Corp//NONSGML PDA Calendar Version 1.0//EN");
     calendar.add_event(event);

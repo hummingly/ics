@@ -4,11 +4,8 @@ use ics::properties::{
     Attach, Attendee, Categories, Class, Description, DtEnd, DtStart, Due, Duration, FreeBusyTime,
     Location, Organizer, Repeat, Sequence, Status, Summary, Trigger, TzID, URL
 };
+use ics::properties::{TzName, TzOffsetFrom, TzOffsetTo};
 use ics::writer::*;
-use ics::{
-    escape_text,
-    properties::{TzName, TzOffsetFrom, TzOffsetTo}
-};
 use ics::{
     parameters::{CUType, FmtType, PartStat, Role, TzIDParam, RSVP},
     properties::Created
@@ -41,11 +38,11 @@ fn event() -> std::io::Result<()> {
         event.write(&Status::confirmed())?;
         event.write(&Categories::new("CONFERENCE"))?;
         event.write(&Summary::new("Networld+Interop Conference"))?;
-        event.write(&Description::new(escape_text(
+        event.write(&Description::new(
             "Networld+Interop Conference and Exhibit\n\
             Atlanta World Congress Center\n\
             Atlanta, Georgia"
-        )))
+        ))
     };
 
     let mut calendar = ICalendarWriter::new(
@@ -157,7 +154,7 @@ fn journal() -> std::io::Result<()> {
         journal.write(&Status::draft())?;
         journal.write(&Class::public())?;
         journal.write(&Categories::new("Project Report,XYZ,Weekly Meeting"))?;
-        journal.write(&Description::new(escape_text("Project xyz Review Meeting Minutes\n\
+        journal.write(&Description::new("Project xyz Review Meeting Minutes\n\
             Agenda\n\
             1. Review of project version 1.0 requirements.\n\
             2. Definition of project processes.\n\
@@ -168,7 +165,7 @@ fn journal() -> std::io::Result<()> {
             -Project schedule needs to account for scheduled holidays and employee vacation time. Check with HR for specific dates.\n\
             -New schedule will be distributed by Friday.\n\
             -Next weeks meeting is cancelled. No meeting until 3/23."
-        )))
+        ))
     };
 
     let mut calendar = ICalendarWriter::new(

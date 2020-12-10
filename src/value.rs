@@ -525,3 +525,87 @@ enum Period<T = Local> {
 
 // Recur
 // List
+
+/// `STATUS` Property Values
+///
+/// [Format definitions of statuses](https://tools.ietf.org/html/rfc5545#section-3.8.1.11)
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
+pub enum StatusValue {
+    /// `TENTATIVE`
+    ///
+    /// Status for a tentative event
+    Tentative,
+    /// `CONFIRMED`
+    ///
+    /// Status for a definite event
+    Confirmed,
+    /// `CANCELLED`
+    ///
+    /// Status for a cancelled Event, To-Do or Journal
+    Cancelled,
+    /// `NEEDS-ACTION`
+    ///
+    /// Status for a To-Do that needs action
+    NeedsAction,
+    /// `COMPLETED`
+    ///
+    /// Status for a completed To-Do
+    Completed,
+    /// `IN-PROCESS`
+    ///
+    /// Status for an in-process To-Do
+    InProcess,
+    /// `DRAFT`
+    ///
+    /// Status for a draft Journal
+    Draft,
+    /// `FINAL`
+    ///
+    /// Status for a final Journal
+    Final
+}
+
+impl StatusValue {
+    pub(crate) fn as_str(self) -> &'static str {
+        match self {
+            StatusValue::Tentative => "TENTATIVE",
+            StatusValue::Confirmed => "CONFIRMED",
+            StatusValue::Cancelled => "CANCELLED",
+            StatusValue::NeedsAction => "NEEDS-ACTION",
+            StatusValue::Completed => "COMPLETED",
+            StatusValue::InProcess => "IN-PROCESS",
+            StatusValue::Draft => "DRAFT",
+            StatusValue::Final => "FINAL"
+        }
+    }
+}
+
+/// `Transp` Property Values
+///
+/// [Format definitions of time transparency](https://tools.ietf.org/html/rfc5545#section-3.8.2.7)
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
+pub enum TranspValue {
+    /// `OPAQUE`
+    ///
+    /// Blocks or opaque on busy time searches. Default value is OPAQUE.
+    Opaque,
+    /// `TRANSPARENT`
+    ///
+    /// Transparent on busy time searches.
+    Transparent
+}
+
+impl TranspValue {
+    pub(crate) fn as_str(self) -> &'static str {
+        match self {
+            TranspValue::Opaque => "OPAQUE",
+            TranspValue::Transparent => "TRANSPARENT"
+        }
+    }
+}
+
+impl Default for TranspValue {
+    fn default() -> Self {
+        TranspValue::Opaque
+    }
+}

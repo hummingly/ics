@@ -23,7 +23,8 @@
 //! For more information on properties, please refer to the specification [RFC5545 3.7. Calendar Properties](https://tools.ietf.org/html/rfc5545#section-3.7) and [RFC7986 5. Properties](https://tools.ietf.org/html/rfc7986#section-5).
 use crate::components::{Parameter, Parameters, Property};
 use crate::contentline::{ContentLine, PropertyWrite};
-use crate::value::{Float, Integer};
+use crate::util::escape_text;
+use crate::value::{Float, Integer, StatusValue, TranspValue};
 use std::borrow::Cow;
 use std::io;
 
@@ -37,13 +38,15 @@ impl PropertyWrite for Property<'_> {
     }
 }
 
-property!(CalScale, "CALSCALE");
-property!(Method, "METHOD");
-property!(ProdID, "PRODID");
+property_text!(CalScale, "CALSCALE");
+property_text!(Method, "METHOD");
+property_text!(ProdID, "PRODID");
+// TODO: min max fmt
 property!(Version, "VERSION");
 property!(Attach, "ATTACH");
+// TODO: property_text_list!
 property!(Categories, "CATEGORIES");
-property_with_constructor!(
+property_text_with_constructor!(
     /// [Format definitions of classifications](https://tools.ietf.org/html/rfc5545#section-3.8.1.3)
     Class, "CLASS",
     // Default Value
@@ -51,9 +54,8 @@ property_with_constructor!(
     fn private() { "PRIVATE" };
     fn confidential() { "CONFIDENTIAL" }
 );
-property!(Comment, "COMMENT");
-property!(Description, "DESCRIPTION");
-// property!(Geo, "GEO");
+property_text!(Comment, "COMMENT");
+property_text!(Description, "DESCRIPTION");
 
 /// `GEO` Property
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
@@ -119,60 +121,216 @@ impl PropertyWrite for Geo<'_> {
     }
 }
 
-property!(Location, "LOCATION");
+property_text!(Location, "LOCATION");
 property_integer!(PercentComplete, "PERCENT-COMPLETE");
 property_integer!(Priority, "PRIORITY");
+// TODO: property_text_list!
 property!(Resources, "RESOURCES");
-property_with_constructor!(
-    /// [Format definitions of statuses](https://tools.ietf.org/html/rfc5545#section-3.8.1.11)
-    Status, "STATUS",
-    /// `Status` for a tentative event
-    fn tentative() { "TENTATIVE" };
-    /// `Status` for a definite event
-    fn confirmed() { "CONFIRMED" };
-    /// `Status` for a cancelled Event, To-Do or Journal
-    fn cancelled() { "CANCELLED" };
-    /// `Status` for a To-Do that needs action
-    fn needs_action() { "NEEDS-ACTION" };
-    /// `Status` for a completed To-Do
-    fn completed() { "COMPLETED" };
-    /// `Status` for an in-process To-Do
-    fn in_process() { "IN-PROCESS" };
-    /// `Status` for a draft Journal
-    fn draft() { "DRAFT" };
-    /// `Status` for a final Journal
-    fn final_() { "FINAL" }
-);
-property!(Summary, "SUMMARY");
+
+/// `STATUS` Property
+#[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
+pub struct Status<'a> {
+    value: StatusValue,
+    parameters: Parameters<'a>
+}
+
+impl<'a> Status<'a> {
+    /// Creates a new `STATUS` Property with the given value.
+    pub const fn new(value: StatusValue) -> Self {
+        Self {
+            value,
+            parameters: Vec::new()
+        }
+    }
+
+    /// Status for a tentative event
+    pub const fn tentative() -> Self {
+        Self::new(StatusValue::Tentative)
+    }
+
+    /// Status for a definite event
+    pub const fn confirmed() -> Self {
+        Self::new(StatusValue::Confirmed)
+    }
+
+    /// Status for a cancelled Event, To-Do or Journal
+    pub const fn cancelled() -> Self {
+        Self::new(StatusValue::Cancelled)
+    }
+
+    /// Status for a To-Do that needs action
+    pub const fn needs_action() -> Self {
+        Self::new(StatusValue::NeedsAction)
+    }
+
+    /// Status for a completed To-Do
+    pub const fn completed() -> Self {
+        Self::new(StatusValue::Completed)
+    }
+
+    /// Status for an in-process To-Do
+    pub const fn in_process() -> Self {
+        Self::new(StatusValue::InProcess)
+    }
+
+    /// Status for a draft Journal
+    pub const fn draft() -> Self {
+        Self::new(StatusValue::Draft)
+    }
+
+    /// Status for a final Journal
+    pub const fn final_() -> Self {
+        Self::new(StatusValue::Final)
+    }
+
+    /// Adds a parameter to the property.
+    pub fn add<P>(&mut self, parameter: P)
+    where
+        P: Into<Parameter<'a>>
+    {
+        let parameter = parameter.into();
+        match self
+            .parameters
+            .iter_mut()
+            .find(|p| p.name == parameter.name)
+        {
+            Some(p) => *p = parameter,
+            None => self.parameters.push(parameter)
+        }
+    }
+
+    /// Adds several parameters at once to the property. For creating
+    /// several parameters at once, consult the documentation of
+    /// the [`parameters!`] macro.
+    pub fn append(&mut self, parameters: &mut Parameters<'a>) {
+        for parameter in parameters.drain(..) {
+            self.add(parameter);
+        }
+    }
+}
+
+impl<'a> From<Status<'a>> for Property<'a> {
+    fn from(builder: Status<'a>) -> Self {
+        Property {
+            name: Cow::Borrowed("STATUS"),
+            value: Cow::Borrowed(builder.value.as_str()),
+            parameters: builder.parameters
+        }
+    }
+}
+
+impl PropertyWrite for Status<'_> {
+    fn write<W: io::Write>(&self, line: &mut ContentLine<'_, W>) -> Result<(), io::Error> {
+        line.write_name_unchecked("STATUS");
+        for parameter in &self.parameters {
+            line.write_parameter(parameter)?;
+        }
+        line.write_value_text(self.value.as_str())
+    }
+}
+
+property_text!(Summary, "SUMMARY");
 property!(Completed, "COMPLETED");
 property!(DtEnd, "DTEND");
 property!(Due, "DUE");
 property!(DtStart, "DTSTART");
 property!(Duration, "DURATION");
 property!(FreeBusyTime, "FREEBUSY");
-property_with_constructor!(
-    /// [Format definitions of time transparency](https://tools.ietf.org/html/rfc5545#section-3.8.2.7)
-    Transp, "TRANSP",
-    // Default Value
-    fn opaque() { "OPAQUE" };
-    fn transparent() { "TRANSPARENT" }
-);
-property!(TzID, "TZID");
-property!(TzName, "TZNAME");
+
+/// `TRANSP` Property
+#[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
+pub struct Transp<'a> {
+    value: TranspValue,
+    parameters: Parameters<'a>
+}
+
+impl<'a> Transp<'a> {
+    /// Creates a new `STATUS` Property with the given value.
+    pub const fn new(value: TranspValue) -> Self {
+        Self {
+            value,
+            parameters: Vec::new()
+        }
+    }
+
+    /// Blocks or opaque on busy time searches.
+    pub const fn opaque() -> Self {
+        Self::new(TranspValue::Opaque)
+    }
+
+    /// Transparent on busy time searches.
+    pub const fn transparent() -> Self {
+        Self::new(TranspValue::Transparent)
+    }
+
+    /// Adds a parameter to the property.
+    pub fn add<P>(&mut self, parameter: P)
+    where
+        P: Into<Parameter<'a>>
+    {
+        let parameter = parameter.into();
+        match self
+            .parameters
+            .iter_mut()
+            .find(|p| p.name == parameter.name)
+        {
+            Some(p) => *p = parameter,
+            None => self.parameters.push(parameter)
+        }
+    }
+
+    /// Adds several parameters at once to the property. For creating
+    /// several parameters at once, consult the documentation of
+    /// the [`parameters!`] macro.
+    pub fn append(&mut self, parameters: &mut Parameters<'a>) {
+        for parameter in parameters.drain(..) {
+            self.add(parameter);
+        }
+    }
+}
+
+impl<'a> From<Transp<'a>> for Property<'a> {
+    fn from(builder: Transp<'a>) -> Self {
+        Property {
+            name: Cow::Borrowed("TRANSP"),
+            value: Cow::Borrowed(builder.value.as_str()),
+            parameters: builder.parameters
+        }
+    }
+}
+
+impl PropertyWrite for Transp<'_> {
+    fn write<W: io::Write>(&self, line: &mut ContentLine<'_, W>) -> Result<(), io::Error> {
+        line.write_name_unchecked("TRANSP");
+        for parameter in &self.parameters {
+            line.write_parameter(parameter)?;
+        }
+        line.write_value_text(self.value.as_str())
+    }
+}
+
+impl Default for Transp<'_> {
+    fn default() -> Self {
+        Self::opaque()
+    }
+}
+
+property_text!(TzID, "TZID");
+property_text!(TzName, "TZNAME");
 property!(TzOffsetFrom, "TZOFFSETFROM");
 property!(TzOffsetTo, "TZOFFSETTO");
 property!(TzURL, "TZURL");
 property!(Attendee, "ATTENDEE");
-property!(Contact, "CONTACT");
+property_text!(Contact, "CONTACT");
 property!(Organizer, "ORGANIZER");
 property!(RecurrenceID, "RECURRENCE-ID");
-property!(RelatedTo, "RELATED-TO");
+property_text!(RelatedTo, "RELATED-TO");
 property!(URL, "URL");
-property!(UID, "UID");
+property_text!(UID, "UID");
 property!(ExDate, "EXDATE");
 property!(RDate, "RDATE");
 property!(RRule, "RRULE");
-property_with_constructor!(
+property_text_with_constructor!(
     /// [Format definitions of alarm actions](https://tools.ietf.org/html/rfc5545#section-3.8.6.1)
     Action, "ACTION",
     fn audio() { "AUDIO" };
@@ -185,17 +343,12 @@ property!(Created, "CREATED");
 property!(DtStamp, "DTSTAMP");
 property!(LastModified, "LAST-MODIFIED");
 property_integer!(Sequence, "SEQUENCE");
+// TODO: statcode ";" statdesc [";" extdata]
 property!(RequestStatus, "REQUEST-STATUS");
 
 impl Default for Class<'_> {
     fn default() -> Self {
         Self::public()
-    }
-}
-
-impl Default for Transp<'_> {
-    fn default() -> Self {
-        Self::opaque()
     }
 }
 
@@ -241,12 +394,13 @@ pub use self::rfc7986::*;
 mod rfc7986 {
     use crate::components::{Parameter, Parameters, Property};
     use crate::contentline::{ContentLine, PropertyWrite};
+    use crate::util::escape_text;
     use std::borrow::Cow;
     use std::io;
-    property!(Name, "NAME");
+    property_text!(Name, "NAME");
     property_with_parameter!(RefreshInterval, "REFRESH-INTERVAL", "DURATION");
     property_with_parameter!(Source, "SOURCE", "URI");
-    property!(Color, "COLOR");
+    property_text!(Color, "COLOR");
     property_with_parameter!(Conference, "CONFERENCE", "URI");
 
     /// `IMAGE` Property

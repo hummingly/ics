@@ -1,7 +1,7 @@
 extern crate ics;
 
 use ics::properties::{Categories, Description, DtEnd, DtStart, Organizer, Status, Summary};
-use ics::{escape_text, Event, ICalendar};
+use ics::{Event, ICalendar};
 
 fn main() -> std::io::Result<()> {
     // Create event which contains the information regarding the conference
@@ -17,11 +17,11 @@ fn main() -> std::io::Result<()> {
 
     // Values that are "TEXT" must be escaped (only if the text contains a comma,
     // semicolon or backlash).
-    event.push(Description::new(escape_text(
+    event.push(Description::new(
         "Networld+Interop Conference and Exhibit\n\
          Atlanta World Congress Center\n\
          Atlanta, Georgia"
-    )));
+    ));
 
     // Create new iCalendar object
     // An iCalendar object must at least consist a component and the VERSION and
