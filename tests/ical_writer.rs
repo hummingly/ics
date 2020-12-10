@@ -1,15 +1,10 @@
-extern crate ics;
-
+use ics::parameters::{CUType, FmtType, PartStat, Role, TzIDParam, RSVP};
 use ics::properties::{
-    Attach, Attendee, Categories, Class, Description, DtEnd, DtStamp, DtStart, Due, Duration,
-    FreeBusyTime, Location, Organizer, Repeat, Sequence, Status, Summary, Trigger, TzID, UID, URL
+    Attach, Attendee, Categories, Class, Created, Description, DtEnd, DtStamp, DtStart, Due,
+    Duration, FreeBusyTime, Location, Organizer, ProdID, Repeat, Sequence, Status, Summary,
+    Trigger, TzID, TzName, TzOffsetFrom, TzOffsetTo, Version, UID, URL
 };
-use ics::properties::{TzName, TzOffsetFrom, TzOffsetTo};
-use ics::writer::*;
-use ics::{
-    parameters::{CUType, FmtType, PartStat, Role, TzIDParam, RSVP},
-    properties::Created
-};
+use ics::writer::{Alarm, Daylight, Event, FreeBusy, ICalendar, Journal, Standard, TimeZone, ToDo};
 
 #[test]
 fn event() -> std::io::Result<()> {
@@ -49,10 +44,10 @@ fn event() -> std::io::Result<()> {
         }
     );
 
-    let mut calendar = ICalendarWriter::new(
+    let mut calendar = ICalendar::new(
         Vec::with_capacity(expected.len()),
-        "2.0",
-        "-//xyz Corp//NONSGML PDA Calendar Version 1.0//EN"
+        Version::new("2.0"),
+        ProdID::new("-//xyz Corp//NONSGML PDA Calendar Version 1.0//EN")
     )?;
 
     calendar.write_event(event)?;
@@ -110,10 +105,10 @@ fn todo() -> std::io::Result<()> {
         }
     );
 
-    let mut calendar = ICalendarWriter::new(
+    let mut calendar = ICalendar::new(
         Vec::with_capacity(expected.len()),
-        "2.0",
-        "-//ABC Corporation//NONSGML My Product//EN"
+        Version::new("2.0"),
+        ProdID::new("-//ABC Corporation//NONSGML My Product//EN")
     )?;
     calendar.write_todo(todo)?;
 
@@ -172,10 +167,10 @@ fn journal() -> std::io::Result<()> {
         }
     );
 
-    let mut calendar = ICalendarWriter::new(
+    let mut calendar = ICalendar::new(
         Vec::with_capacity(expected.len()),
-        "2.0",
-        "-//ABC Corporation//NONSGML My Product//EN"
+        Version::new("2.0"),
+        ProdID::new("-//ABC Corporation//NONSGML My Product//EN")
     )?;
     calendar.write_journal(journal)?;
 
@@ -219,10 +214,10 @@ fn freebusy() -> std::io::Result<()> {
         }
     );
 
-    let mut calendar = ICalendarWriter::new(
+    let mut calendar = ICalendar::new(
         Vec::with_capacity(expected.len()),
-        "2.0",
-        "-//RDU Software//NONSGML HandCal//EN"
+        Version::new("2.0"),
+        ProdID::new("-//RDU Software//NONSGML HandCal//EN")
     )?;
     calendar.write_freebusy(freebusy)?;
 
@@ -286,42 +281,42 @@ fn timezone() -> std::io::Result<()> {
         }
     );
 
-    let event = |event: &mut EventWriter<_>| {
-        event.write(&Organizer::new("mailto:mrbig@example.com"))?;
+    let event = Event::new(
+        UID::new("b7d2e88d-c0ac-4d26-8be2-fbe27217e698"),
+        DtStamp::new("19980309T231000Z"),
+        |event| {
+            event.write(&Organizer::new("mailto:mrbig@example.com"))?;
 
-        let mut attendee = Attendee::new("mailto:employee-A@example.com");
-        attendee.add(RSVP::True);
-        attendee.add(Role::REQ_PARTICIPANT);
-        attendee.add(CUType::GROUP);
-        event.write(&attendee)?;
+            let mut attendee = Attendee::new("mailto:employee-A@example.com");
+            attendee.add(RSVP::True);
+            attendee.add(Role::REQ_PARTICIPANT);
+            attendee.add(CUType::GROUP);
+            event.write(&attendee)?;
 
-        event.write(&Description::new("Project XYZ Review Meeting"))?;
-        event.write(&Categories::new("MEETING"))?;
-        event.write(&Class::public())?;
-        event.write(&Created::new("19980309T130000Z"))?;
-        event.write(&Summary::new("XYZ Project Review"))?;
+            event.write(&Description::new("Project XYZ Review Meeting"))?;
+            event.write(&Categories::new("MEETING"))?;
+            event.write(&Class::public())?;
+            event.write(&Created::new("19980309T130000Z"))?;
+            event.write(&Summary::new("XYZ Project Review"))?;
 
-        let mut start = DtStart::new("19980312T083000");
-        start.add(TzIDParam::new("America/New_York"));
-        let mut end = DtEnd::new("19980312T093000");
-        end.add(TzIDParam::new("America/New_York"));
-        event.write(&start)?;
-        event.write(&end)?;
+            let mut start = DtStart::new("19980312T083000");
+            start.add(TzIDParam::new("America/New_York"));
+            let mut end = DtEnd::new("19980312T093000");
+            end.add(TzIDParam::new("America/New_York"));
+            event.write(&start)?;
+            event.write(&end)?;
 
-        event.write(&Location::new("1CP Conference Room 4350"))
-    };
+            event.write(&Location::new("1CP Conference Room 4350"))
+        }
+    );
 
-    let mut calendar = ICalendarWriter::new(
+    let mut calendar = ICalendar::new(
         Vec::with_capacity(expected.len()),
-        "2.0",
-        "-//RDU Software//NONSGML HandCal//EN"
+        Version::new("2.0"),
+        ProdID::new("-//RDU Software//NONSGML HandCal//EN")
     )?;
     calendar.write_timezone(timezone)?;
-    calendar.write_event(
-        "b7d2e88d-c0ac-4d26-8be2-fbe27217e698",
-        "19980309T231000Z",
-        event
-    )?;
+    calendar.write_event(event)?;
 
     let output = calendar.close()?;
 

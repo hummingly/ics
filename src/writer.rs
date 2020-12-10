@@ -1,6 +1,7 @@
 use crate::contentline::{ContentLine, PropertyWrite, Writer};
 use crate::properties::{
-    Action, Description, DtStamp, DtStart, Summary, Trigger, TzID, TzOffsetFrom, TzOffsetTo, UID
+    Action, Description, DtStamp, DtStart, ProdID, Summary, Trigger, TzID, TzOffsetFrom,
+    TzOffsetTo, Version, UID
 };
 use std::io::{Error, Write};
 
@@ -14,17 +15,19 @@ const VTIMEZONE: &str = "VTIMEZONE";
 const STANDARD: &str = "STANDARD";
 const DAYLIGHT: &str = "DAYLIGHT";
 
-pub struct ICalendarWriter<W: Write>(Writer<W>);
+pub struct ICalendar<W: Write>(Writer<W>);
 
-impl<W: Write> ICalendarWriter<W> {
-    pub fn new(inner: W, version: &str, product_id: &str) -> Result<ICalendarWriter<W>, Error> {
-        let mut writer = Writer::new(inner);
-        writer.write_begin_unchecked(VCALENDAR)?;
-        write!(writer, "VERSION:{}", version)?;
-        writer.end_line()?;
-        write!(writer, "PRODID:{}", product_id)?;
-        writer.end_line()?;
-        Ok(ICalendarWriter(writer))
+impl<W: Write> ICalendar<W> {
+    pub fn new(
+        inner: W,
+        version: Version<'_>,
+        product_id: ProdID<'_>
+    ) -> Result<ICalendar<W>, Error> {
+        let mut writer = Self(Writer::new(inner));
+        writer.0.write_begin_unchecked(VCALENDAR)?;
+        writer.write(&version)?;
+        writer.write(&product_id)?;
+        Ok(writer)
     }
 
     pub fn write<P>(&mut self, property: &P) -> Result<(), Error>
