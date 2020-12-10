@@ -8,7 +8,8 @@
 ///
 /// # fn main() {
 /// let mut date = DtStart::new("20180906");
-/// date.append(parameters!("TZID" => "America/New_York"; "VALUE" => "DATE"));
+/// let mut parameters = parameters!("TZID" => "America/New_York"; "VALUE" => "DATE");
+/// date.append(&mut parameters);
 /// assert_eq!(
 ///     Property::from(date).to_string(),
 ///     "DTSTART;TZID=America/New_York;VALUE=DATE:20180906\r\n"
