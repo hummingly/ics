@@ -5,9 +5,10 @@ use ics::properties::{
     Trigger, TzID, TzName, TzOffsetFrom, TzOffsetTo, Version, UID, URL
 };
 use ics::writer::{Alarm, Daylight, Event, FreeBusy, ICalendar, Journal, Standard, TimeZone, ToDo};
+use std::io;
 
 #[test]
-fn event() -> std::io::Result<()> {
+fn event() -> Result<(), io::Error> {
     let expected = "BEGIN:VCALENDAR\r\n\
                     VERSION:2.0\r\n\
                     PRODID:-//xyz Corp//NONSGML PDA Calendar Version 1.0//EN\r\n\
@@ -59,7 +60,7 @@ fn event() -> std::io::Result<()> {
 }
 
 #[test]
-fn todo() -> std::io::Result<()> {
+fn todo() -> Result<(), io::Error> {
     let expected = "BEGIN:VCALENDAR\r\n\
                     VERSION:2.0\r\n\
                     PRODID:-//ABC Corporation//NONSGML My Product//EN\r\n\
@@ -119,7 +120,7 @@ fn todo() -> std::io::Result<()> {
 }
 
 #[test]
-fn journal() -> std::io::Result<()> {
+fn journal() -> Result<(), io::Error> {
     let expected = "BEGIN:VCALENDAR\r\n\
                     VERSION:2.0\r\n\
                     PRODID:-//ABC Corporation//NONSGML My Product//EN\r\n\
@@ -181,7 +182,7 @@ fn journal() -> std::io::Result<()> {
 }
 
 #[test]
-fn freebusy() -> std::io::Result<()> {
+fn freebusy() -> Result<(), io::Error> {
     let expected = "BEGIN:VCALENDAR\r\n\
                     VERSION:2.0\r\n\
                     PRODID:-//RDU Software//NONSGML HandCal//EN\r\n\
@@ -228,7 +229,7 @@ fn freebusy() -> std::io::Result<()> {
 }
 
 #[test]
-fn timezone() -> std::io::Result<()> {
+fn timezone() -> Result<(), io::Error> {
     let expected = "BEGIN:VCALENDAR\r\n\
                     VERSION:2.0\r\n\
                     PRODID:-//RDU Software//NONSGML HandCal//EN\r\n\
