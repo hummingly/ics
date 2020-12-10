@@ -15,6 +15,7 @@ const VTIMEZONE: &str = "VTIMEZONE";
 const STANDARD: &str = "STANDARD";
 const DAYLIGHT: &str = "DAYLIGHT";
 
+#[derive(Debug)]
 pub struct ICalendar<W: Write>(Writer<W>);
 
 impl<W: Write> ICalendar<W> {
@@ -275,6 +276,7 @@ impl<'d, W: Write> Daylight<'d, W> {
     }
 }
 
+#[derive(Debug)]
 pub struct EventWriter<'w, W: Write>(&'w mut Writer<W>);
 
 impl<W: Write> EventWriter<'_, W> {
@@ -294,6 +296,7 @@ impl<W: Write> EventWriter<'_, W> {
     }
 }
 
+#[derive(Debug)]
 pub struct ToDoWriter<'w, W: Write>(&'w mut Writer<W>);
 
 impl<W: Write> ToDoWriter<'_, W> {
@@ -313,6 +316,7 @@ impl<W: Write> ToDoWriter<'_, W> {
     }
 }
 
+#[derive(Debug)]
 pub struct JournalWriter<'w, W: Write>(&'w mut Writer<W>);
 
 impl<W: Write> JournalWriter<'_, W> {
@@ -326,6 +330,7 @@ impl<W: Write> JournalWriter<'_, W> {
     }
 }
 
+#[derive(Debug)]
 pub struct FreeBusyWriter<'w, W: Write>(&'w mut Writer<W>);
 
 impl<W: Write> FreeBusyWriter<'_, W> {
@@ -339,6 +344,7 @@ impl<W: Write> FreeBusyWriter<'_, W> {
     }
 }
 
+#[derive(Debug)]
 pub struct TimeZoneWriter<'w, W: Write>(&'w mut Writer<W>);
 
 impl<W: Write> TimeZoneWriter<'_, W> {
@@ -364,6 +370,7 @@ impl<W: Write> TimeZoneWriter<'_, W> {
     }
 }
 
+#[derive(Debug)]
 pub struct AlarmWriter<'w, W: Write>(&'w mut Writer<W>);
 
 impl<W: Write> AlarmWriter<'_, W> {
@@ -377,6 +384,7 @@ impl<W: Write> AlarmWriter<'_, W> {
     }
 }
 
+#[derive(Debug)]
 pub struct StandardWriter<'w, W: Write>(&'w mut Writer<W>);
 
 impl<W: Write> StandardWriter<'_, W> {
@@ -390,6 +398,7 @@ impl<W: Write> StandardWriter<'_, W> {
     }
 }
 
+#[derive(Debug)]
 pub struct DaylightWriter<'w, W: Write>(&'w mut Writer<W>);
 
 impl<W: Write> DaylightWriter<'_, W> {

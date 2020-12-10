@@ -11,6 +11,7 @@ pub trait PropertyWrite {
     fn write<W: Write>(&self, line: &mut ContentLine<'_, W>) -> Result<(), Error>;
 }
 
+#[derive(Debug)]
 pub struct ContentLine<'w, W: Write>(&'w mut Writer<W>);
 
 impl<W: Write> ContentLine<'_, W> {
@@ -58,6 +59,7 @@ impl<W: Write> ContentLine<'_, W> {
     }
 }
 
+#[derive(Debug)]
 pub(crate) struct Writer<W: Write> {
     buffer: Box<[u8; CAPACITY]>,
     len: usize,
