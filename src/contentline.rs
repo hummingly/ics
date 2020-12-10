@@ -1,5 +1,6 @@
 #![allow(dead_code)]
-use crate::value::write_escaped_bytes;
+use crate::{components::Parameter, value::write_escaped_bytes};
+use std::fmt;
 use std::io::{Error, Write};
 
 pub const LINE_MAX_LEN: usize = 75;
@@ -32,15 +33,22 @@ impl<W: Write> ContentLine<'_, W> {
         write!(self.0, "{}", name)
     }
 
+    pub fn write_parameter(&mut self, parameter: &Parameter<'_>) -> Result<(), Error> {
+        write!(self.0, ";{}", parameter)
+    }
+
     pub fn write_parameter_pair(&mut self, key: &str, value: &str) -> Result<(), Error> {
         write!(self.0, ";{}={}", key, value)
     }
 
-    #[inline]
     pub fn write_value<V>(&mut self, value: &V) -> Result<(), Error>
     where
-        V: std::fmt::Display
+        V: fmt::Display
     {
+        write!(self.0, ":{}", value)
+    }
+
+    pub fn write_fmt_value(&mut self, value: fmt::Arguments<'_>) -> Result<(), Error> {
         write!(self.0, ":{}", value)
     }
 

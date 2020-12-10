@@ -18,6 +18,8 @@
     - `Priority`
     - `Repeat`
     - `Sequence`
+  - `pub const fn new(latitude: Float, longitude: Float) -> Self`
+    - `Geo`
 - Changed `[PROPERTY]::append(&mut self, Parameters<'_>)` to `[PROPERTY]::append(&mut self, &mut Parameters<'_>)`. The value is drained empty instead of being moved.
 - Replaced `BTreeMap` with `Vec` for `Parameters`.
 

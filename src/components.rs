@@ -86,7 +86,7 @@ impl fmt::Display for Component<'_> {
 pub struct Property<'a> {
     pub(crate) key: Cow<'a, str>,
     pub(crate) value: Cow<'a, str>,
-    pub(crate) parameters: Parameters<'a>
+    pub(crate) parameters: Vec<Parameter<'a>>
 }
 
 impl<'a> Property<'a> {

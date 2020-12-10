@@ -23,7 +23,7 @@
 //! For more information on properties, please refer to the specification [RFC5545 3.7. Calendar Properties](https://tools.ietf.org/html/rfc5545#section-3.7) and [RFC7986 5. Properties](https://tools.ietf.org/html/rfc7986#section-5).
 use crate::components::{Parameter, Parameters, Property};
 use crate::contentline::{ContentLine, PropertyWrite};
-use crate::value::Integer;
+use crate::value::{Float, Integer};
 use std::borrow::Cow;
 use std::io;
 
@@ -43,7 +43,68 @@ property_with_constructor!(
 );
 property!(Comment, "COMMENT");
 property!(Description, "DESCRIPTION");
-property!(Geo, "GEO");
+// property!(Geo, "GEO");
+
+/// `GEO` Property
+#[derive(Debug, Clone, PartialEq, PartialOrd)]
+pub struct Geo<'a> {
+    latitude: Float,
+    longitude: Float,
+    parameters: Vec<Parameter<'a>>
+}
+
+impl<'a> Geo<'a> {
+    /// Creates a new `GEO` Property with the given value.
+    pub const fn new(latitude: Float, longitude: Float) -> Self {
+        Self {
+            latitude,
+            longitude,
+            parameters: Vec::new()
+        }
+    }
+
+    /// Adds a parameter to the property.
+    pub fn add<P>(&mut self, parameter: P)
+    where
+        P: Into<Parameter<'a>>
+    {
+        let parameter = parameter.into();
+        match self.parameters.iter_mut().find(|p| p.key == parameter.key) {
+            Some(p) => *p = parameter,
+            None => self.parameters.push(parameter)
+        }
+    }
+
+    /// Adds several parameters at once to the property. For creating
+    /// several parameters at once, consult the documentation of
+    /// the [`parameters!`] macro.
+    pub fn append(&mut self, parameters: &mut Parameters<'a>) {
+        for parameter in parameters.drain(..) {
+            self.add(parameter);
+        }
+    }
+}
+
+impl<'a> From<Geo<'a>> for Property<'a> {
+    fn from(builder: Geo<'a>) -> Self {
+        Property {
+            key: Cow::Borrowed("GEO"),
+            value: Cow::Owned(format!("{};{}", builder.latitude, builder.longitude)),
+            parameters: builder.parameters
+        }
+    }
+}
+
+impl PropertyWrite for Geo<'_> {
+    fn write<W: io::Write>(&self, line: &mut ContentLine<'_, W>) -> Result<(), io::Error> {
+        line.write_name_unchecked("GEO");
+        for parameter in &self.parameters {
+            line.write_parameter(parameter)?;
+        }
+        line.write_fmt_value(format_args!("{};{}", self.latitude, self.longitude))
+    }
+}
+
 property!(Location, "LOCATION");
 property_integer!(PercentComplete, "PERCENT-COMPLETE");
 property_integer!(Priority, "PRIORITY");
@@ -183,7 +244,7 @@ mod rfc7986 {
     #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
     pub struct Image<'a> {
         value: Cow<'a, str>,
-        parameters: Parameters<'a>
+        parameters: Vec<Parameter<'a>>
     }
 
     impl<'a> Image<'a> {
@@ -234,23 +295,7 @@ mod rfc7986 {
         }
     }
 
-    impl<'a> From<Image<'a>> for Property<'a> {
-        fn from(builder: Image<'a>) -> Self {
-            Property {
-                key: Cow::Borrowed("IMAGE"),
-                value: builder.value,
-                parameters: builder.parameters
-            }
-        }
-    }
+    impl_from_prop!(Image, "IMAGE");
 
-    impl PropertyWrite for Image<'_> {
-        fn write<W: io::Write>(&self, line: &mut ContentLine<'_, W>) -> Result<(), io::Error> {
-            line.write_name_unchecked("IMAGE");
-            for parameter in &self.parameters {
-                line.write_parameter_pair(&parameter.key, &parameter.value)?;
-            }
-            line.write_value(&self.value)
-        }
-    }
+    impl_property_write!(Image, "IMAGE");
 }

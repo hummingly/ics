@@ -351,7 +351,7 @@ macro_rules! impl_property_write {
             fn write<W: io::Write>(&self, line: &mut ContentLine<'_, W>) -> Result<(), io::Error> {
                 line.write_name_unchecked($name);
                 for parameter in &self.parameters {
-                    line.write_parameter_pair(&parameter.key, &parameter.value)?;
+                    line.write_parameter(parameter)?;
                 }
                 line.write_value(&self.value)
             }
