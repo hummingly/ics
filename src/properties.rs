@@ -238,7 +238,7 @@ property!(Duration, "DURATION");
 property!(FreeBusyTime, "FREEBUSY");
 
 /// `TRANSP` Property
-#[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
+#[derive(Debug, Default, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Transp<'a> {
     value: TranspValue,
     parameters: Parameters<'a>
@@ -306,12 +306,6 @@ impl PropertyWrite for Transp<'_> {
             line.write_parameter(parameter)?;
         }
         line.write_value_text(self.value.as_str())
-    }
-}
-
-impl Default for Transp<'_> {
-    fn default() -> Self {
-        Self::opaque()
     }
 }
 
