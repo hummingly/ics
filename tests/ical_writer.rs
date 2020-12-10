@@ -1,8 +1,8 @@
 extern crate ics;
 
 use ics::properties::{
-    Attach, Attendee, Categories, Class, Description, DtEnd, DtStart, Due, Duration, FreeBusyTime,
-    Location, Organizer, Repeat, Sequence, Status, Summary, Trigger, TzID, URL
+    Attach, Attendee, Categories, Class, Description, DtEnd, DtStamp, DtStart, Due, Duration,
+    FreeBusyTime, Location, Organizer, Repeat, Sequence, Status, Summary, Trigger, TzID, UID, URL
 };
 use ics::properties::{TzName, TzOffsetFrom, TzOffsetTo};
 use ics::writer::*;
@@ -31,19 +31,23 @@ fn event() -> std::io::Result<()> {
                     END:VEVENT\r\n\
                     END:VCALENDAR\r\n";
 
-    let event = |event: &mut Event<'_, _>| {
-        event.write(&Organizer::new("mailto:jsmith@example.com"))?;
-        event.write(&DtStart::new("19960918T143000Z"))?;
-        event.write(&DtEnd::new("19960920T220000Z"))?;
-        event.write(&Status::confirmed())?;
-        event.write(&Categories::new("CONFERENCE"))?;
-        event.write(&Summary::new("Networld+Interop Conference"))?;
-        event.write(&Description::new(
-            "Networld+Interop Conference and Exhibit\n\
+    let event = Event::new(
+        UID::new("b68378cf-872d-44f1-9703-5e3725c56e71"),
+        DtStamp::new("19960704T120000Z"),
+        |event| {
+            event.write(&Organizer::new("mailto:jsmith@example.com"))?;
+            event.write(&DtStart::new("19960918T143000Z"))?;
+            event.write(&DtEnd::new("19960920T220000Z"))?;
+            event.write(&Status::confirmed())?;
+            event.write(&Categories::new("CONFERENCE"))?;
+            event.write(&Summary::new("Networld+Interop Conference"))?;
+            event.write(&Description::new(
+                "Networld+Interop Conference and Exhibit\n\
             Atlanta World Congress Center\n\
             Atlanta, Georgia"
-        ))
-    };
+            ))
+        }
+    );
 
     let mut calendar = ICalendarWriter::new(
         Vec::with_capacity(expected.len()),
@@ -51,11 +55,7 @@ fn event() -> std::io::Result<()> {
         "-//xyz Corp//NONSGML PDA Calendar Version 1.0//EN"
     )?;
 
-    calendar.write_event(
-        "b68378cf-872d-44f1-9703-5e3725c56e71",
-        "19960704T120000Z",
-        event
-    )?;
+    calendar.write_event(event)?;
 
     let output = calendar.close()?;
     assert_eq!(String::from_utf8_lossy(&output), expected);
@@ -87,35 +87,35 @@ fn todo() -> std::io::Result<()> {
                     END:VTODO\r\n\
                     END:VCALENDAR\r\n";
 
-    let todo = |todo: &mut ToDo<'_, _>| {
-        todo.write(&Organizer::new("mailto:unclesam@example.com"))?;
-        let mut attendee = Attendee::new("mailto:jqpublic@example.com");
-        attendee.add(PartStat::ACCEPTED);
-        todo.write(&attendee)?;
-        todo.write(&Due::new("19980415T000000"))?;
-        todo.write(&Status::needs_action())?;
-        todo.write(&Summary::new("Submit Income Taxes"))?;
-        todo.write(&Sequence::new(2))?;
+    let todo = ToDo::new(
+        UID::new("b68378cf-872d-44f1-9703-5e3725c56e71"),
+        DtStamp::new("19980130T134500Z"),
+        |todo| {
+            todo.write(&Organizer::new("mailto:unclesam@example.com"))?;
+            let mut attendee = Attendee::new("mailto:jqpublic@example.com");
+            attendee.add(PartStat::ACCEPTED);
+            todo.write(&attendee)?;
+            todo.write(&Due::new("19980415T000000"))?;
+            todo.write(&Status::needs_action())?;
+            todo.write(&Summary::new("Submit Income Taxes"))?;
+            todo.write(&Sequence::new(2))?;
 
-        todo.write_audio_alarm(&Trigger::new("19980403T120000Z"), |alarm| {
-            let mut attach = Attach::new("http://example.com/pub/audio-files/ssbanner.aud");
-            attach.add(FmtType::new("audio/basic"));
-            alarm.write(&attach)?;
-            alarm.write(&Repeat::new(4))?;
-            alarm.write(&Duration::new("PT1H"))
-        })
-    };
+            todo.write_alarm(Alarm::audio(Trigger::new("19980403T120000Z"), |alarm| {
+                let mut attach = Attach::new("http://example.com/pub/audio-files/ssbanner.aud");
+                attach.add(FmtType::new("audio/basic"));
+                alarm.write(&attach)?;
+                alarm.write(&Repeat::new(4))?;
+                alarm.write(&Duration::new("PT1H"))
+            }))
+        }
+    );
 
     let mut calendar = ICalendarWriter::new(
         Vec::with_capacity(expected.len()),
         "2.0",
         "-//ABC Corporation//NONSGML My Product//EN"
     )?;
-    calendar.write_todo(
-        "b68378cf-872d-44f1-9703-5e3725c56e71",
-        "19980130T134500Z",
-        todo
-    )?;
+    calendar.write_todo(todo)?;
 
     let output = calendar.close()?;
     assert_eq!(String::from_utf8_lossy(&output), expected);
@@ -149,12 +149,15 @@ fn journal() -> std::io::Result<()> {
                     END:VJOURNAL\r\n\
                     END:VCALENDAR\r\n";
 
-    let journal = |journal: &mut Journal<'_, _>| {
-        journal.write(&Organizer::new("mailto:jsmith@example.com"))?;
-        journal.write(&Status::draft())?;
-        journal.write(&Class::public())?;
-        journal.write(&Categories::new("Project Report,XYZ,Weekly Meeting"))?;
-        journal.write(&Description::new("Project xyz Review Meeting Minutes\n\
+    let journal = Journal::new(
+        UID::new("b4035e76-699e-4cb2-85f6-724d01f18284"),
+        DtStamp::new("19970324T120000Z"),
+        |journal| {
+            journal.write(&Organizer::new("mailto:jsmith@example.com"))?;
+            journal.write(&Status::draft())?;
+            journal.write(&Class::public())?;
+            journal.write(&Categories::new("Project Report,XYZ,Weekly Meeting"))?;
+            journal.write(&Description::new("Project xyz Review Meeting Minutes\n\
             Agenda\n\
             1. Review of project version 1.0 requirements.\n\
             2. Definition of project processes.\n\
@@ -166,18 +169,15 @@ fn journal() -> std::io::Result<()> {
             -New schedule will be distributed by Friday.\n\
             -Next weeks meeting is cancelled. No meeting until 3/23."
         ))
-    };
+        }
+    );
 
     let mut calendar = ICalendarWriter::new(
         Vec::with_capacity(expected.len()),
         "2.0",
         "-//ABC Corporation//NONSGML My Product//EN"
     )?;
-    calendar.write_journal(
-        "b4035e76-699e-4cb2-85f6-724d01f18284",
-        "19970324T120000Z",
-        journal
-    )?;
+    calendar.write_journal(journal)?;
 
     let output = calendar.close()?;
     assert_eq!(String::from_utf8_lossy(&output), expected);
@@ -203,28 +203,28 @@ fn freebusy() -> std::io::Result<()> {
                     END:VFREEBUSY\r\n\
                     END:VCALENDAR\r\n";
 
-    let freebusy = |freebusy: &mut FreeBusy<'_, _>| {
-        freebusy.write(&Organizer::new("mailto:jsmith@example.com"))?;
-        freebusy.write(&DtStart::new("19980313T141711Z"))?;
-        freebusy.write(&DtEnd::new("19980410T141711Z"))?;
-        freebusy.write(&FreeBusyTime::new("19980314T233000Z/19980315T003000Z"))?;
-        freebusy.write(&FreeBusyTime::new("19980316T153000Z/19980316T163000Z"))?;
-        freebusy.write(&FreeBusyTime::new("19980318T030000Z/19980318T040000Z"))?;
-        freebusy.write(&URL::new(
-            "http://www.example.com/calendar/busytime/jsmith.ifb"
-        ))
-    };
+    let freebusy = FreeBusy::new(
+        UID::new("0b04bd52-c396-4251-a673-1cc0b96def93"),
+        DtStamp::new("19970324T120000Z"),
+        |freebusy| {
+            freebusy.write(&Organizer::new("mailto:jsmith@example.com"))?;
+            freebusy.write(&DtStart::new("19980313T141711Z"))?;
+            freebusy.write(&DtEnd::new("19980410T141711Z"))?;
+            freebusy.write(&FreeBusyTime::new("19980314T233000Z/19980315T003000Z"))?;
+            freebusy.write(&FreeBusyTime::new("19980316T153000Z/19980316T163000Z"))?;
+            freebusy.write(&FreeBusyTime::new("19980318T030000Z/19980318T040000Z"))?;
+            freebusy.write(&URL::new(
+                "http://www.example.com/calendar/busytime/jsmith.ifb"
+            ))
+        }
+    );
 
     let mut calendar = ICalendarWriter::new(
         Vec::with_capacity(expected.len()),
         "2.0",
         "-//RDU Software//NONSGML HandCal//EN"
     )?;
-    calendar.write_freebusy(
-        "0b04bd52-c396-4251-a673-1cc0b96def93",
-        "19970324T120000Z",
-        freebusy
-    )?;
+    calendar.write_freebusy(freebusy)?;
 
     let output = calendar.close()?;
     assert_eq!(String::from_utf8_lossy(&output), expected);
@@ -268,22 +268,25 @@ fn timezone() -> std::io::Result<()> {
                     END:VEVENT\r\n\
                     END:VCALENDAR\r\n";
 
-    let timezone = |timezone: &mut TimeZone<'_, _>| {
-        timezone.write_standard(
-            &DtStart::new("19981025T020000"),
-            &TzOffsetFrom::new("-0400"),
-            &TzOffsetTo::new("-0500"),
+    let timezone = TimeZone::standard(
+        TzID::new("America/New_York"),
+        Standard::new(
+            DtStart::new("19981025T020000"),
+            TzOffsetFrom::new("-0400"),
+            TzOffsetTo::new("-0500"),
             |standard| standard.write(&TzName::new("EST"))
-        )?;
-        timezone.write_daylight(
-            &DtStart::new("19990404T020000"),
-            &TzOffsetFrom::new("-0500"),
-            &TzOffsetTo::new("-0400"),
-            |daylight| daylight.write(&TzName::new("EDT"))
-        )
-    };
+        ),
+        |timezone| {
+            timezone.write_daylight(Daylight::new(
+                DtStart::new("19990404T020000"),
+                TzOffsetFrom::new("-0500"),
+                TzOffsetTo::new("-0400"),
+                |daylight| daylight.write(&TzName::new("EDT"))
+            ))
+        }
+    );
 
-    let event = |event: &mut Event<'_, _>| {
+    let event = |event: &mut EventWriter<_>| {
         event.write(&Organizer::new("mailto:mrbig@example.com"))?;
 
         let mut attendee = Attendee::new("mailto:employee-A@example.com");
@@ -313,7 +316,7 @@ fn timezone() -> std::io::Result<()> {
         "2.0",
         "-//RDU Software//NONSGML HandCal//EN"
     )?;
-    calendar.write_timezone(&TzID::new("America/New_York"), timezone)?;
+    calendar.write_timezone(timezone)?;
     calendar.write_event(
         "b7d2e88d-c0ac-4d26-8be2-fbe27217e698",
         "19980309T231000Z",
