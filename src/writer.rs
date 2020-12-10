@@ -147,11 +147,11 @@ impl<'f, W: Write> FreeBusy<'f, W> {
     }
 }
 
-pub struct TimeZone<'t, W: Write + 't>(
+pub struct TimeZone<'t, W: Write>(
     Box<dyn FnOnce(&mut TimeZoneWriter<W>) -> Result<(), Error> + 't>
 );
 
-impl<'t, W: Write> TimeZone<'t, W> {
+impl<'t, W: Write + 't> TimeZone<'t, W> {
     pub fn standard<F>(tzid: TzID<'t>, definition: Standard<'t, W>, body: F) -> Self
     where
         F: FnOnce(&mut TimeZoneWriter<W>) -> Result<(), Error> + 't
