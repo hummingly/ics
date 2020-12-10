@@ -27,6 +27,16 @@ use crate::value::{Float, Integer};
 use std::borrow::Cow;
 use std::io;
 
+impl PropertyWrite for Property<'_> {
+    fn write<W: io::Write>(&self, line: &mut ContentLine<'_, W>) -> Result<(), io::Error> {
+        line.write_name(&self.name)?;
+        for parameter in &self.parameters {
+            line.write_parameter(parameter)?;
+        }
+        line.write_value(&self.value)
+    }
+}
+
 property!(CalScale, "CALSCALE");
 property!(Method, "METHOD");
 property!(ProdID, "PRODID");
@@ -69,7 +79,11 @@ impl<'a> Geo<'a> {
         P: Into<Parameter<'a>>
     {
         let parameter = parameter.into();
-        match self.parameters.iter_mut().find(|p| p.key == parameter.key) {
+        match self
+            .parameters
+            .iter_mut()
+            .find(|p| p.name == parameter.name)
+        {
             Some(p) => *p = parameter,
             None => self.parameters.push(parameter)
         }
@@ -88,7 +102,7 @@ impl<'a> Geo<'a> {
 impl<'a> From<Geo<'a>> for Property<'a> {
     fn from(builder: Geo<'a>) -> Self {
         Property {
-            key: Cow::Borrowed("GEO"),
+            name: Cow::Borrowed("GEO"),
             value: Cow::Owned(format!("{};{}", builder.latitude, builder.longitude)),
             parameters: builder.parameters
         }
@@ -279,7 +293,11 @@ mod rfc7986 {
             P: Into<Parameter<'a>>
         {
             let parameter = parameter.into();
-            match self.parameters.iter_mut().find(|p| p.key == parameter.key) {
+            match self
+                .parameters
+                .iter_mut()
+                .find(|p| p.name == parameter.name)
+            {
                 Some(p) => *p = parameter,
                 None => self.parameters.push(parameter)
             }

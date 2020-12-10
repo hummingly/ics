@@ -84,7 +84,7 @@ impl fmt::Display for Component<'_> {
 /// it is.
 #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Property<'a> {
-    pub(crate) key: Cow<'a, str>,
+    pub(crate) name: Cow<'a, str>,
     pub(crate) value: Cow<'a, str>,
     pub(crate) parameters: Vec<Parameter<'a>>
 }
@@ -97,7 +97,7 @@ impl<'a> Property<'a> {
         V: Into<Cow<'a, str>>
     {
         Property {
-            key: key.into(),
+            name: key.into(),
             value: value.into(),
             parameters: Vec::new()
         }
@@ -109,7 +109,11 @@ impl<'a> Property<'a> {
         P: Into<Parameter<'a>>
     {
         let parameter = parameter.into();
-        match self.parameters.iter_mut().find(|p| p.key == parameter.key) {
+        match self
+            .parameters
+            .iter_mut()
+            .find(|p| p.name == parameter.name)
+        {
             Some(p) => *p = parameter,
             None => self.parameters.push(parameter)
         }
@@ -128,13 +132,13 @@ impl<'a> Property<'a> {
         // + 1 for the : in the property
         // + 2 for the ; and = in the parameter
         self.parameters.iter().fold(
-            self.value.len() + self.key.len() + 1,
-            |len, Parameter { key, value }| len + key.len() + value.len() + 2
+            self.value.len() + self.name.len() + 1,
+            |len, Parameter { name: key, value }| len + key.len() + value.len() + 2
         )
     }
 
     fn format<W: fmt::Write>(&self, writer: &mut W) -> fmt::Result {
-        write!(writer, "{}", self.key)?;
+        write!(writer, "{}", self.name)?;
         for parameter in &self.parameters {
             write!(writer, ";{}", parameter)?;
         }
@@ -163,7 +167,7 @@ impl fmt::Display for Property<'_> {
 /// wrapper type or just use it as it is.
 #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Parameter<'a> {
-    pub(crate) key: Cow<'a, str>,
+    pub(crate) name: Cow<'a, str>,
     pub(crate) value: Cow<'a, str>
 }
 
@@ -175,7 +179,7 @@ impl<'a> Parameter<'a> {
         V: Into<Cow<'a, str>>
     {
         Parameter {
-            key: key.into(),
+            name: key.into(),
             value: value.into()
         }
     }
@@ -183,7 +187,7 @@ impl<'a> Parameter<'a> {
 
 impl fmt::Display for Parameter<'_> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}={}", self.key, self.value)
+        write!(f, "{}={}", self.name, self.value)
     }
 }
 

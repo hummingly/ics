@@ -73,7 +73,7 @@ macro_rules! property {
                 P: Into<Parameter<'a>>
             {
                 let parameter = parameter.into();
-                match self.parameters.iter_mut().find(|p| p.key == parameter.key) {
+                match self.parameters.iter_mut().find(|p| p.name == parameter.name) {
                     Some(p) => *p = parameter,
                     None => self.parameters.push(parameter)
                 }
@@ -139,7 +139,7 @@ macro_rules! property_with_constructor {
                 P: Into<Parameter<'a>>
             {
                 let parameter = parameter.into();
-                match self.parameters.iter_mut().find(|p| p.key == parameter.key) {
+                match self.parameters.iter_mut().find(|p| p.name == parameter.name) {
                     Some(p) => *p = parameter,
                     None => self.parameters.push(parameter)
                 }
@@ -195,7 +195,7 @@ macro_rules! property_with_parameter {
                 P: Into<Parameter<'a>>
             {
                 let parameter = parameter.into();
-                match self.parameters.iter_mut().find(|p| p.key == parameter.key) {
+                match self.parameters.iter_mut().find(|p| p.name == parameter.name) {
                     Some(p) => *p = parameter,
                     None => self.parameters.push(parameter)
                 }
@@ -245,7 +245,7 @@ macro_rules! property_integer {
                 P: Into<Parameter<'a>>
             {
                 let parameter = parameter.into();
-                match self.parameters.iter_mut().find(|p| p.key == parameter.key) {
+                match self.parameters.iter_mut().find(|p| p.name == parameter.name) {
                     Some(p) => *p = parameter,
                     None => self.parameters.push(parameter)
                 }
@@ -264,7 +264,7 @@ macro_rules! property_integer {
         impl<'a> From<$type<'a>> for Property<'a> {
             fn from(builder: $type<'a>) -> Self {
                 Property {
-                    key: Cow::Borrowed($name),
+                    name: Cow::Borrowed($name),
                     value: Cow::Owned(builder.value.to_string()),
                     parameters: builder.parameters
                 }
@@ -335,7 +335,7 @@ macro_rules! impl_from_prop {
         impl<'a> From<$type<'a>> for Property<'a> {
             fn from(builder: $type<'a>) -> Self {
                 Property {
-                    key: Cow::Borrowed($name),
+                    name: Cow::Borrowed($name),
                     value: builder.value,
                     parameters: builder.parameters
                 }
@@ -364,7 +364,7 @@ macro_rules! impl_from_param {
         impl<'a> From<$type<'a>> for Parameter<'a> {
             fn from(builder: $type<'a>) -> Self {
                 Parameter {
-                    key: Cow::Borrowed($name),
+                    name: Cow::Borrowed($name),
                     value: builder.0
                 }
             }
