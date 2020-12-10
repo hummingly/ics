@@ -118,8 +118,10 @@ impl<'a> Property<'a> {
     /// Adds several parameters at once to a property. For creating several
     /// parameters at once, consult the documentation of the `parameters!`
     /// macro.
-    pub fn append(&mut self, mut parameters: Parameters<'a>) {
-        self.parameters.append(&mut parameters);
+    pub fn append(&mut self, parameters: &mut Parameters<'a>) {
+        for parameter in parameters.drain(..) {
+            self.add(parameter);
+        }
     }
 
     fn content_len(&self) -> usize {
