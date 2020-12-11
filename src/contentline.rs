@@ -20,12 +20,16 @@ impl<W: Write> ContentLine<'_, W> {
     }
 
     pub(crate) fn write_name_unchecked(&mut self, name: &str) {
+        assert!(name.len() <= CAPACITY);
         self.0.extend_from_slice(name.as_bytes());
     }
 
-    pub(crate) fn end_line(self) -> Result<(), Error> {
-        self.0.flush_line()?;
-        self.0.inner.write_all(b"\r\n")
+    pub(crate) fn write_property<P>(&mut self, property: &P) -> Result<(), Error>
+    where
+        P: PropertyWrite
+    {
+        property.write(self)?;
+        self.0.write_line_break()
     }
 }
 
@@ -75,11 +79,46 @@ impl<W: Write> Writer<W> {
     }
 
     pub(crate) fn into_inner(mut self) -> Result<W, Error> {
-        self.flush()?;
-        Ok(self.inner)
+        match self.flush() {
+            Ok(_) => Ok(self.inner),
+            Err(error) => Err(error)
+        }
     }
 
-    fn flush_line(&mut self) -> Result<(), Error> {
+    pub(crate) fn write_begin(&mut self, component: &str) -> Result<(), Error> {
+        if component.len() <= LINE_MAX_LEN - "BEGIN:".len() {
+            self.write_begin_unchecked(component)
+        } else {
+            write!(self, "BEGIN:{}", component)?;
+            self.write_line_break()
+        }
+    }
+
+    pub(crate) fn write_end(&mut self, component: &str) -> Result<(), Error> {
+        if component.len() <= LINE_MAX_LEN - "END:".len() {
+            self.write_begin_unchecked(component)
+        } else {
+            write!(self, "END:{}", component)?;
+            self.write_line_break()
+        }
+    }
+
+    pub(crate) fn write_begin_unchecked(&mut self, component: &str) -> Result<(), Error> {
+        assert!(component.len() <= LINE_MAX_LEN - "BEGIN:".len());
+        writeln!(self.inner, "BEGIN:{}\r", component)
+    }
+
+    pub(crate) fn write_end_unchecked(&mut self, component: &str) -> Result<(), Error> {
+        assert!(component.len() <= LINE_MAX_LEN - "END:".len());
+        writeln!(self.inner, "END:{}\r", component)
+    }
+
+    fn write_line_break(&mut self) -> Result<(), Error> {
+        self.write_buffer()?;
+        self.inner.write_all(b"\r\n")
+    }
+
+    fn write_buffer(&mut self) -> Result<(), Error> {
         if self.len > 0 {
             match lazy_fold(&mut self.inner, &self.buffer[..self.len]) {
                 Ok(0) => Ok(()),
@@ -98,92 +137,42 @@ impl<W: Write> Writer<W> {
     }
 }
 
-impl<W: Write> Writer<W> {
-    pub(crate) fn write_begin(&mut self, component: &str) -> Result<(), Error> {
-        if component.len() <= LINE_MAX_LEN - "BEGIN:".len() {
-            self.write_begin_unchecked(component)
-        } else {
-            writeln!(self, "BEGIN:{}", component)?;
-            self.end_line()
-        }
-    }
-
-    /// Write BEGIN limiter without folding
-    ///
-    /// Components part of the specification have names that are shorter than
-    /// `LIMIT - "BEGIN:".len()`. This is why checking for line breaks in a
-    /// single line is redundant.
-    pub(crate) fn write_begin_unchecked(&mut self, component: &str) -> Result<(), Error> {
-        debug_assert!(component.len() <= LINE_MAX_LEN - "BEGIN:".len());
-        writeln!(self.inner, "BEGIN:{}\r", component)
-    }
-
-    pub(crate) fn write_end(&mut self, component: &str) -> Result<(), Error> {
-        if component.len() <= LINE_MAX_LEN - "END:".len() {
-            self.write_end_unchecked(component)
-        } else {
-            writeln!(self, "END:{}", component)?;
-            self.end_line()
-        }
-    }
-
-    /// Write END limiter without folding
-    ///
-    /// Components part of the specification have names that are shorter than
-    /// `LIMIT - "END:".len()`. This is why checking for line breaks in a
-    /// single line is redundant.
-    pub(crate) fn write_end_unchecked(&mut self, component: &str) -> Result<(), Error> {
-        debug_assert!(component.len() <= LINE_MAX_LEN - "END:".len());
-        writeln!(self.inner, "END:{}\r", component)
-    }
-
-    pub(crate) fn end_line(&mut self) -> Result<(), Error> {
-        self.flush_line()?;
-        self.inner.write_all(b"\r\n")
-    }
-}
-
 impl<W: Write> Write for Writer<W> {
     fn write(&mut self, buf: &[u8]) -> Result<usize, Error> {
-        match self.write_all(buf) {
-            Ok(_) => Ok(buf.len()),
-            Err(error) => Err(error)
-        }
+        self.write_all(buf)?;
+        Ok(buf.len())
     }
 
     fn flush(&mut self) -> Result<(), Error> {
-        self.flush_line()?;
+        self.write_buffer()?;
         self.inner.flush()
     }
 
     fn write_all(&mut self, mut buf: &[u8]) -> Result<(), Error> {
-        if buf.is_empty() {
+        if self.len + buf.len() < CAPACITY {
+            self.extend_from_slice(buf);
             return Ok(());
         }
 
-        if self.len + buf.len() < CAPACITY {
-            self.extend_from_slice(buf);
-        } else {
-            let mut end = CAPACITY - self.len;
-            loop {
-                self.buffer[self.len..CAPACITY].copy_from_slice(&buf[..end]);
-                match lazy_fold(&mut self.inner, self.buffer.as_ref()) {
-                    Ok(n) => {
-                        // SAFETY: The n value can never be bigger than CAPACITY because the input
-                        // self.buffer is CAPACITY bytes long!
-                        self.buffer.copy_within(CAPACITY - n..CAPACITY, 0);
-                        self.len = n;
-                        buf = &buf[end..];
-                        end = CAPACITY - self.len;
-                        if buf.len() < end {
-                            self.extend_from_slice(buf);
-                            break;
-                        }
+        let mut end = CAPACITY - self.len;
+        loop {
+            self.buffer[self.len..CAPACITY].copy_from_slice(&buf[..end]);
+            match lazy_fold(&mut self.inner, self.buffer.as_ref()) {
+                Ok(n) => {
+                    // SAFETY: The n value can never be bigger than CAPACITY because the input
+                    // self.buffer is CAPACITY bytes long!
+                    self.buffer.copy_within(CAPACITY - n..CAPACITY, 0);
+                    self.len = n;
+                    buf = &buf[end..];
+                    end = CAPACITY - self.len;
+                    if buf.len() < end {
+                        self.extend_from_slice(buf);
+                        break;
                     }
-                    Err(err) => {
-                        self.len = CAPACITY;
-                        return Err(err);
-                    }
+                }
+                Err(err) => {
+                    self.len = CAPACITY;
+                    return Err(err);
                 }
             }
         }

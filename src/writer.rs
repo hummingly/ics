@@ -31,9 +31,7 @@ impl<W: Write> ICalendar<W> {
     where
         P: PropertyWrite
     {
-        let mut line = ContentLine::new(&mut self.0);
-        property.write(&mut line)?;
-        line.end_line()
+        ContentLine::new(&mut self.0).write_property(property)
     }
 
     pub fn write_component<F>(&mut self, name: &str, body: F) -> Result<(), Error>
@@ -281,9 +279,7 @@ impl<W: Write> EventWriter<'_, W> {
     where
         P: PropertyWrite
     {
-        let mut line = ContentLine::new(self.0);
-        property.write(&mut line)?;
-        line.end_line()
+        ContentLine::new(self.0).write_property(property)
     }
 
     pub fn write_alarm(&mut self, alarm: Alarm<W>) -> Result<(), Error> {
@@ -301,9 +297,7 @@ impl<W: Write> ToDoWriter<'_, W> {
     where
         P: PropertyWrite
     {
-        let mut line = ContentLine::new(self.0);
-        property.write(&mut line)?;
-        line.end_line()
+        ContentLine::new(self.0).write_property(property)
     }
 
     pub fn write_alarm(&mut self, alarm: Alarm<W>) -> Result<(), Error> {
@@ -321,9 +315,7 @@ impl<W: Write> JournalWriter<'_, W> {
     where
         P: PropertyWrite
     {
-        let mut line = ContentLine::new(self.0);
-        property.write(&mut line)?;
-        line.end_line()
+        ContentLine::new(self.0).write_property(property)
     }
 }
 
@@ -335,9 +327,7 @@ impl<W: Write> FreeBusyWriter<'_, W> {
     where
         P: PropertyWrite
     {
-        let mut line = ContentLine::new(self.0);
-        property.write(&mut line)?;
-        line.end_line()
+        ContentLine::new(self.0).write_property(property)
     }
 }
 
@@ -349,9 +339,7 @@ impl<W: Write> TimeZoneWriter<'_, W> {
     where
         P: PropertyWrite
     {
-        let mut line = ContentLine::new(self.0);
-        property.write(&mut line)?;
-        line.end_line()
+        ContentLine::new(self.0).write_property(property)
     }
 
     pub fn write_standard(&mut self, definition: Standard<W>) -> Result<(), Error> {
@@ -375,9 +363,7 @@ impl<W: Write> AlarmWriter<'_, W> {
     where
         P: PropertyWrite
     {
-        let mut line = ContentLine::new(self.0);
-        property.write(&mut line)?;
-        line.end_line()
+        ContentLine::new(self.0).write_property(property)
     }
 }
 
@@ -389,9 +375,7 @@ impl<W: Write> StandardWriter<'_, W> {
     where
         P: PropertyWrite
     {
-        let mut line = ContentLine::new(self.0);
-        property.write(&mut line)?;
-        line.end_line()
+        ContentLine::new(self.0).write_property(property)
     }
 }
 
@@ -403,8 +387,6 @@ impl<W: Write> DaylightWriter<'_, W> {
     where
         P: PropertyWrite
     {
-        let mut line = ContentLine::new(self.0);
-        property.write(&mut line)?;
-        line.end_line()
+        ContentLine::new(self.0).write_property(property)
     }
 }
