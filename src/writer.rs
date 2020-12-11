@@ -159,12 +159,12 @@ impl<'t, W: Write + 't> TimeZone<'t, W> {
         }))
     }
 
-    pub fn daylight<F>(tzid: &'t TzID, definition: Daylight<'t, W>, body: F) -> Self
+    pub fn daylight<F>(tzid: TzID<'t>, definition: Daylight<'t, W>, body: F) -> Self
     where
         F: FnOnce(&mut TimeZoneWriter<W>) -> Result<(), Error> + 't
     {
         Self(Box::new(move |timezone| {
-            timezone.write(tzid)?;
+            timezone.write(&tzid)?;
             timezone.write_daylight(definition)?;
             body(timezone)
         }))
