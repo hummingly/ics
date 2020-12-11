@@ -222,7 +222,7 @@ impl<'a, W: Write> Alarm<'a, W> {
         F: FnOnce(&mut AlarmWriter<W>) -> Result<(), Error> + 'a
     {
         Self(Box::new(move |alarm| {
-            alarm.write(&Action::display())?;
+            alarm.write(&Action::email())?;
             alarm.write(&trigger)?;
             alarm.write(&description)?;
             alarm.write(&summary)?;

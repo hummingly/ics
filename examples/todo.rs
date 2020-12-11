@@ -5,8 +5,9 @@ use ics::properties::{
 };
 use ics::writer::{Alarm, ICalendar, ToDo};
 use std::fs::File;
+use std::io;
 
-fn main() -> std::io::Result<()> {
+fn main() -> Result<(), io::Error> {
     // Crate a writer object to which the iCalendar object is written to.
     let file = File::create("todo.ics")?;
 
