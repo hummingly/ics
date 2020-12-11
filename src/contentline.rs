@@ -59,7 +59,6 @@ impl<W: Write> ContentLine<'_, W> {
     }
 }
 
-#[derive(Debug)]
 pub(crate) struct Writer<W: Write> {
     buffer: Box<[u8; CAPACITY]>,
     len: usize,
@@ -226,6 +225,16 @@ fn next_boundary(input: &[u8]) -> Option<usize> {
     match input[..=LINE_MAX_LEN].iter().rposition(is_char_boundary) {
         Some(0) | None => None,
         boundary => boundary
+    }
+}
+
+impl<W: Write + fmt::Debug> fmt::Debug for Writer<W> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Writer")
+            .field("buffer", &&self.buffer[..])
+            .field("len", &self.len)
+            .field("inner", &self.inner)
+            .finish()
     }
 }
 
