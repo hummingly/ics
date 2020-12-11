@@ -1,40 +1,55 @@
-extern crate ics;
-
 use ics::parameters::{FmtType, PartStat};
 use ics::properties::{
-    Attach, Attendee, Due, Duration, Organizer, Repeat, Sequence, Status, Summary, Trigger
+    Attach, Attendee, DtStamp, Due, Duration, Organizer, ProdID, Repeat, Sequence, Status, Summary,
+    Trigger, Version, UID
 };
-use ics::{Alarm, ICalendar, ToDo};
+use ics::writer::{Alarm, ICalendar, ToDo};
+use std::fs::File;
 
 fn main() -> std::io::Result<()> {
-    // Create simple todo
+    // Crate a writer object to which the iCalendar object is written to.
+    let file = File::create("todo.ics")?;
+
+    // Create a new iCalendar object.
+    // An iCalendar object must at least consist of the VERSION and PRODID property.
+    let mut calendar = ICalendar::new(
+        file,
+        Version::new("2.0"),
+        ProdID::new("-//ABC Corporation//NONSGML My Product//EN")
+    )?;
+
+    // Create a simple todo.
     // The required properties must be a unique identifier which should be random
     // generated and the date stamp which must be in UTC time.
-    let mut todo = ToDo::new("b68378cf-872d-44f1-9703-5e3725c56e71", "19980130T134500Z");
-    todo.push(Organizer::new("mailto:unclesam@example.com"));
-    let mut attendee = Attendee::new("mailto:jqpublic@example.com");
-    attendee.add(PartStat::ACCEPTED);
-    todo.push(attendee);
-    todo.push(Due::new("19980415T000000"));
-    todo.push(Status::needs_action());
-    todo.push(Summary::new("Submit Income Taxes"));
-    todo.push(Sequence::new(2));
-    // Add alarm to todo
-    let mut alarm = Alarm::audio(Trigger::new("19980403T120000Z"));
-    let mut attach = Attach::new("http://example.com/pub/audio-files/ssbanner.aud");
-    attach.add(FmtType::new("audio/basic"));
-    alarm.push(attach);
-    alarm.push(Repeat::new(4));
-    alarm.push(Duration::new("PT1H"));
-    todo.add_alarm(alarm);
+    let todo = ToDo::new(
+        UID::new("b68378cf-872d-44f1-9703-5e3725c56e71"),
+        DtStamp::new("19980130T134500Z"),
+        |todo| {
+            todo.write(&Organizer::new("mailto:unclesam@example.com"))?;
+            let mut attendee = Attendee::new("mailto:jqpublic@example.com");
+            attendee.add(PartStat::ACCEPTED);
+            todo.write(&attendee)?;
+            todo.write(&Due::new("19980415T000000"))?;
+            todo.write(&Status::needs_action())?;
+            todo.write(&Summary::new("Submit Income Taxes"))?;
+            todo.write(&Sequence::new(2))?;
 
-    // Create new iCalendar object
-    // An iCalendar object must at least consist a component and the VERSION and
-    // PRODID property.
-    let mut calendar = ICalendar::new("2.0", "-//ABC Corporation//NONSGML My Product//EN");
-    calendar.add_todo(todo);
-    // Write calendar to file
-    calendar.save_file("todo.ics")?;
+            // Write an audio alarm into the todo.
+            todo.write_alarm(Alarm::audio(Trigger::new("19980403T120000Z"), |alarm| {
+                let mut attach = Attach::new("http://example.com/pub/audio-files/ssbanner.aud");
+                attach.add(FmtType::new("audio/basic"));
+                alarm.write(&attach)?;
+                alarm.write(&Repeat::new(4))?;
+                alarm.write(&Duration::new("PT1H"))
+            }))
+        }
+    );
+
+    // Write the todo into the writer.
+    calendar.write_todo(todo)?;
+
+    // Write remaining bits from calendar to file
+    calendar.close()?;
     Ok(())
 
     /* inside todo.ics
