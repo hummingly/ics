@@ -23,25 +23,30 @@
 //!
 //! # Example
 //! ```
-//! use ics::properties::{Comment, Status, Summary};
-//! use ics::{ICalendar, ToDo};
+//! use ics::properties::{Comment, DtStamp, ProdID, Status, Summary, UID, Version};
+//! use ics::writer::{ICalendar, ToDo};
+//! use std::fs::File;
+//! use std::io;
 //!
-//! fn main() -> std::io::Result<()> {
-//!     // Anything that can be converted to a Cow<str> is accepted as value which means
-//!     // &str and String can be used freely. For the sake of demonstrating the UID was
-//!     // taken from somewhere. Out of security reasons the UID should always be
-//!     // randomly generated.
-//!     let mut todo = ToDo::new("d4092ed9-1667-4518-a7c0-bcfaac4f1fc6", "20181021T190000");
-//!     todo.push(Summary::new("Katarina's Birthday Present"));
-//!     todo.push(Comment::new("Buy her Imagine Dragons tickets!"));
-//!     todo.push(Status::needs_action());
-//!
+//! fn main() -> Result<(), io::Error> {
+//!     let file = File::create("birthday.ics")?;
 //!     // The ICalendar object is what is later written to the file.
-//!     let mut calendar = ICalendar::new("2.0", "ics-rs");
-//!     calendar.add_todo(todo);
+//!     let mut calendar = ICalendar::new(file, Version::new("2.0"), ProdID::new("ics-rs"))?;
 //!
-//!     // Write `calendar` to a file.
-//!     calendar.save_file("birthday.ics")?;
+//!     // For the sake of demonstrating the UID was taken from somewhere. Out of security
+//!     // reasons the UID should always be randomly generated.
+//!     let todo = ToDo::new(
+//!         UID::new("d4092ed9-1667-4518-a7c0-bcfaac4f1fc6"),
+//!         DtStamp::new("20181021T190000"),
+//!         |todo| {
+//!             todo.write(&Summary::new("Katarina's Birthday Present"))?;
+//!             todo.write(&Comment::new("Buy her Imagine Dragons tickets!"))?;
+//!             todo.write(&Status::needs_action())
+//!     });
+//!     calendar.write_todo(todo)?;
+//!
+//!     // Write remaining bits to the file.
+//!     calendar.close()?;
 //!     Ok(())
 //! }
 //! ```
@@ -53,15 +58,10 @@
 mod macros;
 pub mod components;
 pub mod contentline;
-mod ical;
 pub mod parameters;
 pub mod properties;
 mod util;
 mod value;
 pub mod writer;
-
-pub use crate::ical::{
-    Alarm, Daylight, Event, FreeBusy, ICalendar, Journal, Standard, TimeZone, ToDo
-};
 
 pub use crate::util::escape_text;
