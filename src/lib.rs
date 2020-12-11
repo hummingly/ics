@@ -56,12 +56,8 @@
 
 #[macro_use]
 mod macros;
-pub mod components;
 pub mod contentline;
 pub mod parameters;
 pub mod properties;
-mod util;
 mod value;
 pub mod writer;
-
-pub use crate::util::escape_text;

@@ -1,5 +1,6 @@
 #![allow(dead_code)]
-use crate::{components::Parameter, value::write_escaped_bytes};
+use crate::parameters::Parameter;
+use crate::value::write_escaped_bytes;
 use std::fmt;
 use std::io::{Error, Write};
 

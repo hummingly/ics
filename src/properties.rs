@@ -8,35 +8,12 @@
 //! Additionally, some of them also specify format definitions or defined
 //! values. Those are associated functions or constructors.
 //!
-//! # Example
-//! ```
-//! use ics::components::Property;
-//! use ics::properties::Class;
-//!
-//! // Using associated functions should be preferred over using the generic
-//! // constructors whenever possible
-//! let confidential = Class::confidential();
-//!
-//! assert_eq!(Class::new("CONFIDENTIAL"), confidential);
-//! assert_eq!(Property::new("CLASS", "CONFIDENTIAL"), confidential.into());
-//! ```
 //! For more information on properties, please refer to the specification [RFC5545 3.7. Calendar Properties](https://tools.ietf.org/html/rfc5545#section-3.7) and [RFC7986 5. Properties](https://tools.ietf.org/html/rfc7986#section-5).
-use crate::components::{Parameter, Parameters, Property};
 use crate::contentline::{ContentLine, PropertyWrite};
-use crate::util::escape_text;
+use crate::parameters::{Parameter, Parameters};
 use crate::value::{Float, Integer, StatusValue, TranspValue};
 use std::borrow::Cow;
 use std::io;
-
-impl PropertyWrite for Property<'_> {
-    fn write<W: io::Write>(&self, line: &mut ContentLine<'_, W>) -> Result<(), io::Error> {
-        line.write_name(&self.name)?;
-        for parameter in &self.parameters {
-            line.write_parameter(parameter)?;
-        }
-        line.write_value(&self.value)
-    }
-}
 
 property_text!(CalScale, "CALSCALE");
 property_text!(Method, "METHOD");
@@ -97,16 +74,6 @@ impl<'a> Geo<'a> {
     pub fn append(&mut self, parameters: &mut Parameters<'a>) {
         for parameter in parameters.drain(..) {
             self.add(parameter);
-        }
-    }
-}
-
-impl<'a> From<Geo<'a>> for Property<'a> {
-    fn from(builder: Geo<'a>) -> Self {
-        Property {
-            name: Cow::Borrowed("GEO"),
-            value: Cow::Owned(format!("{};{}", builder.latitude, builder.longitude)),
-            parameters: builder.parameters
         }
     }
 }
@@ -209,16 +176,6 @@ impl<'a> Status<'a> {
     }
 }
 
-impl<'a> From<Status<'a>> for Property<'a> {
-    fn from(builder: Status<'a>) -> Self {
-        Property {
-            name: Cow::Borrowed("STATUS"),
-            value: Cow::Borrowed(builder.value.as_str()),
-            parameters: builder.parameters
-        }
-    }
-}
-
 impl PropertyWrite for Status<'_> {
     fn write<W: io::Write>(&self, line: &mut ContentLine<'_, W>) -> Result<(), io::Error> {
         line.write_name_unchecked("STATUS");
@@ -285,16 +242,6 @@ impl<'a> Transp<'a> {
     pub fn append(&mut self, parameters: &mut Parameters<'a>) {
         for parameter in parameters.drain(..) {
             self.add(parameter);
-        }
-    }
-}
-
-impl<'a> From<Transp<'a>> for Property<'a> {
-    fn from(builder: Transp<'a>) -> Self {
-        Property {
-            name: Cow::Borrowed("TRANSP"),
-            value: Cow::Borrowed(builder.value.as_str()),
-            parameters: builder.parameters
         }
     }
 }
@@ -386,9 +333,8 @@ pub use self::rfc7986::*;
 
 #[cfg(feature = "rfc7986")]
 mod rfc7986 {
-    use crate::components::{Parameter, Parameters, Property};
     use crate::contentline::{ContentLine, PropertyWrite};
-    use crate::util::escape_text;
+    use crate::parameters::{Parameter, Parameters};
     use std::borrow::Cow;
     use std::io;
     property_text!(Name, "NAME");
@@ -460,8 +406,6 @@ mod rfc7986 {
             }
         }
     }
-
-    impl_from_prop!(Image, "IMAGE");
 
     impl_property_write!(Image, "IMAGE");
 }

@@ -1,26 +1,9 @@
 /// Macro to create several `Parameter`s at once.
-///
-/// # Example
-/// ```
-/// # #[macro_use] extern crate ics;
-/// use ics::components::Property;
-/// use ics::properties::DtStart;
-///
-/// # fn main() {
-/// let mut date = DtStart::new("20180906");
-/// let mut parameters = parameters!("TZID" => "America/New_York"; "VALUE" => "DATE");
-/// date.append(&mut parameters);
-/// assert_eq!(
-///     Property::from(date).to_string(),
-///     "DTSTART;TZID=America/New_York;VALUE=DATE:20180906\r\n"
-/// );
-/// # }
-/// ```
 #[macro_export]
 macro_rules! parameters {
     ($($key:expr => $value:expr);*) => {
         {
-            use $crate::components::Parameter;
+            use $crate::parameters::Parameter;
             let mut parameters = Vec::new();
             $(
                 parameters.push(Parameter::new($key, $value));
@@ -32,7 +15,7 @@ macro_rules! parameters {
 
 #[cfg(test)]
 mod test {
-    use crate::components::Parameter;
+    use crate::parameters::Parameter;
 
     #[test]
     fn parameters() {
@@ -89,8 +72,6 @@ macro_rules! property {
                 }
             }
         }
-
-        impl_from_prop!($type, $name);
 
         impl_property_write!($type, $name);
     };
@@ -152,16 +133,6 @@ macro_rules! property_text_with_constructor {
             pub fn append(&mut self, parameters: &mut Parameters<'a>) {
                 for parameter in parameters.drain(..) {
                     self.add(parameter);
-                }
-            }
-        }
-
-        impl<'a> From<$type<'a>> for Property<'a> {
-            fn from(builder: $type<'a>) -> Self {
-                Property {
-                    name: Cow::Borrowed($name),
-                    value: escape_text(builder.value),
-                    parameters: builder.parameters
                 }
             }
         }
@@ -228,8 +199,6 @@ macro_rules! property_with_parameter {
             }
         }
 
-        impl_from_prop!($type, $name);
-
         impl_property_write!($type, $name);
     };
 }
@@ -274,16 +243,6 @@ macro_rules! property_integer {
             pub fn append(&mut self, parameters: &mut Parameters<'a>) {
                 for parameter in parameters.drain(..) {
                     self.add(parameter);
-                }
-            }
-        }
-
-        impl<'a> From<$type<'a>> for Property<'a> {
-            fn from(builder: $type<'a>) -> Self {
-                Property {
-                    name: Cow::Borrowed($name),
-                    value: Cow::Owned(builder.value.to_string()),
-                    parameters: builder.parameters
                 }
             }
         }
@@ -333,16 +292,6 @@ macro_rules! property_text {
             pub fn append(&mut self, parameters: &mut Parameters<'a>) {
                 for parameter in parameters.drain(..) {
                     self.add(parameter);
-                }
-            }
-        }
-
-        impl<'a> From<$type<'a>> for Property<'a> {
-            fn from(builder: $type<'a>) -> Self {
-                Property {
-                    name: Cow::Borrowed($name),
-                    value: escape_text(builder.value),
-                    parameters: builder.parameters
                 }
             }
         }
@@ -411,20 +360,6 @@ macro_rules! parameter_with_const {
         }
 
         impl_from_param!($type, $name);
-    };
-}
-
-macro_rules! impl_from_prop {
-    ($type:ident, $name:expr) => {
-        impl<'a> From<$type<'a>> for Property<'a> {
-            fn from(builder: $type<'a>) -> Self {
-                Property {
-                    name: Cow::Borrowed($name),
-                    value: builder.value,
-                    parameters: builder.parameters
-                }
-            }
-        }
     };
 }
 

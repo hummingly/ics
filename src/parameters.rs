@@ -7,8 +7,7 @@
 //!
 //! # Example
 //! ```
-//! use ics::components::Parameter;
-//! use ics::parameters::CUType;
+//! use ics::parameters::{CUType, Parameter};
 //!
 //! // Using associated constants or enums should be preferred over using the
 //! // generic constructors whenever possible
@@ -18,8 +17,43 @@
 //! assert_eq!(Parameter::new("CUTYPE", "INDIVIDUAL"), individual.into());
 //! ```
 //! For more information on parameters, please refer to the specification [RFC5545 3.2. Property Parameters](https://tools.ietf.org/html/rfc5545#section-3.2) and [RFC7986 6. Property Parameters](https://tools.ietf.org/html/rfc7986#section-6).
-use crate::components::Parameter;
 use std::borrow::Cow;
+use std::fmt;
+
+/// A `Parameter` is a key-value that can be added to a property to specify it
+/// more.
+///
+/// This can be used to create a new calendar parameter by either creating a
+/// wrapper type or just use it as it is.
+#[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
+pub struct Parameter<'a> {
+    pub(crate) name: Cow<'a, str>,
+    pub(crate) value: Cow<'a, str>
+}
+
+impl<'a> Parameter<'a> {
+    /// Creates a new property with the given key and value.
+    pub fn new<K, V>(key: K, value: V) -> Self
+    where
+        K: Into<Cow<'a, str>>,
+        V: Into<Cow<'a, str>>
+    {
+        Parameter {
+            name: key.into(),
+            value: value.into()
+        }
+    }
+}
+
+impl fmt::Display for Parameter<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}={}", self.name, self.value)
+    }
+}
+
+/// `Parameters` is a collection of `Parameter`s. It can be created with the
+/// `parameters!` macro.
+pub type Parameters<'p> = Vec<Parameter<'p>>;
 
 parameter!(AltRep, "ALTREP");
 parameter!(CN, "CN");
@@ -242,7 +276,7 @@ pub use self::rfc7986::*;
 
 #[cfg(feature = "rfc7986")]
 mod rfc7986 {
-    use crate::components::Parameter;
+    use super::Parameter;
     use std::borrow::Cow;
     parameter_with_const!(
         /// [Format definitions of displaying images](https://tools.ietf.org/html/rfc7986#section-6.1)
