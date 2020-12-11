@@ -79,7 +79,7 @@ impl<'a> Geo<'a> {
 }
 
 impl PropertyWrite for Geo<'_> {
-    fn write<W: io::Write>(&self, line: &mut ContentLine<'_, W>) -> Result<(), io::Error> {
+    fn write<W: io::Write>(&self, line: &mut ContentLine<W>) -> Result<(), io::Error> {
         line.write_name_unchecked("GEO");
         for parameter in &self.parameters {
             line.write_parameter(parameter)?;
@@ -177,7 +177,7 @@ impl<'a> Status<'a> {
 }
 
 impl PropertyWrite for Status<'_> {
-    fn write<W: io::Write>(&self, line: &mut ContentLine<'_, W>) -> Result<(), io::Error> {
+    fn write<W: io::Write>(&self, line: &mut ContentLine<W>) -> Result<(), io::Error> {
         line.write_name_unchecked("STATUS");
         for parameter in &self.parameters {
             line.write_parameter(parameter)?;
@@ -247,7 +247,7 @@ impl<'a> Transp<'a> {
 }
 
 impl PropertyWrite for Transp<'_> {
-    fn write<W: io::Write>(&self, line: &mut ContentLine<'_, W>) -> Result<(), io::Error> {
+    fn write<W: io::Write>(&self, line: &mut ContentLine<W>) -> Result<(), io::Error> {
         line.write_name_unchecked("TRANSP");
         for parameter in &self.parameters {
             line.write_parameter(parameter)?;

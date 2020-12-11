@@ -3,20 +3,19 @@ use crate::value::write_escaped_bytes;
 use std::fmt;
 use std::io::{Error, Write};
 
-pub const LINE_MAX_LEN: usize = 75;
+const LINE_MAX_LEN: usize = 75;
 const CAPACITY: usize = LINE_MAX_LEN * 2;
-const LINE_SPLIT: &[u8; 3] = b"\r\n ";
 
 pub trait PropertyWrite {
-    fn write<W: Write>(&self, line: &mut ContentLine<'_, W>) -> Result<(), Error>;
+    fn write<W: Write>(&self, line: &mut ContentLine<W>) -> Result<(), Error>;
 }
 
 #[derive(Debug)]
-pub struct ContentLine<'w, W: Write>(&'w mut Writer<W>);
+pub struct ContentLine<W: Write>(Writer<W>);
 
-impl<W: Write> ContentLine<'_, W> {
-    pub(crate) fn new<'w>(writer: &'w mut Writer<W>) -> ContentLine<'w, W> {
-        ContentLine(writer)
+impl<W: Write> ContentLine<W> {
+    pub(crate) fn new<'w>(inner: W) -> ContentLine<W> {
+        Self(Writer::new(inner))
     }
 
     pub(crate) fn write_name_unchecked(&mut self, name: &str) {
@@ -29,11 +28,49 @@ impl<W: Write> ContentLine<'_, W> {
         P: PropertyWrite
     {
         property.write(self)?;
-        self.0.write_line_break()
+        self.write_line_break()
+    }
+
+    pub(crate) fn write_begin(&mut self, component: &str) -> Result<(), Error> {
+        if component.len() <= LINE_MAX_LEN - "BEGIN:".len() {
+            self.write_begin_unchecked(component)
+        } else {
+            write!(self.0, "BEGIN:{}", component)?;
+            self.write_line_break()
+        }
+    }
+
+    pub(crate) fn write_end(&mut self, component: &str) -> Result<(), Error> {
+        if component.len() <= LINE_MAX_LEN - "END:".len() {
+            self.write_begin_unchecked(component)
+        } else {
+            write!(self.0, "END:{}", component)?;
+            self.write_line_break()
+        }
+    }
+
+    pub(crate) fn write_begin_unchecked(&mut self, component: &str) -> Result<(), Error> {
+        assert!(component.len() <= LINE_MAX_LEN - "BEGIN:".len());
+        writeln!(self.0.inner, "BEGIN:{}\r", component)
+    }
+
+    pub(crate) fn write_end_unchecked(&mut self, component: &str) -> Result<(), Error> {
+        assert!(component.len() <= LINE_MAX_LEN - "END:".len());
+        writeln!(self.0.inner, "END:{}\r", component)
+    }
+
+    pub(crate) fn into_inner(mut self) -> Result<W, Error> {
+        self.0.flush()?;
+        Ok(self.0.inner)
+    }
+
+    fn write_line_break(&mut self) -> Result<(), Error> {
+        self.0.write_buffer()?;
+        self.0.inner.write_all(b"\r\n")
     }
 }
 
-impl<W: Write> ContentLine<'_, W> {
+impl<W: Write> ContentLine<W> {
     pub fn write_name(&mut self, name: &str) -> Result<(), Error> {
         write!(self.0, "{}", name)
     }
@@ -59,63 +96,23 @@ impl<W: Write> ContentLine<'_, W> {
 
     pub fn write_value_text(&mut self, text: &str) -> Result<(), Error> {
         self.0.write_all(b":")?;
-        write_escaped_bytes(self.0, text.as_bytes())
+        write_escaped_bytes(&mut self.0, text.as_bytes())
     }
 }
 
-pub(crate) struct Writer<W: Write> {
+struct Writer<W: Write> {
     buffer: Box<[u8; CAPACITY]>,
     len: usize,
     inner: W
 }
 
 impl<W: Write> Writer<W> {
-    pub(crate) fn new(writer: W) -> Writer<W> {
-        Writer {
+    fn new(writer: W) -> Writer<W> {
+        Self {
             buffer: Box::new([0; CAPACITY]),
             len: 0,
             inner: writer
         }
-    }
-
-    pub(crate) fn into_inner(mut self) -> Result<W, Error> {
-        match self.flush() {
-            Ok(_) => Ok(self.inner),
-            Err(error) => Err(error)
-        }
-    }
-
-    pub(crate) fn write_begin(&mut self, component: &str) -> Result<(), Error> {
-        if component.len() <= LINE_MAX_LEN - "BEGIN:".len() {
-            self.write_begin_unchecked(component)
-        } else {
-            write!(self, "BEGIN:{}", component)?;
-            self.write_line_break()
-        }
-    }
-
-    pub(crate) fn write_end(&mut self, component: &str) -> Result<(), Error> {
-        if component.len() <= LINE_MAX_LEN - "END:".len() {
-            self.write_begin_unchecked(component)
-        } else {
-            write!(self, "END:{}", component)?;
-            self.write_line_break()
-        }
-    }
-
-    pub(crate) fn write_begin_unchecked(&mut self, component: &str) -> Result<(), Error> {
-        assert!(component.len() <= LINE_MAX_LEN - "BEGIN:".len());
-        writeln!(self.inner, "BEGIN:{}\r", component)
-    }
-
-    pub(crate) fn write_end_unchecked(&mut self, component: &str) -> Result<(), Error> {
-        assert!(component.len() <= LINE_MAX_LEN - "END:".len());
-        writeln!(self.inner, "END:{}\r", component)
-    }
-
-    fn write_line_break(&mut self) -> Result<(), Error> {
-        self.write_buffer()?;
-        self.inner.write_all(b"\r\n")
     }
 
     fn write_buffer(&mut self) -> Result<(), Error> {
@@ -188,7 +185,7 @@ fn lazy_fold<W: Write>(writer: &mut W, mut content: &[u8]) -> Result<usize, Erro
 
     while boundary < content.len() {
         content = &content[boundary..];
-        writer.write_all(LINE_SPLIT)?;
+        writer.write_all(b"\r\n ")?;
         match next_boundary(&content) {
             Some(next_boundary) => {
                 writer.write_all(&content[..next_boundary])?;

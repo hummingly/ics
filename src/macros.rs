@@ -138,7 +138,7 @@ macro_rules! property_text_with_constructor {
         }
 
         impl PropertyWrite for $type<'_> {
-            fn write<W: io::Write>(&self, line: &mut ContentLine<'_, W>) -> Result<(), io::Error> {
+            fn write<W: io::Write>(&self, line: &mut ContentLine<W>) -> Result<(), io::Error> {
                 line.write_name_unchecked($name);
                 for parameter in &self.parameters {
                     line.write_parameter(parameter)?;
@@ -297,7 +297,7 @@ macro_rules! property_text {
         }
 
         impl PropertyWrite for $type<'_> {
-            fn write<W: io::Write>(&self, line: &mut ContentLine<'_, W>) -> Result<(), io::Error> {
+            fn write<W: io::Write>(&self, line: &mut ContentLine<W>) -> Result<(), io::Error> {
                 line.write_name_unchecked($name);
                 for parameter in &self.parameters {
                     line.write_parameter(parameter)?;
@@ -367,7 +367,7 @@ macro_rules! parameter_with_const {
 macro_rules! impl_property_write {
     ($type:ident, $name:expr) => {
         impl PropertyWrite for $type<'_> {
-            fn write<W: io::Write>(&self, line: &mut ContentLine<'_, W>) -> Result<(), io::Error> {
+            fn write<W: io::Write>(&self, line: &mut ContentLine<W>) -> Result<(), io::Error> {
                 line.write_name_unchecked($name);
                 for parameter in &self.parameters {
                     line.write_parameter(parameter)?;

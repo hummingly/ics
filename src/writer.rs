@@ -1,4 +1,4 @@
-use crate::contentline::{ContentLine, PropertyWrite, Writer};
+use crate::contentline::{ContentLine, PropertyWrite};
 use crate::properties::{
     Action, Description, DtStamp, DtStart, ProdID, Summary, Trigger, TzID, TzOffsetFrom,
     TzOffsetTo, Version, UID
@@ -16,11 +16,11 @@ const STANDARD: &str = "STANDARD";
 const DAYLIGHT: &str = "DAYLIGHT";
 
 #[derive(Debug)]
-pub struct ICalendar<W: Write>(Writer<W>);
+pub struct ICalendar<W: Write>(ContentLine<W>);
 
 impl<W: Write> ICalendar<W> {
     pub fn new(inner: W, version: Version, product_id: ProdID) -> Result<ICalendar<W>, Error> {
-        let mut writer = Self(Writer::new(inner));
+        let mut writer = Self(ContentLine::new(inner));
         writer.0.write_begin_unchecked(VCALENDAR)?;
         writer.write(&version)?;
         writer.write(&product_id)?;
@@ -31,7 +31,7 @@ impl<W: Write> ICalendar<W> {
     where
         P: PropertyWrite
     {
-        ContentLine::new(&mut self.0).write_property(property)
+        self.0.write_property(property)
     }
 
     pub fn write_component<F>(&mut self, name: &str, body: F) -> Result<(), Error>
@@ -272,14 +272,14 @@ impl<'d, W: Write> Daylight<'d, W> {
 }
 
 #[derive(Debug)]
-pub struct EventWriter<'w, W: Write>(&'w mut Writer<W>);
+pub struct EventWriter<'w, W: Write>(&'w mut ContentLine<W>);
 
 impl<W: Write> EventWriter<'_, W> {
     pub fn write<P>(&mut self, property: &P) -> Result<(), Error>
     where
         P: PropertyWrite
     {
-        ContentLine::new(self.0).write_property(property)
+        self.0.write_property(property)
     }
 
     pub fn write_alarm(&mut self, alarm: Alarm<W>) -> Result<(), Error> {
@@ -290,14 +290,14 @@ impl<W: Write> EventWriter<'_, W> {
 }
 
 #[derive(Debug)]
-pub struct ToDoWriter<'w, W: Write>(&'w mut Writer<W>);
+pub struct ToDoWriter<'w, W: Write>(&'w mut ContentLine<W>);
 
 impl<W: Write> ToDoWriter<'_, W> {
     pub fn write<P>(&mut self, property: &P) -> Result<(), Error>
     where
         P: PropertyWrite
     {
-        ContentLine::new(self.0).write_property(property)
+        self.0.write_property(property)
     }
 
     pub fn write_alarm(&mut self, alarm: Alarm<W>) -> Result<(), Error> {
@@ -308,38 +308,38 @@ impl<W: Write> ToDoWriter<'_, W> {
 }
 
 #[derive(Debug)]
-pub struct JournalWriter<'w, W: Write>(&'w mut Writer<W>);
+pub struct JournalWriter<'w, W: Write>(&'w mut ContentLine<W>);
 
 impl<W: Write> JournalWriter<'_, W> {
     pub fn write<P>(&mut self, property: &P) -> Result<(), Error>
     where
         P: PropertyWrite
     {
-        ContentLine::new(self.0).write_property(property)
+        self.0.write_property(property)
     }
 }
 
 #[derive(Debug)]
-pub struct FreeBusyWriter<'w, W: Write>(&'w mut Writer<W>);
+pub struct FreeBusyWriter<'w, W: Write>(&'w mut ContentLine<W>);
 
 impl<W: Write> FreeBusyWriter<'_, W> {
     pub fn write<P>(&mut self, property: &P) -> Result<(), Error>
     where
         P: PropertyWrite
     {
-        ContentLine::new(self.0).write_property(property)
+        self.0.write_property(property)
     }
 }
 
 #[derive(Debug)]
-pub struct TimeZoneWriter<'w, W: Write>(&'w mut Writer<W>);
+pub struct TimeZoneWriter<'w, W: Write>(&'w mut ContentLine<W>);
 
 impl<W: Write> TimeZoneWriter<'_, W> {
     pub fn write<P>(&mut self, property: &P) -> Result<(), Error>
     where
         P: PropertyWrite
     {
-        ContentLine::new(self.0).write_property(property)
+        self.0.write_property(property)
     }
 
     pub fn write_standard(&mut self, definition: Standard<W>) -> Result<(), Error> {
@@ -356,37 +356,37 @@ impl<W: Write> TimeZoneWriter<'_, W> {
 }
 
 #[derive(Debug)]
-pub struct AlarmWriter<'w, W: Write>(&'w mut Writer<W>);
+pub struct AlarmWriter<'w, W: Write>(&'w mut ContentLine<W>);
 
 impl<W: Write> AlarmWriter<'_, W> {
     pub fn write<P>(&mut self, property: &P) -> Result<(), Error>
     where
         P: PropertyWrite
     {
-        ContentLine::new(self.0).write_property(property)
+        self.0.write_property(property)
     }
 }
 
 #[derive(Debug)]
-pub struct StandardWriter<'w, W: Write>(&'w mut Writer<W>);
+pub struct StandardWriter<'w, W: Write>(&'w mut ContentLine<W>);
 
 impl<W: Write> StandardWriter<'_, W> {
     pub fn write<P>(&mut self, property: &P) -> Result<(), Error>
     where
         P: PropertyWrite
     {
-        ContentLine::new(self.0).write_property(property)
+        self.0.write_property(property)
     }
 }
 
 #[derive(Debug)]
-pub struct DaylightWriter<'w, W: Write>(&'w mut Writer<W>);
+pub struct DaylightWriter<'w, W: Write>(&'w mut ContentLine<W>);
 
 impl<W: Write> DaylightWriter<'_, W> {
     pub fn write<P>(&mut self, property: &P) -> Result<(), Error>
     where
         P: PropertyWrite
     {
-        ContentLine::new(self.0).write_property(property)
+        self.0.write_property(property)
     }
 }
