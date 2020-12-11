@@ -1,4 +1,3 @@
-#![allow(dead_code)]
 use crate::parameters::Parameter;
 use crate::value::write_escaped_bytes;
 use std::fmt;
