@@ -19,11 +19,7 @@ const DAYLIGHT: &str = "DAYLIGHT";
 pub struct ICalendar<W: Write>(Writer<W>);
 
 impl<W: Write> ICalendar<W> {
-    pub fn new(
-        inner: W,
-        version: Version<'_>,
-        product_id: ProdID<'_>
-    ) -> Result<ICalendar<W>, Error> {
+    pub fn new(inner: W, version: Version, product_id: ProdID) -> Result<ICalendar<W>, Error> {
         let mut writer = Self(Writer::new(inner));
         writer.0.write_begin_unchecked(VCALENDAR)?;
         writer.write(&version)?;

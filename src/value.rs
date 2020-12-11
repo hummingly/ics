@@ -11,7 +11,7 @@ pub type Float = f32;
 pub struct Boolean(pub bool);
 
 impl fmt::Display for Boolean {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         f.write_str(if self.0 { "TRUE" } else { "FALSE" })
     }
 }
@@ -59,7 +59,7 @@ impl FromStr for Binary<'_> {
 }
 
 impl fmt::Display for Binary<'_> {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         encode_base64(f, &self.0)
     }
 }
@@ -238,7 +238,7 @@ impl From<String> for Text<'_> {
 }
 
 impl fmt::Display for Text<'_> {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write_escaped_text(f, &self.0)
     }
 }

@@ -34,7 +34,7 @@ impl<W: Write> ContentLine<'_, W> {
         write!(self.0, "{}", name)
     }
 
-    pub fn write_parameter(&mut self, parameter: &Parameter<'_>) -> Result<(), Error> {
+    pub fn write_parameter(&mut self, parameter: &Parameter) -> Result<(), Error> {
         write!(self.0, ";{}", parameter)
     }
 
@@ -49,7 +49,7 @@ impl<W: Write> ContentLine<'_, W> {
         write!(self.0, ":{}", value)
     }
 
-    pub fn write_fmt_value(&mut self, value: fmt::Arguments<'_>) -> Result<(), Error> {
+    pub fn write_fmt_value(&mut self, value: fmt::Arguments) -> Result<(), Error> {
         write!(self.0, ":{}", value)
     }
 
@@ -229,7 +229,7 @@ fn next_boundary(input: &[u8]) -> Option<usize> {
 }
 
 impl<W: Write + fmt::Debug> fmt::Debug for Writer<W> {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         f.debug_struct("Writer")
             .field("buffer", &&self.buffer[..])
             .field("len", &self.len)
