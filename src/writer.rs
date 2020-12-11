@@ -226,6 +226,7 @@ impl<'a, W: Write> Alarm<'a, W> {
         }))
     }
 }
+
 pub struct Standard<'s, W: Write>(
     Box<dyn FnOnce(&mut StandardWriter<W>) -> Result<(), Error> + 's>
 );

@@ -39,8 +39,8 @@ fn event() -> Result<(), io::Error> {
             event.write(&Summary::new("Networld+Interop Conference"))?;
             event.write(&Description::new(
                 "Networld+Interop Conference and Exhibit\n\
-            Atlanta World Congress Center\n\
-            Atlanta, Georgia"
+                Atlanta World Congress Center\n\
+                Atlanta, Georgia"
             ))
         }
     );
@@ -54,8 +54,9 @@ fn event() -> Result<(), io::Error> {
     calendar.write_event(event)?;
 
     let output = calendar.close()?;
-    assert_eq!(String::from_utf8_lossy(&output), expected);
+    let output = String::from_utf8_lossy(&output);
 
+    assert_eq!(output, expected);
     Ok(())
 }
 
@@ -114,8 +115,9 @@ fn todo() -> Result<(), io::Error> {
     calendar.write_todo(todo)?;
 
     let output = calendar.close()?;
-    assert_eq!(String::from_utf8_lossy(&output), expected);
+    let output = String::from_utf8_lossy(&output);
 
+    assert_eq!(output, expected);
     Ok(())
 }
 
@@ -153,18 +155,19 @@ fn journal() -> Result<(), io::Error> {
             journal.write(&Status::draft())?;
             journal.write(&Class::public())?;
             journal.write(&Categories::new("Project Report,XYZ,Weekly Meeting"))?;
-            journal.write(&Description::new("Project xyz Review Meeting Minutes\n\
-            Agenda\n\
-            1. Review of project version 1.0 requirements.\n\
-            2. Definition of project processes.\n\
-            3. Review of project schedule.\n\
-            Participants: John Smith, Jane Doe, Jim Dandy\n\
-            -It was decided that the requirements need to be signed off by product marketing.\n\
-            -Project processes were accepted.\n\
-            -Project schedule needs to account for scheduled holidays and employee vacation time. Check with HR for specific dates.\n\
-            -New schedule will be distributed by Friday.\n\
-            -Next weeks meeting is cancelled. No meeting until 3/23."
-        ))
+            journal.write(&Description::new(
+                "Project xyz Review Meeting Minutes\n\
+                Agenda\n\
+                1. Review of project version 1.0 requirements.\n\
+                2. Definition of project processes.\n\
+                3. Review of project schedule.\n\
+                Participants: John Smith, Jane Doe, Jim Dandy\n\
+                -It was decided that the requirements need to be signed off by product marketing.\n\
+                -Project processes were accepted.\n\
+                -Project schedule needs to account for scheduled holidays and employee vacation time. Check with HR for specific dates.\n\
+                -New schedule will be distributed by Friday.\n\
+                -Next weeks meeting is cancelled. No meeting until 3/23."
+            ))
         }
     );
 
@@ -176,8 +179,9 @@ fn journal() -> Result<(), io::Error> {
     calendar.write_journal(journal)?;
 
     let output = calendar.close()?;
-    assert_eq!(String::from_utf8_lossy(&output), expected);
+    let output = String::from_utf8_lossy(&output);
 
+    assert_eq!(output, expected);
     Ok(())
 }
 
@@ -223,8 +227,9 @@ fn freebusy() -> Result<(), io::Error> {
     calendar.write_freebusy(freebusy)?;
 
     let output = calendar.close()?;
-    assert_eq!(String::from_utf8_lossy(&output), expected);
+    let output = String::from_utf8_lossy(&output);
 
+    assert_eq!(output, expected);
     Ok(())
 }
 
@@ -320,8 +325,8 @@ fn timezone() -> Result<(), io::Error> {
     calendar.write_event(event)?;
 
     let output = calendar.close()?;
+    let output = String::from_utf8_lossy(&output);
 
-    assert_eq!(String::from_utf8_lossy(&output), expected);
-
+    assert_eq!(output, expected);
     Ok(())
 }
