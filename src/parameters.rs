@@ -57,9 +57,9 @@ pub type Parameters<'p> = Vec<Parameter<'p>>;
 
 parameter!(AltRep, "ALTREP");
 parameter!(CN, "CN");
-parameter_with_const!(
+parameter!(
     /// [Format definitions of calender user types.](https://tools.ietf.org/html/rfc5545#section-3.2.3)
-    CUType, "CUTYPE",
+    CUType, "CUTYPE";
     /// Default Value
     const INDIVIDUAL = "INDIVIDUAL";
     const GROUP = "GROUP";
@@ -71,9 +71,9 @@ parameter!(DelegatedFrom, "DELEGATED-FROM");
 parameter!(DelegatedTo, "DELEGATED-TO");
 parameter!(Dir, "DIR");
 parameter!(FmtType, "FMTTYPE");
-parameter_with_const!(
+parameter!(
     /// [Format definitions of free/busy time types](https://tools.ietf.org/html/rfc5545#section-3.2.9)
-    FBType, "FBTYPE",
+    FBType, "FBTYPE";
     const FREE = "FREE";
     /// Default Value
     const BUSY = "BUSY";
@@ -82,9 +82,9 @@ parameter_with_const!(
 );
 parameter!(Language, "LANGUAGE");
 parameter!(Member, "MEMBER");
-parameter_with_const!(
+parameter!(
     /// [Format definitions of participation statuses of calendar users](https://tools.ietf.org/html/rfc5545#section-3.2.12)
-    PartStat, "PARTSTAT",
+    PartStat, "PARTSTAT";
     /// `PartStat` for an Event, To-Do or Journal that needs action (Default Value)
     const NEEDS_ACTION = "NEEDS-ACTION";
     /// `PartStat` for an accepted Event, To-Do or Journal
@@ -100,17 +100,17 @@ parameter_with_const!(
     /// `PartStat` for an in-process To-Do
     const IN_PROCESS = "IN-PROCESS"
 );
-parameter_with_const!(
+parameter!(
     /// [Format definitions of hierarchical relationship types associated with the calendar component](https://tools.ietf.org/html/rfc5545#section-3.2.15)
-    RelType, "RELTYPE",
+    RelType, "RELTYPE";
     /// Default Value
     const PARENT = "PARENT";
     const CHILD = "CHILD";
     const SILBLING = "SILBLING"
 );
-parameter_with_const!(
+parameter!(
     /// [Format definitions of participation roles for calendar users](https://tools.ietf.org/html/rfc5545#section-3.2.16)
-    Role, "ROLE",
+    Role, "ROLE";
     const CHAIR = "CHAIR";
     /// Default Value
     const REQ_PARTICIPANT = "REQ-PARTICIPANT";
@@ -119,9 +119,9 @@ parameter_with_const!(
 );
 parameter!(SentBy, "SENT-BY");
 parameter!(TzIDParam, "TZID");
-parameter_with_const!(
+parameter!(
     /// [Format definitions of value type format for a property value](https://tools.ietf.org/html/rfc5545#section-3.2.20)
-    Value, "VALUE",
+    Value, "VALUE";
     const BINARY = "BINARY";
     const BOOLEAN = "BOOLEAN";
     const CAL_ADDRESS = "CAL-ADDRESS";
@@ -278,9 +278,9 @@ pub use self::rfc7986::*;
 mod rfc7986 {
     use super::Parameter;
     use std::borrow::Cow;
-    parameter_with_const!(
+    parameter!(
         /// [Format definitions of displaying images](https://tools.ietf.org/html/rfc7986#section-6.1)
-        Display, "DISPLAY",
+        Display, "DISPLAY";
         /// Default Value
         const BADGE = "BADGE";
         const GRAPHIC = "GRAPHIC";
@@ -288,9 +288,9 @@ mod rfc7986 {
         const THUMBNAIL = "THUMBNAIL"
     );
     parameter!(Email, "EMAIL");
-    parameter_with_const!(
+    parameter!(
         /// [Format definitions of features of of a conference or broadcast system](https://tools.ietf.org/html/rfc7986#section-6.3)
-        Feature, "FEATURE",
+        Feature, "FEATURE";
         const AUDIO = "AUDIO";
         const CHAT = "CHAT";
         const FEED = "FEED";

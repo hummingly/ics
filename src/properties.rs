@@ -23,9 +23,9 @@ property!(Version, "VERSION");
 property!(Attach, "ATTACH");
 // TODO: property_text_list!
 property!(Categories, "CATEGORIES");
-property_text_with_constructor!(
+property_text!(
     /// [Format definitions of classifications](https://tools.ietf.org/html/rfc5545#section-3.8.1.3)
-    Class, "CLASS",
+    Class, "CLASS";
     // Default Value
     fn public() { "PUBLIC" };
     fn private() { "PRIVATE" };
@@ -271,9 +271,9 @@ property_text!(UID, "UID");
 property!(ExDate, "EXDATE");
 property!(RDate, "RDATE");
 property!(RRule, "RRULE");
-property_text_with_constructor!(
+property_text!(
     /// [Format definitions of alarm actions](https://tools.ietf.org/html/rfc5545#section-3.8.6.1)
-    Action, "ACTION",
+    Action, "ACTION";
     fn audio() { "AUDIO" };
     fn display() { "DISPLAY" };
     fn email() { "EMAIL" }
