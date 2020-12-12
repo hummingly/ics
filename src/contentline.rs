@@ -24,6 +24,7 @@ impl<W: Write> ContentLine<W> {
         self.0.len = end;
     }
 
+    #[inline]
     pub(crate) fn write_property<P>(&mut self, property: &P) -> Result<(), Error>
     where
         P: PropertyWrite
@@ -71,7 +72,7 @@ impl<W: Write> ContentLine<W> {
 
 impl<W: Write> ContentLine<W> {
     pub fn write_name(&mut self, name: &str) -> Result<(), Error> {
-        write!(self.0, "{}", name)
+        self.0.write_all(name.as_bytes())
     }
 
     pub fn write_parameter(&mut self, parameter: &Parameter) -> Result<(), Error> {
@@ -93,7 +94,7 @@ impl<W: Write> ContentLine<W> {
         write!(self.0, ":{}", value)
     }
 
-    pub fn write_value_text(&mut self, text: &str) -> Result<(), Error> {
+    pub fn write_text_value(&mut self, text: &str) -> Result<(), Error> {
         self.0.write_all(b":")?;
         write_escaped_bytes(&mut self.0, text.as_bytes())
     }
@@ -106,11 +107,11 @@ struct Writer<W: Write> {
 }
 
 impl<W: Write> Writer<W> {
-    fn new(writer: W) -> Writer<W> {
+    fn new(inner: W) -> Writer<W> {
         Self {
             buffer: Box::new([0; CAPACITY]),
             len: 0,
-            inner: writer
+            inner
         }
     }
 

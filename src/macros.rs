@@ -143,7 +143,7 @@ macro_rules! property_text {
                 for parameter in &self.parameters {
                     line.write_parameter(parameter)?;
                 }
-                line.write_value_text(&self.value)
+                line.write_text_value(&self.value)
             }
         }
     };

@@ -182,7 +182,7 @@ impl PropertyWrite for Status<'_> {
         for parameter in &self.parameters {
             line.write_parameter(parameter)?;
         }
-        line.write_value_text(self.value.as_str())
+        line.write_text_value(self.value.as_str())
     }
 }
 
@@ -252,7 +252,7 @@ impl PropertyWrite for Transp<'_> {
         for parameter in &self.parameters {
             line.write_parameter(parameter)?;
         }
-        line.write_value_text(self.value.as_str())
+        line.write_text_value(self.value.as_str())
     }
 }
 
