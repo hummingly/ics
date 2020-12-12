@@ -42,7 +42,8 @@
 //!             todo.write(&Summary::new("Katarina's Birthday Present"))?;
 //!             todo.write(&Comment::new("Buy her Imagine Dragons tickets!"))?;
 //!             todo.write(&Status::needs_action())
-//!     });
+//!         }
+//!     );
 //!     calendar.write_todo(todo)?;
 //!
 //!     // Write remaining bits to the file.

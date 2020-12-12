@@ -14,13 +14,13 @@ pub trait PropertyWrite {
 pub struct ContentLine<W: Write>(Writer<W>);
 
 impl<W: Write> ContentLine<W> {
-    pub(crate) fn new<'w>(inner: W) -> ContentLine<W> {
+    pub(crate) fn new(inner: W) -> ContentLine<W> {
         Self(Writer::new(inner))
     }
 
     pub(crate) fn write_name_unchecked(&mut self, name: &str) {
         assert!(name.len() <= CAPACITY);
-        self.0.extend_from_slice(name.as_bytes());
+        self.0.extend_buffer(name.as_bytes());
     }
 
     pub(crate) fn write_property<P>(&mut self, property: &P) -> Result<(), Error>
@@ -50,12 +50,10 @@ impl<W: Write> ContentLine<W> {
     }
 
     pub(crate) fn write_begin_unchecked(&mut self, component: &str) -> Result<(), Error> {
-        assert!(component.len() <= LINE_MAX_LEN - "BEGIN:".len());
         writeln!(self.0.inner, "BEGIN:{}\r", component)
     }
 
     pub(crate) fn write_end_unchecked(&mut self, component: &str) -> Result<(), Error> {
-        assert!(component.len() <= LINE_MAX_LEN - "END:".len());
         writeln!(self.0.inner, "END:{}\r", component)
     }
 
@@ -127,9 +125,9 @@ impl<W: Write> Writer<W> {
         Ok(())
     }
 
-    fn extend_from_slice(&mut self, bytes: &[u8]) {
-        let end = self.len + bytes.len();
-        self.buffer[self.len..end].copy_from_slice(bytes);
+    fn extend_buffer(&mut self, buffer: &[u8]) {
+        let end = self.len + buffer.len();
+        self.buffer[self.len..end].copy_from_slice(buffer);
         self.len = end;
     }
 }
@@ -147,7 +145,7 @@ impl<W: Write> Write for Writer<W> {
 
     fn write_all(&mut self, mut buf: &[u8]) -> Result<(), Error> {
         if self.len + buf.len() < CAPACITY {
-            self.extend_from_slice(buf);
+            self.extend_buffer(buf);
             return Ok(());
         }
 
@@ -163,7 +161,7 @@ impl<W: Write> Write for Writer<W> {
                     buf = &buf[end..];
                     end = CAPACITY - self.len;
                     if buf.len() < end {
-                        self.extend_from_slice(buf);
+                        self.extend_buffer(buf);
                         break;
                     }
                 }
