@@ -19,8 +19,9 @@ impl<W: Write> ContentLine<W> {
     }
 
     pub(crate) fn write_name_unchecked(&mut self, name: &str) {
-        assert!(name.len() <= CAPACITY);
-        self.0.extend_buffer(name.as_bytes());
+        let end = name.len();
+        self.0.buffer[..end].copy_from_slice(name.as_bytes());
+        self.0.len = end;
     }
 
     pub(crate) fn write_property<P>(&mut self, property: &P) -> Result<(), Error>
@@ -115,7 +116,7 @@ impl<W: Write> Writer<W> {
 
     fn write_buffer(&mut self) -> Result<(), Error> {
         if self.len > 0 {
-            match lazy_fold(&mut self.inner, &self.buffer[..self.len]) {
+            match self.fold_buffer() {
                 Ok(0) => Ok(()),
                 Ok(n) => self.inner.write_all(&self.buffer[self.len - n..self.len]),
                 Err(error) => Err(error)
@@ -123,6 +124,44 @@ impl<W: Write> Writer<W> {
             self.len = 0;
         }
         Ok(())
+    }
+
+    /// Folds and writes exactly LIMIT * N bytes and returns number of not
+    /// written bytes.
+    fn fold_buffer(&mut self) -> Result<usize, Error> {
+        fn next_boundary(input: &[u8]) -> Option<usize> {
+            if input.len() <= LINE_MAX_LEN {
+                return None;
+            }
+
+            // In str::is_char_boundary bit magic is used in the form of (b as i8) >= -0x40
+            // but this is more understandable for me.
+            fn is_char_boundary(&b: &u8) -> bool {
+                b < 128 || b >= 192
+            }
+
+            match input[..=LINE_MAX_LEN].iter().rposition(is_char_boundary) {
+                Some(0) | None => None,
+                boundary => boundary
+            }
+        }
+
+        let mut content = &self.buffer[..self.len];
+        let mut boundary = next_boundary(&content).unwrap_or(content.len());
+        self.inner.write_all(&content[..boundary])?;
+
+        while boundary < content.len() {
+            content = &content[boundary..];
+            self.inner.write_all(b"\r\n ")?;
+            match next_boundary(&content) {
+                Some(next_boundary) => {
+                    self.inner.write_all(&content[..next_boundary])?;
+                    boundary = next_boundary;
+                }
+                None => return Ok(content.len())
+            }
+        }
+        Ok(0)
     }
 
     fn extend_buffer(&mut self, buffer: &[u8]) {
@@ -151,12 +190,14 @@ impl<W: Write> Write for Writer<W> {
 
         let mut end = CAPACITY - self.len;
         loop {
-            self.buffer[self.len..CAPACITY].copy_from_slice(&buf[..end]);
-            match lazy_fold(&mut self.inner, self.buffer.as_ref()) {
+            self.buffer[self.len..].copy_from_slice(&buf[..end]);
+            self.len = CAPACITY;
+            match self.fold_buffer() {
                 Ok(n) => {
-                    // SAFETY: The n value can never be bigger than CAPACITY because the input
+                    self.buffer.copy_within(CAPACITY - n.., 0);
+                    // SAFETY: The value n can never be bigger than CAPACITY because the input
                     // self.buffer is CAPACITY bytes long!
-                    self.buffer.copy_within(CAPACITY - n..CAPACITY, 0);
+                    assert!(n <= CAPACITY);
                     self.len = n;
                     buf = &buf[end..];
                     end = CAPACITY - self.len;
@@ -165,50 +206,10 @@ impl<W: Write> Write for Writer<W> {
                         break;
                     }
                 }
-                Err(err) => {
-                    self.len = CAPACITY;
-                    return Err(err);
-                }
+                Err(err) => return Err(err)
             }
         }
         Ok(())
-    }
-}
-
-/// Folds and writes exactly LIMIT * N bytes and returns number of not written
-/// bytes.
-fn lazy_fold<W: Write>(writer: &mut W, mut content: &[u8]) -> Result<usize, Error> {
-    let mut boundary = next_boundary(&content).unwrap_or(content.len());
-    writer.write_all(&content[..boundary])?;
-
-    while boundary < content.len() {
-        content = &content[boundary..];
-        writer.write_all(b"\r\n ")?;
-        match next_boundary(&content) {
-            Some(next_boundary) => {
-                writer.write_all(&content[..next_boundary])?;
-                boundary = next_boundary;
-            }
-            None => return Ok(content.len())
-        }
-    }
-    Ok(0)
-}
-
-fn next_boundary(input: &[u8]) -> Option<usize> {
-    if input.len() <= LINE_MAX_LEN {
-        return None;
-    }
-
-    fn is_char_boundary(&b: &u8) -> bool {
-        // In std::is_char_boundary bit magic is used in the form of (b as i8) >= -0x40
-        // but this is more understandable for me.
-        b < 128 || b >= 192
-    }
-
-    match input[..=LINE_MAX_LEN].iter().rposition(is_char_boundary) {
-        Some(0) | None => None,
-        boundary => boundary
     }
 }
 
