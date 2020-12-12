@@ -5,9 +5,18 @@
 ### Breaking Changes
 
 - Minimum supported rustc is now **1.39.0**!
+- Removed all components in root module for writer components in `ics::writer` module.
+  - `Alarm`
+  - `Daylight`
+  - `Event`
+  - `FreeBusy`
+  - `Journal`
+  - `ToDo`
+  - `Standard`
+  - `TimeZone`
+- Removed `ics::components` module with `Component` and `Property`. However, `Parameter` was moved to `ics::parameters`.
 - Property values are strongly typed as specified which changes some constructors.
-- `Parameters` is now a `Vec` but adding `Parameter` still works like `BTreeMap::insert()`. This is done to avoid the overhead of `BTreeMap` and default sorting. It should have no noticable overhead because in practice few `Parameter`s are added to a property.
-- The `append` method on properties now takes a mutable reference instead of moving the value into the method and empties the reference. This works more like the `append` method on collections in `std`.
+- `Parameters` is now a `Vec` which means parameters are not sorted and updated/de-duplicated anymore.
 
 ### API
 
@@ -20,13 +29,13 @@
     - `Sequence`
   - `pub const fn new(latitude: Float, longitude: Float) -> Self`
     - `Geo`
+- `[PROPERTY]::add()` just adds a parameter instead of updating a parameter if it already exists.
 - Changed `[PROPERTY]::append(&mut self, Parameters<'_>)` to `[PROPERTY]::append(&mut self, &mut Parameters<'_>)`. The value is drained empty instead of being moved.
 - Replaced `BTreeMap` with `Vec` for `Parameters`.
 
 ### Misc
 
-- Migrated to edition 2018
-- Replaced `BTreeMap` with `Vec` for `Parameters`. Adding `Parameter`s will still update it but the order is now depending on the insertion.
+- Migrated to edition 2018.
 
 ## Version 0.5.5
 

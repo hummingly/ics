@@ -56,20 +56,14 @@ macro_rules! property {
             where
                 P: Into<Parameter<'a>>
             {
-                let parameter = parameter.into();
-                match self.parameters.iter_mut().find(|p| p.name == parameter.name) {
-                    Some(p) => *p = parameter,
-                    None => self.parameters.push(parameter)
-                }
+                self.parameters.push(parameter.into())
             }
 
             /// Adds several parameters at once to the property. For creating
             /// several parameters at once, consult the documentation of
             /// the [`parameters!`] macro.
             pub fn append(&mut self, parameters: &mut Parameters<'a>) {
-                for parameter in parameters.drain(..) {
-                    self.add(parameter);
-                }
+                self.parameters.append(parameters)
             }
         }
 
@@ -120,20 +114,14 @@ macro_rules! property_text {
             where
                 P: Into<Parameter<'a>>
             {
-                let parameter = parameter.into();
-                match self.parameters.iter_mut().find(|p| p.name == parameter.name) {
-                    Some(p) => *p = parameter,
-                    None => self.parameters.push(parameter)
-                }
+                self.parameters.push(parameter.into())
             }
 
             /// Adds several parameters at once to the property. For creating
             /// several parameters at once, consult the documentation of
             /// the [`parameters!`] macro.
             pub fn append(&mut self, parameters: &mut Parameters<'a>) {
-                for parameter in parameters.drain(..) {
-                    self.add(parameter);
-                }
+                self.parameters.append(parameters)
             }
         }
 
@@ -182,20 +170,14 @@ macro_rules! property_with_parameter {
             where
                 P: Into<Parameter<'a>>
             {
-                let parameter = parameter.into();
-                match self.parameters.iter_mut().find(|p| p.name == parameter.name) {
-                    Some(p) => *p = parameter,
-                    None => self.parameters.push(parameter)
-                }
+                self.parameters.push(parameter.into())
             }
 
             /// Adds several parameters at once to the property. For creating
             /// several parameters at once, consult the documentation of
             /// the [`parameters!`] macro.
             pub fn append(&mut self, parameters: &mut Parameters<'a>) {
-                for parameter in parameters.drain(..) {
-                    self.add(parameter);
-                }
+                self.parameters.append(parameters)
             }
         }
 
@@ -230,20 +212,14 @@ macro_rules! property_integer {
             where
                 P: Into<Parameter<'a>>
             {
-                let parameter = parameter.into();
-                match self.parameters.iter_mut().find(|p| p.name == parameter.name) {
-                    Some(p) => *p = parameter,
-                    None => self.parameters.push(parameter)
-                }
+                self.parameters.push(parameter.into())
             }
 
             /// Adds several parameters at once to the property. For creating
             /// several parameters at once, consult the documentation of
             /// the [`parameters!`] macro.
             pub fn append(&mut self, parameters: &mut Parameters<'a>) {
-                for parameter in parameters.drain(..) {
-                    self.add(parameter);
-                }
+                self.parameters.append(parameters)
             }
         }
 
