@@ -94,7 +94,7 @@ impl<W: Write> ContentLineWriter<W> {
         write!(self.0, ":{}", value)
     }
 
-    pub fn write_boolean(&mut self, value: bool) -> Result<(), Error> {
+    pub fn write_boolean_value(&mut self, value: bool) -> Result<(), Error> {
         self.0.write_all(if value { b"TRUE" } else { b"FALSE" })
     }
 
