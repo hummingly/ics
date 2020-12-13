@@ -16,14 +16,10 @@ pub const STANDARD: &str = "STANDARD";
 pub const DAYLIGHT: &str = "DAYLIGHT";
 
 #[derive(Debug)]
-pub struct ICalendarWriter<W: Write>(ContentLineWriter<W>);
+pub struct ICalendar<W: Write>(ContentLineWriter<W>);
 
-impl<W: Write> ICalendarWriter<W> {
-    pub fn new(
-        inner: W,
-        version: Version,
-        product_id: ProdID
-    ) -> Result<ICalendarWriter<W>, Error> {
+impl<W: Write> ICalendar<W> {
+    pub fn new(inner: W, version: Version, product_id: ProdID) -> Result<ICalendar<W>, Error> {
         let mut writer = ContentLineWriter::new(inner);
         writer.write_begin_unchecked(VCALENDAR)?;
         writer.write_property(&version)?;
