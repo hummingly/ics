@@ -3,7 +3,7 @@ use ics::properties::{
     Attach, Attendee, DtStamp, Due, Duration, Organizer, ProdID, Repeat, Sequence, Status, Summary,
     Trigger, Version, UID
 };
-use ics::writer::{Alarm, ICalendar, ToDo};
+use ics::writer::{Alarm, ICalendarWriter, ToDo};
 use std::fs::File;
 use std::io;
 
@@ -13,7 +13,7 @@ fn main() -> Result<(), io::Error> {
 
     // Create a new iCalendar object.
     // An iCalendar object must at least consist of the VERSION and PRODID property.
-    let mut calendar = ICalendar::new(
+    let mut calendar = ICalendarWriter::new(
         file,
         Version::new("2.0"),
         ProdID::new("-//ABC Corporation//NONSGML My Product//EN")

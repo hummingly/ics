@@ -2,7 +2,7 @@ use ics::properties::{
     Categories, Description, DtEnd, DtStamp, DtStart, Organizer, ProdID, Status, Summary, Version,
     UID
 };
-use ics::writer::{Event, ICalendar};
+use ics::writer::{Event, ICalendarWriter};
 use std::fs::File;
 use std::io;
 
@@ -12,7 +12,7 @@ fn main() -> Result<(), io::Error> {
 
     // Create a new iCalendar object.
     // An iCalendar object must at least consist of the VERSION and PRODID property.
-    let mut calendar = ICalendar::new(
+    let mut calendar = ICalendarWriter::new(
         file,
         Version::new("2.0"),
         ProdID::new("-//xyz Corp//NONSGML PDA Calendar Version 1.0//EN")

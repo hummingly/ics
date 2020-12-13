@@ -4,7 +4,9 @@ use ics::properties::{
     Duration, FreeBusyTime, Location, Organizer, ProdID, Repeat, Sequence, Status, Summary,
     Trigger, TzID, TzName, TzOffsetFrom, TzOffsetTo, Version, UID, URL
 };
-use ics::writer::{Alarm, Daylight, Event, FreeBusy, ICalendar, Journal, Standard, TimeZone, ToDo};
+use ics::writer::{
+    Alarm, Daylight, Event, FreeBusy, ICalendarWriter, Journal, Standard, TimeZone, ToDo
+};
 use std::io;
 
 #[test]
@@ -45,7 +47,7 @@ fn event() -> Result<(), io::Error> {
         }
     );
 
-    let mut calendar = ICalendar::new(
+    let mut calendar = ICalendarWriter::new(
         Vec::with_capacity(expected.len()),
         Version::new("2.0"),
         ProdID::new("-//xyz Corp//NONSGML PDA Calendar Version 1.0//EN")
@@ -107,7 +109,7 @@ fn todo() -> Result<(), io::Error> {
         }
     );
 
-    let mut calendar = ICalendar::new(
+    let mut calendar = ICalendarWriter::new(
         Vec::with_capacity(expected.len()),
         Version::new("2.0"),
         ProdID::new("-//ABC Corporation//NONSGML My Product//EN")
@@ -171,7 +173,7 @@ fn journal() -> Result<(), io::Error> {
         }
     );
 
-    let mut calendar = ICalendar::new(
+    let mut calendar = ICalendarWriter::new(
         Vec::with_capacity(expected.len()),
         Version::new("2.0"),
         ProdID::new("-//ABC Corporation//NONSGML My Product//EN")
@@ -219,7 +221,7 @@ fn freebusy() -> Result<(), io::Error> {
         }
     );
 
-    let mut calendar = ICalendar::new(
+    let mut calendar = ICalendarWriter::new(
         Vec::with_capacity(expected.len()),
         Version::new("2.0"),
         ProdID::new("-//RDU Software//NONSGML HandCal//EN")
@@ -316,7 +318,7 @@ fn timezone() -> Result<(), io::Error> {
         }
     );
 
-    let mut calendar = ICalendar::new(
+    let mut calendar = ICalendarWriter::new(
         Vec::with_capacity(expected.len()),
         Version::new("2.0"),
         ProdID::new("-//RDU Software//NONSGML HandCal//EN")

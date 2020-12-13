@@ -4,11 +4,13 @@ use ics::properties::{
     FreeBusyTime, LastModified, Organizer, Priority, ProdID, RRule, Status, Summary, Transp,
     Trigger, TzID, TzName, TzOffsetFrom, TzOffsetTo, Version, UID, URL
 };
-use ics::writer::{Alarm, Daylight, Event, FreeBusy, ICalendar, Journal, Standard, TimeZone, ToDo};
+use ics::writer::{
+    Alarm, Daylight, Event, FreeBusy, ICalendarWriter, Journal, Standard, TimeZone, ToDo
+};
 use std::io;
 
-fn calendar(capacity: usize) -> Result<ICalendar<Vec<u8>>, io::Error> {
-    ICalendar::new(
+fn calendar(capacity: usize) -> Result<ICalendarWriter<Vec<u8>>, io::Error> {
+    ICalendarWriter::new(
         Vec::with_capacity(capacity),
         Version::new("2.0"),
         ProdID::new("Mock Calendar")
