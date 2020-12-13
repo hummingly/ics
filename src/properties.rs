@@ -9,11 +9,11 @@
 //! values. Those are associated functions or constructors.
 //!
 //! For more information on properties, please refer to the specification [RFC5545 3.7. Calendar Properties](https://tools.ietf.org/html/rfc5545#section-3.7) and [RFC7986 5. Properties](https://tools.ietf.org/html/rfc7986#section-5).
-use crate::contentline::{ContentLine, PropertyWrite};
+use crate::contentline::{ContentLineWriter, PropertyWrite};
 use crate::parameters::{Parameter, Parameters};
 use crate::value::{Float, Integer, StatusValue, TranspValue};
 use std::borrow::Cow;
-use std::io;
+use std::io::{Error, Write};
 
 property_text!(CalScale, "CALSCALE");
 property_text!(Method, "METHOD");
@@ -69,12 +69,12 @@ impl<'a> Geo<'a> {
 }
 
 impl PropertyWrite for Geo<'_> {
-    fn write<W: io::Write>(&self, line: &mut ContentLine<W>) -> Result<(), io::Error> {
-        line.write_name_unchecked("GEO");
+    fn write<W: Write>(&self, w: &mut ContentLineWriter<W>) -> Result<(), Error> {
+        w.write_name_unchecked("GEO");
         for parameter in &self.parameters {
-            line.write_parameter(parameter)?;
+            w.write_parameter(parameter)?;
         }
-        line.write_fmt_value(format_args!("{};{}", self.latitude, self.longitude))
+        w.write_fmt_value(format_args!("{};{}", self.latitude, self.longitude))
     }
 }
 
@@ -157,12 +157,12 @@ impl<'a> Status<'a> {
 }
 
 impl PropertyWrite for Status<'_> {
-    fn write<W: io::Write>(&self, line: &mut ContentLine<W>) -> Result<(), io::Error> {
-        line.write_name_unchecked("STATUS");
+    fn write<W: Write>(&self, w: &mut ContentLineWriter<W>) -> Result<(), Error> {
+        w.write_name_unchecked("STATUS");
         for parameter in &self.parameters {
-            line.write_parameter(parameter)?;
+            w.write_parameter(parameter)?;
         }
-        line.write_text_value(self.value.as_str())
+        w.write_text_value(self.value.as_str())
     }
 }
 
@@ -217,12 +217,12 @@ impl<'a> Transp<'a> {
 }
 
 impl PropertyWrite for Transp<'_> {
-    fn write<W: io::Write>(&self, line: &mut ContentLine<W>) -> Result<(), io::Error> {
-        line.write_name_unchecked("TRANSP");
+    fn write<W: Write>(&self, w: &mut ContentLineWriter<W>) -> Result<(), Error> {
+        w.write_name_unchecked("TRANSP");
         for parameter in &self.parameters {
-            line.write_parameter(parameter)?;
+            w.write_parameter(parameter)?;
         }
-        line.write_text_value(self.value.as_str())
+        w.write_text_value(self.value.as_str())
     }
 }
 
@@ -303,10 +303,10 @@ pub use self::rfc7986::*;
 
 #[cfg(feature = "rfc7986")]
 mod rfc7986 {
-    use crate::contentline::{ContentLine, PropertyWrite};
+    use crate::contentline::{ContentLineWriter, PropertyWrite};
     use crate::parameters::{Parameter, Parameters};
     use std::borrow::Cow;
-    use std::io;
+    use std::io::{Error, Write};
     property_text!(Name, "NAME");
     property_with_parameter!(RefreshInterval, "REFRESH-INTERVAL", "DURATION");
     property_with_parameter!(Source, "SOURCE", "URI");

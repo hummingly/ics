@@ -7,14 +7,14 @@ const LINE_MAX_LEN: usize = 75;
 const CAPACITY: usize = LINE_MAX_LEN * 2;
 
 pub trait PropertyWrite {
-    fn write<W: Write>(&self, line: &mut ContentLine<W>) -> Result<(), Error>;
+    fn write<W: Write>(&self, line: &mut ContentLineWriter<W>) -> Result<(), Error>;
 }
 
 #[derive(Debug)]
-pub struct ContentLine<W: Write>(Writer<W>);
+pub struct ContentLineWriter<W: Write>(Writer<W>);
 
-impl<W: Write> ContentLine<W> {
-    pub(crate) fn new(inner: W) -> ContentLine<W> {
+impl<W: Write> ContentLineWriter<W> {
+    pub(crate) fn new(inner: W) -> ContentLineWriter<W> {
         Self(Writer::new(inner))
     }
 
@@ -70,7 +70,7 @@ impl<W: Write> ContentLine<W> {
     }
 }
 
-impl<W: Write> ContentLine<W> {
+impl<W: Write> ContentLineWriter<W> {
     pub fn write_name(&mut self, name: &str) -> Result<(), Error> {
         self.0.write_all(name.as_bytes())
     }
