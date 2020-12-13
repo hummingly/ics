@@ -1,5 +1,5 @@
 use crate::parameters::Parameter;
-use crate::value::write_escaped_bytes;
+use crate::util::{write_base64, write_escaped_text};
 use std::fmt;
 use std::io::{Error, Write};
 
@@ -94,9 +94,20 @@ impl<W: Write> ContentLineWriter<W> {
         write!(self.0, ":{}", value)
     }
 
+    pub fn write_boolean(&mut self, value: bool) -> Result<(), Error> {
+        self.0.write_all(if value { b"TRUE" } else { b"FALSE" })
+    }
+
+    /// Writes binary data as BASE64 encoded string.
+    pub fn write_binary_value(&mut self, binary: &[u8]) -> Result<(), Error> {
+        self.0.write_all(b":")?;
+        write_base64(&mut self.0, binary)
+    }
+
+    /// Escapes comma, semicolon and backlash, and normalizes newlines.
     pub fn write_text_value(&mut self, text: &str) -> Result<(), Error> {
         self.0.write_all(b":")?;
-        write_escaped_bytes(&mut self.0, text.as_bytes())
+        write_escaped_text(&mut self.0, text)
     }
 }
 
@@ -227,9 +238,9 @@ impl<W: Write + fmt::Debug> fmt::Debug for Writer<W> {
 #[cfg(test)]
 mod tests {
     use super::Writer;
-    use std::io::Write;
+    use std::io::{Error, Write};
 
-    fn write(content: &[u8]) -> Result<String, std::io::Error> {
+    fn write(content: &[u8]) -> Result<String, Error> {
         let mut writer = Writer::new(Vec::with_capacity(content.len()));
         writer.write_all(content)?;
         writer.flush()?;
@@ -237,38 +248,42 @@ mod tests {
     }
 
     #[test]
-    fn no_linebreak() {
+    fn no_linebreak() -> Result<(), Error> {
         let content = "No line break today.";
-        let output = write(content.as_bytes()).unwrap();
+        let output = write(content.as_bytes())?;
 
         assert_eq!(output, content);
+        Ok(())
     }
 
     #[test]
-    fn over_limit() {
+    fn over_limit() -> Result<(), Error> {
         let content = "Content lines that have a fixed length over 75 bytes should be line folded with CRLF and whitespace.";
         let expected = "Content lines that have a fixed length over 75 bytes should be line folded \r\n with CRLF and whitespace.";
-        let output = write(content.as_bytes()).unwrap();
+        let output = write(content.as_bytes())?;
 
         assert_eq!(output, expected);
+        Ok(())
     }
 
     #[test]
-    fn multibytes() {
+    fn multibytes() -> Result<(), Error> {
         let content = "Content lines shouldn't be folded in the middle of a UTF-8 character! 老虎.";
         let expected =
             "Content lines shouldn't be folded in the middle of a UTF-8 character! 老\r\n 虎.";
-        let output = write(content.as_bytes()).unwrap();
+        let output = write(content.as_bytes())?;
 
         assert_eq!(output, expected);
+        Ok(())
     }
 
     #[test]
-    fn multi_lines() {
+    fn multi_lines() -> Result<(), Error> {
         let content = "The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy cog. The quick brown fox jumps over the lazy hog. The quick brown fox jumps over the lazy log. The quick brown fox jumps over the lazy dog. ";
         let expected = "The quick brown fox jumps over the lazy dog. The quick brown fox jumps over\r\n  the lazy cog. The quick brown fox jumps over the lazy hog. The quick brown\r\n  fox jumps over the lazy log. The quick brown fox jumps over the lazy dog. ";
-        let output = write(content.as_bytes()).unwrap();
+        let output = write(content.as_bytes())?;
 
         assert_eq!(output, expected);
+        Ok(())
     }
 }

@@ -313,6 +313,12 @@ mod rfc7986 {
     property_text!(Color, "COLOR");
     property_with_parameter!(Conference, "CONFERENCE", "URI");
 
+    #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
+    enum Data<'a> {
+        Link(Cow<'a, str>),
+        Binary(Cow<'a, [u8]>)
+    }
+
     /// `IMAGE` Property
     ///
     /// Newer properties that have a different value type than `TEXT` have to
@@ -321,19 +327,19 @@ mod rfc7986 {
     /// the constructor the value can be either `URI` or `BINARY`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
     pub struct Image<'a> {
-        value: Cow<'a, str>,
+        value: Data<'a>,
         parameters: Vec<Parameter<'a>>
     }
 
     impl<'a> Image<'a> {
         /// Creates a new `IMAGE` Property with the given value. The value type
         /// is `URI`.
-        pub fn uri<S>(value: S) -> Self
+        pub fn uri<S>(uri: S) -> Self
         where
             S: Into<Cow<'a, str>>
         {
             Image {
-                value: value.into(),
+                value: Data::Link(uri.into()),
                 parameters: parameters!("VALUE" => "URI")
             }
         }
@@ -341,12 +347,12 @@ mod rfc7986 {
         /// Creates a new `IMAGE` Property with the given value.
         /// The value type is `BINARY` which is why the `ENCODING` parameter
         /// with the value `BASE64` is also added.
-        pub fn binary<S>(value: S) -> Self
+        pub fn binary<S>(binary: S) -> Self
         where
-            S: Into<Cow<'a, str>>
+            S: Into<Cow<'a, [u8]>>
         {
             Image {
-                value: value.into(),
+                value: Data::Binary(binary.into()),
                 parameters: parameters!("ENCODING" => "BASE64"; "VALUE" => "BINARY")
             }
         }
@@ -367,5 +373,16 @@ mod rfc7986 {
         }
     }
 
-    impl_property_write!(Image, "IMAGE");
+    impl PropertyWrite for Image<'_> {
+        fn write<W: Write>(&self, w: &mut ContentLineWriter<W>) -> Result<(), Error> {
+            w.write_name_unchecked("IMAGE");
+            for parameter in &self.parameters {
+                w.write_parameter(parameter)?;
+            }
+            match &self.value {
+                Data::Link(uri) => w.write_value(uri),
+                Data::Binary(binary) => w.write_binary_value(binary)
+            }
+        }
+    }
 }
