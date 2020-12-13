@@ -57,7 +57,7 @@
 
 #[macro_use]
 mod macros;
-pub mod contentline;
+mod contentline;
 pub mod parameters;
 pub mod properties;
 mod value;

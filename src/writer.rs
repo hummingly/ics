@@ -1,19 +1,19 @@
-use crate::contentline::{ContentLine, PropertyWrite};
+pub use crate::contentline::{ContentLine, PropertyWrite};
 use crate::properties::{
     Action, Description, DtStamp, DtStart, ProdID, Summary, Trigger, TzID, TzOffsetFrom,
     TzOffsetTo, Version, UID
 };
 use std::io::{Error, Write};
 
-const VCALENDAR: &str = "VCALENDAR";
-const VEVENT: &str = "VEVENT";
-const VTODO: &str = "VTODO";
-const VJOURNAL: &str = "VJOURNAL";
-const VFREEBUSY: &str = "VFREEBUSY";
-const VALARM: &str = "VALARM";
-const VTIMEZONE: &str = "VTIMEZONE";
-const STANDARD: &str = "STANDARD";
-const DAYLIGHT: &str = "DAYLIGHT";
+pub const VCALENDAR: &str = "VCALENDAR";
+pub const VEVENT: &str = "VEVENT";
+pub const VTODO: &str = "VTODO";
+pub const VJOURNAL: &str = "VJOURNAL";
+pub const VFREEBUSY: &str = "VFREEBUSY";
+pub const VALARM: &str = "VALARM";
+pub const VTIMEZONE: &str = "VTIMEZONE";
+pub const STANDARD: &str = "STANDARD";
+pub const DAYLIGHT: &str = "DAYLIGHT";
 
 #[derive(Debug)]
 pub struct ICalendar<W: Write>(ContentLine<W>);
