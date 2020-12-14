@@ -148,14 +148,13 @@ impl<W: Write> Writer<W> {
 
             // In str::is_char_boundary bit magic is used in the form of (b as i8) >= -0x40
             // but this is more understandable for me.
-            fn is_char_boundary(&b: &u8) -> bool {
+            fn is_char_boundary(b: u8) -> bool {
                 b < 128 || b >= 192
             }
 
-            match input[..=LINE_MAX_LEN].iter().rposition(is_char_boundary) {
-                Some(0) | None => None,
-                boundary => boundary
-            }
+            (1..=LINE_MAX_LEN)
+                .rev()
+                .find(|&boundary| is_char_boundary(input[boundary]))
         }
 
         let mut content = &self.buffer[..self.len];
