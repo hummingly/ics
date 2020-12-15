@@ -1,11 +1,11 @@
 use std::io::{Error, Write};
 
-/// Write bytes using the Base64 standard encoding.
+/// Write bytes using the BASE64 standard encoding.
 pub fn write_base64<W: Write>(output: &mut W, bytes: &[u8]) -> Result<(), Error> {
     // Mask for extracting 6 bits from a byte.
     const BIT_MASK: u8 = 0b0011_1111;
 
-    const BASE_64: [u8; 64] = [
+    const BASE64: [u8; 64] = [
         b'A', b'B', b'C', b'D', b'E', b'F', b'G', b'H', b'I', b'J', b'K', b'L', b'M', b'N', b'O',
         b'P', b'Q', b'R', b'S', b'T', b'U', b'V', b'W', b'X', b'Y', b'Z', b'a', b'b', b'c', b'd',
         b'e', b'f', b'g', b'h', b'i', b'j', b'k', b'l', b'm', b'n', b'o', b'p', b'q', b'r', b's',
@@ -19,23 +19,23 @@ pub fn write_base64<W: Write>(output: &mut W, bytes: &[u8]) -> Result<(), Error>
 
     let mut chunks = bytes.chunks_exact(3);
     while let Some(chunk) = chunks.next() {
-        let first = BASE_64[usize::from(chunk[0] >> 2)];
-        let second = BASE_64[usize::from(chunk[0] << 4 & BIT_MASK | chunk[1] >> 4)];
-        let third = BASE_64[usize::from(chunk[1] << 2 & BIT_MASK | chunk[2] >> 6)];
-        let fourth = BASE_64[usize::from(chunk[2] & BIT_MASK)];
+        let first = BASE64[usize::from(chunk[0] >> 2)];
+        let second = BASE64[usize::from(chunk[0] << 4 & BIT_MASK | chunk[1] >> 4)];
+        let third = BASE64[usize::from(chunk[1] << 2 & BIT_MASK | chunk[2] >> 6)];
+        let fourth = BASE64[usize::from(chunk[2] & BIT_MASK)];
         output.write_all(&[first, second, third, fourth])?;
     }
 
     match chunks.remainder() {
         [first] => {
-            let first_char = BASE_64[usize::from(first >> 2)];
-            let second = BASE_64[usize::from(first << 4 & BIT_MASK)];
+            let first_char = BASE64[usize::from(first >> 2)];
+            let second = BASE64[usize::from(first << 4 & BIT_MASK)];
             output.write_all(&[first_char, second, b'=', b'='])
         }
         [first, second] => {
-            let first_char = BASE_64[usize::from(first >> 2)];
-            let second_char = BASE_64[usize::from(first << 4 & BIT_MASK | second >> 4)];
-            let third = BASE_64[usize::from(second << 2 & BIT_MASK)];
+            let first_char = BASE64[usize::from(first >> 2)];
+            let second_char = BASE64[usize::from(first << 4 & BIT_MASK | second >> 4)];
+            let third = BASE64[usize::from(second << 2 & BIT_MASK)];
             output.write_all(&[first_char, second_char, third, b'='])
         }
         _ => Ok(())
