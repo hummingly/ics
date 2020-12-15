@@ -53,10 +53,7 @@ impl<'a> Geo<'a> {
     }
 
     /// Adds a parameter to the property.
-    pub fn add<P>(&mut self, parameter: P)
-    where
-        P: Into<Parameter<'a>>
-    {
+    pub fn add(&mut self, parameter: impl Into<Parameter<'a>>) {
         self.parameters.push(parameter.into())
     }
 
@@ -141,10 +138,7 @@ impl<'a> Status<'a> {
     }
 
     /// Adds a parameter to the property.
-    pub fn add<P>(&mut self, parameter: P)
-    where
-        P: Into<Parameter<'a>>
-    {
+    pub fn add(&mut self, parameter: impl Into<Parameter<'a>>) {
         self.parameters.push(parameter.into())
     }
 
@@ -201,10 +195,7 @@ impl<'a> Transp<'a> {
     }
 
     /// Adds a parameter to the property.
-    pub fn add<P>(&mut self, parameter: P)
-    where
-        P: Into<Parameter<'a>>
-    {
+    pub fn add(&mut self, parameter: impl Into<Parameter<'a>>) {
         self.parameters.push(parameter.into())
     }
 
@@ -334,10 +325,7 @@ mod rfc7986 {
     impl<'a> Image<'a> {
         /// Creates a new `IMAGE` Property with the given value. The value type
         /// is `URI`.
-        pub fn uri<S>(uri: S) -> Self
-        where
-            S: Into<Cow<'a, str>>
-        {
+        pub fn uri<S>(uri: impl Into<Cow<'a, str>>) -> Self {
             Image {
                 value: Data::Link(uri.into()),
                 parameters: parameters!("VALUE" => "URI")
@@ -347,10 +335,7 @@ mod rfc7986 {
         /// Creates a new `IMAGE` Property with the given value.
         /// The value type is `BINARY` which is why the `ENCODING` parameter
         /// with the value `BASE64` is also added.
-        pub fn binary<S>(binary: S) -> Self
-        where
-            S: Into<Cow<'a, [u8]>>
-        {
+        pub fn binary(binary: impl Into<Cow<'a, [u8]>>) -> Self {
             Image {
                 value: Data::Binary(binary.into()),
                 parameters: parameters!("ENCODING" => "BASE64"; "VALUE" => "BINARY")
@@ -358,10 +343,7 @@ mod rfc7986 {
         }
 
         /// Adds a parameter to the property.
-        pub fn add<P>(&mut self, parameter: P)
-        where
-            P: Into<Parameter<'a>>
-        {
+        pub fn add(&mut self, parameter: impl Into<Parameter<'a>>) {
             self.parameters.push(parameter.into())
         }
 

@@ -33,11 +33,7 @@ pub struct Parameter<'a> {
 
 impl<'a> Parameter<'a> {
     /// Creates a new property with the given key and value.
-    pub fn new<K, V>(name: K, value: V) -> Self
-    where
-        K: Into<Cow<'a, str>>,
-        V: Into<Cow<'a, str>>
-    {
+    pub fn new(name: impl Into<Cow<'a, str>>, value: impl Into<Cow<'a, str>>) -> Self {
         Parameter {
             name: name.into(),
             value: value.into()

@@ -25,10 +25,7 @@ impl<W: Write> ContentLineWriter<W> {
     }
 
     #[inline]
-    pub(crate) fn write_property<P>(&mut self, property: &P) -> Result<(), Error>
-    where
-        P: PropertyWrite
-    {
+    pub(crate) fn write_property(&mut self, property: &impl PropertyWrite) -> Result<(), Error> {
         property.write(self)?;
         self.write_line_break()
     }
@@ -83,10 +80,7 @@ impl<W: Write> ContentLineWriter<W> {
         write!(self.0, ";{}={}", key, value)
     }
 
-    pub fn write_value<V>(&mut self, value: &V) -> Result<(), Error>
-    where
-        V: fmt::Display
-    {
+    pub fn write_value(&mut self, value: &impl fmt::Display) -> Result<(), Error> {
         write!(self.0, ":{}", value)
     }
 

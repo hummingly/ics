@@ -41,10 +41,7 @@ macro_rules! property {
 
         impl<'a> $type<'a> {
             #[doc = "Creates a new `"]#[doc=$name]#[doc = "` Property with the given value."]
-            pub fn new<S>(value: S) -> Self
-            where
-                S: Into<Cow<'a, str>>
-            {
+            pub fn new(value: impl Into<Cow<'a, str>>) -> Self {
                 Self {
                     value: value.into(),
                     parameters: Vec::new()
@@ -52,10 +49,7 @@ macro_rules! property {
             }
 
             /// Adds a parameter to the property.
-            pub fn add<P>(&mut self, parameter: P)
-            where
-                P: Into<Parameter<'a>>
-            {
+            pub fn add(&mut self, parameter: impl Into<Parameter<'a>>) {
                 self.parameters.push(parameter.into())
             }
 
@@ -87,10 +81,7 @@ macro_rules! property_text {
 
         impl<'a> $type<'a> {
             #[doc = "Creates a new `"]#[doc=$name]#[doc = "` Property with the given value."]
-            pub fn new<S>(value: S) -> Self
-            where
-                S: Into<Cow<'a, str>>
-            {
+            pub fn new(value: impl Into<Cow<'a, str>>) -> Self {
                 Self {
                     value: value.into(),
                     parameters: Vec::new()
@@ -110,10 +101,7 @@ macro_rules! property_text {
             )*
 
             /// Adds a parameter to the property.
-            pub fn add<P>(&mut self, parameter: P)
-            where
-                P: Into<Parameter<'a>>
-            {
+            pub fn add(&mut self, parameter: impl Into<Parameter<'a>>) {
                 self.parameters.push(parameter.into())
             }
 
@@ -155,10 +143,7 @@ macro_rules! property_with_parameter {
 
         impl<'a> $type<'a> {
             #[doc = "Creates a new `"]#[doc=$name]#[doc = "` Property with the given value."]
-            pub fn new<S>(value: S) -> Self
-            where
-                S: Into<Cow<'a, str>>
-            {
+            pub fn new(value: impl Into<Cow<'a, str>>) -> Self {
                 Self {
                     value: value.into(),
                     parameters: parameters!("VALUE" => $value)
@@ -166,10 +151,7 @@ macro_rules! property_with_parameter {
             }
 
             /// Adds a parameter to the property.
-            pub fn add<P>(&mut self, parameter: P)
-            where
-                P: Into<Parameter<'a>>
-            {
+            pub fn add(&mut self, parameter: impl Into<Parameter<'a>>) {
                 self.parameters.push(parameter.into())
             }
 
@@ -208,10 +190,7 @@ macro_rules! property_integer {
             }
 
             /// Adds a parameter to the property.
-            pub fn add<P>(&mut self, parameter: P)
-            where
-                P: Into<Parameter<'a>>
-            {
+            pub fn add(&mut self, parameter: impl Into<Parameter<'a>>) {
                 self.parameters.push(parameter.into())
             }
 
@@ -241,10 +220,7 @@ macro_rules! parameter {
 
         impl<'a> $type<'a> {
             #[doc = "Creates a new `"]#[doc=$name]#[doc = "` Parameter with the given value."]
-            pub fn new<S>(value: S) -> Self
-            where
-                S: Into<Cow<'a, str>>
-            {
+            pub fn new(value: impl Into<Cow<'a, str>>) -> Self {
                 Self(value.into())
             }
 
