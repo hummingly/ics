@@ -23,8 +23,8 @@ pub fn write_base64<W: Write>(writer: &mut W, bytes: &[u8]) -> Result<(), Error>
     let mut output = [0; 4];
     for chunk in chunks {
         output[0] = BASE64[usize::from(chunk[0] >> 2)];
-        output[1] = BASE64[usize::from(chunk[0] << 4 & BIT_MASK | chunk[1] >> 4)];
-        output[2] = BASE64[usize::from(chunk[1] << 2 & BIT_MASK | chunk[2] >> 6)];
+        output[1] = BASE64[usize::from((chunk[0] << 4 | chunk[1] >> 4) & BIT_MASK)];
+        output[2] = BASE64[usize::from((chunk[1] << 2 | chunk[2] >> 6) & BIT_MASK)];
         output[3] = BASE64[usize::from(chunk[2] & BIT_MASK)];
         writer.write_all(&output)?;
     }
@@ -39,7 +39,7 @@ pub fn write_base64<W: Write>(writer: &mut W, bytes: &[u8]) -> Result<(), Error>
         }
         [first, second] => {
             output[0] = BASE64[usize::from(first >> 2)];
-            output[1] = BASE64[usize::from(first << 4 & BIT_MASK | second >> 4)];
+            output[1] = BASE64[usize::from((first << 4 | second >> 4) & BIT_MASK)];
             output[2] = BASE64[usize::from(second << 2 & BIT_MASK)];
             output[3] = b'=';
             writer.write_all(&output)
