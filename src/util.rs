@@ -1,7 +1,11 @@
 use std::io::{Error, Write};
 
 /// Write bytes using the BASE64 standard encoding.
-pub fn write_base64<W: Write>(output: &mut W, bytes: &[u8]) -> Result<(), Error> {
+pub fn write_base64<W: Write>(writer: &mut W, bytes: &[u8]) -> Result<(), Error> {
+    if bytes.is_empty() {
+        return Ok(());
+    }
+
     // Mask for extracting 6 bits from a byte.
     const BIT_MASK: u8 = 0b0011_1111;
 
@@ -13,30 +17,32 @@ pub fn write_base64<W: Write>(output: &mut W, bytes: &[u8]) -> Result<(), Error>
         b'8', b'9', b'+', b'/'
     ];
 
-    if bytes.is_empty() {
-        return Ok(());
+    let chunks = bytes.chunks_exact(3);
+    let remainder = chunks.remainder();
+
+    let mut output = [0; 4];
+    for chunk in chunks {
+        output[0] = BASE64[usize::from(chunk[0] >> 2)];
+        output[1] = BASE64[usize::from(chunk[0] << 4 & BIT_MASK | chunk[1] >> 4)];
+        output[2] = BASE64[usize::from(chunk[1] << 2 & BIT_MASK | chunk[2] >> 6)];
+        output[3] = BASE64[usize::from(chunk[2] & BIT_MASK)];
+        writer.write_all(&output)?;
     }
 
-    let mut chunks = bytes.chunks_exact(3);
-    while let Some(chunk) = chunks.next() {
-        let first = BASE64[usize::from(chunk[0] >> 2)];
-        let second = BASE64[usize::from(chunk[0] << 4 & BIT_MASK | chunk[1] >> 4)];
-        let third = BASE64[usize::from(chunk[1] << 2 & BIT_MASK | chunk[2] >> 6)];
-        let fourth = BASE64[usize::from(chunk[2] & BIT_MASK)];
-        output.write_all(&[first, second, third, fourth])?;
-    }
-
-    match chunks.remainder() {
+    match remainder {
         [first] => {
-            let first_char = BASE64[usize::from(first >> 2)];
-            let second = BASE64[usize::from(first << 4 & BIT_MASK)];
-            output.write_all(&[first_char, second, b'=', b'='])
+            output[0] = BASE64[usize::from(first >> 2)];
+            output[1] = BASE64[usize::from(first << 4 & BIT_MASK)];
+            output[2] = b'=';
+            output[3] = b'=';
+            writer.write_all(&output)
         }
         [first, second] => {
-            let first_char = BASE64[usize::from(first >> 2)];
-            let second_char = BASE64[usize::from(first << 4 & BIT_MASK | second >> 4)];
-            let third = BASE64[usize::from(second << 2 & BIT_MASK)];
-            output.write_all(&[first_char, second_char, third, b'='])
+            output[0] = BASE64[usize::from(first >> 2)];
+            output[1] = BASE64[usize::from(first << 4 & BIT_MASK | second >> 4)];
+            output[2] = BASE64[usize::from(second << 2 & BIT_MASK)];
+            output[3] = b'=';
+            writer.write_all(&output)
         }
         _ => Ok(())
     }
@@ -45,8 +51,13 @@ pub fn write_base64<W: Write>(output: &mut W, bytes: &[u8]) -> Result<(), Error>
 /// Escapes the comma, semicolon and backlash character and normalizes newlines
 /// by replacing them with linefeed character.
 pub fn write_escaped_text<W: Write>(writer: &mut W, text: &str) -> Result<(), Error> {
+    if text.is_empty() {
+        return Ok(());
+    }
+
     let text = text.as_bytes();
     let mut last_end = 0;
+
     for (start, part) in EscapeByteIndices::new(text) {
         writer.write_all(&text[last_end..start])?;
         match part {
