@@ -41,33 +41,48 @@ impl<W: Write> ICalendar<W> {
         self.0.write_end(name)
     }
 
-    pub fn write_event(&mut self, event: Event<W>) -> Result<(), Error> {
+    pub fn write_event(
+        &mut self,
+        event: impl FnOnce(&mut EventWriter<W>) -> Result<(), Error>
+    ) -> Result<(), Error> {
         self.0.write_begin_unchecked(VEVENT)?;
-        (event.0)(&mut EventWriter(&mut self.0))?;
+        (event)(&mut EventWriter(&mut self.0))?;
         self.0.write_end_unchecked(VEVENT)
     }
 
-    pub fn write_todo(&mut self, todo: ToDo<W>) -> Result<(), Error> {
+    pub fn write_todo(
+        &mut self,
+        todo: impl FnOnce(&mut ToDoWriter<W>) -> Result<(), Error>
+    ) -> Result<(), Error> {
         self.0.write_begin_unchecked(VTODO)?;
-        (todo.0)(&mut ToDoWriter(&mut self.0))?;
+        (todo)(&mut ToDoWriter(&mut self.0))?;
         self.0.write_end_unchecked(VTODO)
     }
 
-    pub fn write_journal(&mut self, journal: Journal<W>) -> Result<(), Error> {
+    pub fn write_journal(
+        &mut self,
+        journal: impl FnOnce(&mut JournalWriter<W>) -> Result<(), Error>
+    ) -> Result<(), Error> {
         self.0.write_begin_unchecked(VJOURNAL)?;
-        (journal.0)(&mut JournalWriter(&mut self.0))?;
+        (journal)(&mut JournalWriter(&mut self.0))?;
         self.0.write_end_unchecked(VJOURNAL)
     }
 
-    pub fn write_freebusy(&mut self, freebusy: FreeBusy<W>) -> Result<(), Error> {
+    pub fn write_freebusy(
+        &mut self,
+        freebusy: impl FnOnce(&mut FreeBusyWriter<W>) -> Result<(), Error>
+    ) -> Result<(), Error> {
         self.0.write_begin_unchecked(VFREEBUSY)?;
-        (freebusy.0)(&mut FreeBusyWriter(&mut self.0))?;
+        (freebusy)(&mut FreeBusyWriter(&mut self.0))?;
         self.0.write_end_unchecked(VFREEBUSY)
     }
 
-    pub fn write_timezone(&mut self, timezone: TimeZone<W>) -> Result<(), Error> {
+    pub fn write_timezone(
+        &mut self,
+        timezone: impl FnOnce(&mut TimeZoneWriter<W>) -> Result<(), Error>
+    ) -> Result<(), Error> {
         self.0.write_begin_unchecked(VTIMEZONE)?;
-        (timezone.0)(&mut TimeZoneWriter(&mut self.0))?;
+        (timezone)(&mut TimeZoneWriter(&mut self.0))?;
         self.0.write_end_unchecked(VTIMEZONE)
     }
 
@@ -77,194 +92,186 @@ impl<W: Write> ICalendar<W> {
     }
 }
 
-pub struct Event<'e, W: Write>(Box<dyn FnOnce(&mut EventWriter<W>) -> Result<(), Error> + 'e>);
+pub struct Event;
 
-impl<'e, W: Write> Event<'e, W> {
-    pub fn new(
+impl Event {
+    pub fn build<'e, W: Write>(
         uid: UID<'e>,
         dt_stamp: DtStamp<'e>,
         body: impl FnOnce(&mut EventWriter<W>) -> Result<(), Error> + 'e
-    ) -> Self {
-        Self(Box::new(move |event| {
+    ) -> impl FnOnce(&mut EventWriter<W>) -> Result<(), Error> + 'e {
+        move |event| {
             event.write(&uid)?;
             event.write(&dt_stamp)?;
             body(event)
-        }))
+        }
     }
 }
 
-pub struct ToDo<'t, W: Write>(Box<dyn FnOnce(&mut ToDoWriter<W>) -> Result<(), Error> + 't>);
+pub struct ToDo;
 
-impl<'t, W: Write> ToDo<'t, W> {
-    pub fn new(
+impl ToDo {
+    pub fn build<'t, W: Write>(
         uid: UID<'t>,
         dt_stamp: DtStamp<'t>,
         body: impl FnOnce(&mut ToDoWriter<W>) -> Result<(), Error> + 't
-    ) -> Self {
-        Self(Box::new(move |todo| {
+    ) -> impl FnOnce(&mut ToDoWriter<W>) -> Result<(), Error> + 't {
+        move |todo| {
             todo.write(&uid)?;
             todo.write(&dt_stamp)?;
             body(todo)
-        }))
+        }
     }
 }
 
-pub struct Journal<'j, W: Write>(Box<dyn FnOnce(&mut JournalWriter<W>) -> Result<(), Error> + 'j>);
+pub struct Journal;
 
-impl<'j, W: Write> Journal<'j, W> {
-    pub fn new(
+impl Journal {
+    pub fn build<'j, W: Write>(
         uid: UID<'j>,
         dt_stamp: DtStamp<'j>,
         body: impl FnOnce(&mut JournalWriter<W>) -> Result<(), Error> + 'j
-    ) -> Self {
-        Self(Box::new(move |journal| {
+    ) -> impl FnOnce(&mut JournalWriter<W>) -> Result<(), Error> + 'j {
+        move |journal| {
             journal.write(&uid)?;
             journal.write(&dt_stamp)?;
             body(journal)
-        }))
+        }
     }
 }
 
-pub struct FreeBusy<'f, W: Write>(
-    Box<dyn FnOnce(&mut FreeBusyWriter<W>) -> Result<(), Error> + 'f>
-);
+pub struct FreeBusy;
 
-impl<'f, W: Write> FreeBusy<'f, W> {
-    pub fn new(
+impl FreeBusy {
+    pub fn build<'f, W: Write>(
         uid: UID<'f>,
         dt_stamp: DtStamp<'f>,
         body: impl FnOnce(&mut FreeBusyWriter<W>) -> Result<(), Error> + 'f
-    ) -> Self {
-        Self(Box::new(move |freebusy| {
+    ) -> impl FnOnce(&mut FreeBusyWriter<W>) -> Result<(), Error> + 'f {
+        move |freebusy| {
             freebusy.write(&uid)?;
             freebusy.write(&dt_stamp)?;
             body(freebusy)
-        }))
+        }
     }
 }
 
-pub struct TimeZone<'t, W: Write>(
-    Box<dyn FnOnce(&mut TimeZoneWriter<W>) -> Result<(), Error> + 't>
-);
+pub struct TimeZone;
 
-impl<'t, W: Write + 't> TimeZone<'t, W> {
-    pub fn standard(
+impl TimeZone {
+    pub fn standard<'t, W: Write + 't>(
         tzid: TzID<'t>,
-        definition: Standard<'t, W>,
+        definition: impl FnOnce(&mut StandardWriter<W>) -> Result<(), Error> + 't,
         body: impl FnOnce(&mut TimeZoneWriter<W>) -> Result<(), Error> + 't
-    ) -> Self {
-        Self(Box::new(move |timezone| {
+    ) -> impl FnOnce(&mut TimeZoneWriter<W>) -> Result<(), Error> + 't {
+        move |timezone| {
             timezone.write(&tzid)?;
             timezone.write_standard(definition)?;
             body(timezone)
-        }))
+        }
     }
 
-    pub fn daylight(
+    pub fn daylight<'t, W: Write + 't>(
         tzid: TzID<'t>,
-        definition: Daylight<'t, W>,
+        definition: impl FnOnce(&mut DaylightWriter<W>) -> Result<(), Error> + 't,
         body: impl FnOnce(&mut TimeZoneWriter<W>) -> Result<(), Error> + 't
-    ) -> Self {
-        Self(Box::new(move |timezone| {
+    ) -> impl FnOnce(&mut TimeZoneWriter<W>) -> Result<(), Error> + 't {
+        move |timezone| {
             timezone.write(&tzid)?;
             timezone.write_daylight(definition)?;
             body(timezone)
-        }))
+        }
     }
 }
 
-pub struct Alarm<'a, W: Write>(Box<dyn FnOnce(&mut AlarmWriter<W>) -> Result<(), Error> + 'a>);
+pub struct Alarm;
 
-impl<'a, W: Write> Alarm<'a, W> {
-    pub fn new(
+impl Alarm {
+    pub fn new<'a, W: Write>(
         action: Action<'a>,
         trigger: Trigger<'a>,
         body: impl FnOnce(&mut AlarmWriter<W>) -> Result<(), Error> + 'a
-    ) -> Self {
-        Self(Box::new(move |alarm| {
+    ) -> impl FnOnce(&mut AlarmWriter<W>) -> Result<(), Error> + 'a {
+        move |alarm| {
             alarm.write(&action)?;
             alarm.write(&trigger)?;
             body(alarm)
-        }))
+        }
     }
 
-    pub fn audio(
+    pub fn audio<'a, W: Write>(
         trigger: Trigger<'a>,
         body: impl FnOnce(&mut AlarmWriter<W>) -> Result<(), Error> + 'a
-    ) -> Self {
-        Self(Box::new(move |alarm| {
+    ) -> impl FnOnce(&mut AlarmWriter<W>) -> Result<(), Error> + 'a {
+        move |alarm| {
             alarm.write(&Action::audio())?;
             alarm.write(&trigger)?;
             body(alarm)
-        }))
+        }
     }
 
-    pub fn display(
+    pub fn display<'a, W: Write>(
         trigger: Trigger<'a>,
         description: Description<'a>,
         body: impl FnOnce(&mut AlarmWriter<W>) -> Result<(), Error> + 'a
-    ) -> Self {
-        Self(Box::new(move |alarm| {
+    ) -> impl FnOnce(&mut AlarmWriter<W>) -> Result<(), Error> + 'a {
+        move |alarm| {
             alarm.write(&Action::display())?;
             alarm.write(&trigger)?;
             alarm.write(&description)?;
             body(alarm)
-        }))
+        }
     }
 
-    pub fn email(
+    pub fn email<'a, W: Write>(
         trigger: Trigger<'a>,
         description: Description<'a>,
         summary: Summary<'a>,
         body: impl FnOnce(&mut AlarmWriter<W>) -> Result<(), Error> + 'a
-    ) -> Self {
-        Self(Box::new(move |alarm| {
+    ) -> impl FnOnce(&mut AlarmWriter<W>) -> Result<(), Error> + 'a {
+        move |alarm| {
             alarm.write(&Action::email())?;
             alarm.write(&trigger)?;
             alarm.write(&description)?;
             alarm.write(&summary)?;
             body(alarm)
-        }))
+        }
     }
 }
 
-pub struct Standard<'s, W: Write>(
-    Box<dyn FnOnce(&mut StandardWriter<W>) -> Result<(), Error> + 's>
-);
+pub struct Standard;
 
-impl<'s, W: Write> Standard<'s, W> {
-    pub fn new(
+impl Standard {
+    pub fn build<'s, W: Write>(
         dt_start: DtStart<'s>,
         tz_offset_from: TzOffsetFrom<'s>,
         tz_offset_to: TzOffsetTo<'s>,
         body: impl FnOnce(&mut StandardWriter<W>) -> Result<(), Error> + 's
-    ) -> Self {
-        Self(Box::new(move |standard| {
+    ) -> impl FnOnce(&mut StandardWriter<W>) -> Result<(), Error> + 's {
+        move |standard| {
             standard.write(&dt_start)?;
             standard.write(&tz_offset_from)?;
             standard.write(&tz_offset_to)?;
             body(standard)
-        }))
+        }
     }
 }
 
-pub struct Daylight<'d, W: Write>(
-    Box<dyn FnOnce(&mut DaylightWriter<W>) -> Result<(), Error> + 'd>
-);
+pub struct Daylight;
 
-impl<'d, W: Write> Daylight<'d, W> {
-    pub fn new(
+impl Daylight {
+    pub fn new<'d, W: Write>(
         dt_start: DtStart<'d>,
         tz_offset_from: TzOffsetFrom<'d>,
         tz_offset_to: TzOffsetTo<'d>,
         body: impl FnOnce(&mut DaylightWriter<W>) -> Result<(), Error> + 'd
-    ) -> Self {
-        Self(Box::new(move |daylight| {
+    ) -> impl FnOnce(&mut DaylightWriter<W>) -> Result<(), Error> + 'd {
+        move |daylight| {
             daylight.write(&dt_start)?;
             daylight.write(&tz_offset_from)?;
             daylight.write(&tz_offset_to)?;
             body(daylight)
-        }))
+        }
     }
 }
 
@@ -276,9 +283,12 @@ impl<W: Write> EventWriter<'_, W> {
         self.0.write_property(property)
     }
 
-    pub fn write_alarm(&mut self, alarm: Alarm<W>) -> Result<(), Error> {
+    pub fn write_alarm(
+        &mut self,
+        alarm: impl FnOnce(&mut AlarmWriter<W>) -> Result<(), Error>
+    ) -> Result<(), Error> {
         self.0.write_begin_unchecked(VALARM)?;
-        (alarm.0)(&mut AlarmWriter(self.0))?;
+        (alarm)(&mut AlarmWriter(self.0))?;
         self.0.write_end_unchecked(VALARM)
     }
 }
@@ -291,9 +301,12 @@ impl<W: Write> ToDoWriter<'_, W> {
         self.0.write_property(property)
     }
 
-    pub fn write_alarm(&mut self, alarm: Alarm<W>) -> Result<(), Error> {
+    pub fn write_alarm(
+        &mut self,
+        alarm: impl FnOnce(&mut AlarmWriter<W>) -> Result<(), Error>
+    ) -> Result<(), Error> {
         self.0.write_begin_unchecked(VALARM)?;
-        (alarm.0)(&mut AlarmWriter(self.0))?;
+        (alarm)(&mut AlarmWriter(self.0))?;
         self.0.write_end_unchecked(VALARM)
     }
 }
@@ -324,15 +337,21 @@ impl<W: Write> TimeZoneWriter<'_, W> {
         self.0.write_property(property)
     }
 
-    pub fn write_standard(&mut self, definition: Standard<W>) -> Result<(), Error> {
+    pub fn write_standard(
+        &mut self,
+        definition: impl FnOnce(&mut StandardWriter<W>) -> Result<(), Error>
+    ) -> Result<(), Error> {
         self.0.write_begin_unchecked(STANDARD)?;
-        (definition.0)(&mut StandardWriter(self.0))?;
+        (definition)(&mut StandardWriter(self.0))?;
         self.0.write_end_unchecked(STANDARD)
     }
 
-    pub fn write_daylight(&mut self, definition: Daylight<W>) -> Result<(), Error> {
+    pub fn write_daylight(
+        &mut self,
+        definition: impl FnOnce(&mut DaylightWriter<W>) -> Result<(), Error>
+    ) -> Result<(), Error> {
         self.0.write_begin_unchecked(DAYLIGHT)?;
-        (definition.0)(&mut DaylightWriter(self.0))?;
+        (definition)(&mut DaylightWriter(self.0))?;
         self.0.write_end_unchecked(DAYLIGHT)
     }
 }

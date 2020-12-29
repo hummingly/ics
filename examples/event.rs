@@ -21,7 +21,7 @@ fn main() -> Result<(), io::Error> {
     // Create a new event.
     // The required properties must be a unique identifier which should be random
     // generated and the date stamp which must be in UTC time.
-    let event = Event::new(
+    let event = Event::build(
         UID::new("b68378cf-872d-44f1-9703-5e3725c56e71"),
         DtStamp::new("19960704T120000Z"),
         // The passed parameter for writing the body of the event can either be a function or a

@@ -34,7 +34,7 @@ fn event() -> Result<(), io::Error> {
 
     let mut calendar = calendar(expected.len())?;
 
-    let event = Event::new(
+    let event = Event::build(
         UID::new("b68378cf-872d-44f1-9703-5e3725c56e71"),
         DtStamp::new("19970901T130000Z"),
         |event| {
@@ -76,7 +76,7 @@ fn todo() -> Result<(), io::Error> {
 
     let mut calendar = calendar(expected.len())?;
 
-    let todo = ToDo::new(
+    let todo = ToDo::build(
         UID::new("b68378cf-872d-44f1-9703-5e3725c56e71"),
         DtStamp::new("20070514T103211Z"),
         |todo| {
@@ -115,7 +115,7 @@ fn journal() -> Result<(), io::Error> {
 
     let mut calendar = calendar(expected.len())?;
 
-    let journal = Journal::new(
+    let journal = Journal::build(
         UID::new("b68378cf-872d-44f1-9703-5e3725c56e71"),
         DtStamp::new("19970901T130000Z"),
         |journal| {
@@ -159,7 +159,7 @@ fn freebusy() -> Result<(), io::Error> {
 
     let mut calendar = calendar(expected.len())?;
 
-    let freebusy = FreeBusy::new(
+    let freebusy = FreeBusy::build(
         UID::new("b68378cf-872d-44f1-9703-5e3725c56e71"),
         DtStamp::new("19970901T120000Z"),
         |freebusy| {
@@ -209,7 +209,7 @@ fn timezone() -> Result<(), io::Error> {
 
     let mut calendar = calendar(expected.len())?;
 
-    let standard = Standard::new(
+    let standard = Standard::build(
         DtStart::new("20071104T020000"),
         TzOffsetFrom::new("-0400"),
         TzOffsetTo::new("-0500"),
@@ -257,7 +257,7 @@ fn alarm() -> Result<(), io::Error> {
 
     let mut calendar = calendar(expected.len())?;
 
-    let event = Event::new(
+    let event = Event::build(
         UID::new("b68378cf-872d-44f1-9703-5e3725c56e71"),
         DtStamp::new("19970901T130000Z"),
         |event| {

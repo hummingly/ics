@@ -27,7 +27,7 @@ fn event() -> Result<(), io::Error> {
                     END:VEVENT\r\n\
                     END:VCALENDAR\r\n";
 
-    let event = Event::new(
+    let event = Event::build(
         UID::new("b68378cf-872d-44f1-9703-5e3725c56e71"),
         DtStamp::new("19960704T120000Z"),
         |event| {
@@ -84,7 +84,7 @@ fn todo() -> Result<(), io::Error> {
                     END:VTODO\r\n\
                     END:VCALENDAR\r\n";
 
-    let todo = ToDo::new(
+    let todo = ToDo::build(
         UID::new("b68378cf-872d-44f1-9703-5e3725c56e71"),
         DtStamp::new("19980130T134500Z"),
         |todo| {
@@ -147,7 +147,7 @@ fn journal() -> Result<(), io::Error> {
                     END:VJOURNAL\r\n\
                     END:VCALENDAR\r\n";
 
-    let journal = Journal::new(
+    let journal = Journal::build(
         UID::new("b4035e76-699e-4cb2-85f6-724d01f18284"),
         DtStamp::new("19970324T120000Z"),
         |journal| {
@@ -203,7 +203,7 @@ fn freebusy() -> Result<(), io::Error> {
                     END:VFREEBUSY\r\n\
                     END:VCALENDAR\r\n";
 
-    let freebusy = FreeBusy::new(
+    let freebusy = FreeBusy::build(
         UID::new("0b04bd52-c396-4251-a673-1cc0b96def93"),
         DtStamp::new("19970324T120000Z"),
         |freebusy| {
@@ -271,7 +271,7 @@ fn timezone() -> Result<(), io::Error> {
 
     let timezone = TimeZone::standard(
         TzID::new("America/New_York"),
-        Standard::new(
+        Standard::build(
             DtStart::new("19981025T020000"),
             TzOffsetFrom::new("-0400"),
             TzOffsetTo::new("-0500"),
@@ -287,7 +287,7 @@ fn timezone() -> Result<(), io::Error> {
         }
     );
 
-    let event = Event::new(
+    let event = Event::build(
         UID::new("b7d2e88d-c0ac-4d26-8be2-fbe27217e698"),
         DtStamp::new("19980309T231000Z"),
         |event| {

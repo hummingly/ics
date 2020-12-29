@@ -22,7 +22,7 @@ fn main() -> Result<(), io::Error> {
     // Create a simple todo.
     // The required properties must be a unique identifier which should be random
     // generated and the date stamp which must be in UTC time.
-    let todo = ToDo::new(
+    let todo = ToDo::build(
         UID::new("b68378cf-872d-44f1-9703-5e3725c56e71"),
         DtStamp::new("19980130T134500Z"),
         |todo| {
