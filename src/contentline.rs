@@ -1,4 +1,3 @@
-use crate::parameters::Parameter;
 use crate::util::{write_base64, write_escaped_text};
 use std::fmt;
 use std::io::{Error, Write};
@@ -72,11 +71,7 @@ impl<W: Write> ContentLineWriter<W> {
         self.0.write_all(name.as_bytes())
     }
 
-    pub fn write_parameter(&mut self, parameter: &Parameter) -> Result<(), Error> {
-        write!(self.0, ";{}", parameter)
-    }
-
-    pub fn write_parameter_pair(&mut self, key: &str, value: &str) -> Result<(), Error> {
+    pub fn write_parameter(&mut self, key: &str, value: &str) -> Result<(), Error> {
         write!(self.0, ";{}={}", key, value)
     }
 
@@ -121,14 +116,12 @@ impl<W: Write> Writer<W> {
     }
 
     fn write_buffer(&mut self) -> Result<(), Error> {
-        if self.len > 0 {
-            match self.fold_buffer() {
-                Ok(0) => Ok(()),
-                Ok(n) => self.inner.write_all(&self.buffer[self.len - n..self.len]),
-                Err(error) => Err(error)
-            }?;
-            self.len = 0;
-        }
+        match self.fold_buffer() {
+            Ok(0) => Ok(()),
+            Ok(n) => self.inner.write_all(&self.buffer[self.len - n..self.len]),
+            Err(error) => Err(error)
+        }?;
+        self.len = 0;
         Ok(())
     }
 

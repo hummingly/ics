@@ -69,7 +69,7 @@ impl PropertyWrite for Geo<'_> {
     fn write<W: Write>(&self, w: &mut ContentLineWriter<W>) -> Result<(), Error> {
         w.write_name_unchecked("GEO");
         for parameter in &self.parameters {
-            w.write_parameter(parameter)?;
+            w.write_parameter(&parameter.name, &parameter.value)?;
         }
         w.write_fmt_value(format_args!("{};{}", self.latitude, self.longitude))
     }
@@ -154,7 +154,7 @@ impl PropertyWrite for Status<'_> {
     fn write<W: Write>(&self, w: &mut ContentLineWriter<W>) -> Result<(), Error> {
         w.write_name_unchecked("STATUS");
         for parameter in &self.parameters {
-            w.write_parameter(parameter)?;
+            w.write_parameter(&parameter.name, &parameter.value)?;
         }
         w.write_text_value(self.value.as_str())
     }
@@ -211,7 +211,7 @@ impl PropertyWrite for Transp<'_> {
     fn write<W: Write>(&self, w: &mut ContentLineWriter<W>) -> Result<(), Error> {
         w.write_name_unchecked("TRANSP");
         for parameter in &self.parameters {
-            w.write_parameter(parameter)?;
+            w.write_parameter(&parameter.name, &parameter.value)?;
         }
         w.write_text_value(self.value.as_str())
     }
@@ -359,7 +359,7 @@ mod rfc7986 {
         fn write<W: Write>(&self, w: &mut ContentLineWriter<W>) -> Result<(), Error> {
             w.write_name_unchecked("IMAGE");
             for parameter in &self.parameters {
-                w.write_parameter(parameter)?;
+                w.write_parameter(&parameter.name, &parameter.value)?;
             }
             match &self.value {
                 Data::Link(uri) => w.write_value(uri),

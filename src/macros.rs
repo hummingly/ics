@@ -117,7 +117,7 @@ macro_rules! property_text {
             fn write<W: Write>(&self, w: &mut ContentLineWriter<W>) -> Result<(), Error> {
                 w.write_name_unchecked($name);
                 for parameter in &self.parameters {
-                    w.write_parameter(parameter)?;
+                    w.write_parameter(&parameter.name, &parameter.value)?;
                 }
                 w.write_text_value(&self.value)
             }
@@ -250,7 +250,7 @@ macro_rules! impl_property_write {
             fn write<W: Write>(&self, w: &mut ContentLineWriter<W>) -> Result<(), Error> {
                 w.write_name_unchecked($name);
                 for parameter in &self.parameters {
-                    w.write_parameter(parameter)?;
+                    w.write_parameter(&parameter.name, &parameter.value)?;
                 }
                 w.write_value(&self.value)
             }
