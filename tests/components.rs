@@ -215,7 +215,7 @@ fn timezone() -> Result<(), io::Error> {
         TzOffsetTo::new("-0500"),
         |standard| standard.write(&TzName::new("EST"))
     );
-    let daylight = Daylight::new(
+    let daylight = Daylight::build(
         DtStart::new("20070311T020000"),
         TzOffsetFrom::new("-0500"),
         TzOffsetTo::new("-0400"),

@@ -278,7 +278,7 @@ fn timezone() -> Result<(), io::Error> {
             |standard| standard.write(&TzName::new("EST"))
         ),
         |timezone| {
-            timezone.write_daylight(Daylight::new(
+            timezone.write_daylight(Daylight::build(
                 DtStart::new("19990404T020000"),
                 TzOffsetFrom::new("-0500"),
                 TzOffsetTo::new("-0400"),

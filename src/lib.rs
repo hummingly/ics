@@ -35,7 +35,7 @@
 //!
 //!     // For the sake of demonstrating the UID was taken from somewhere. Out of security
 //!     // reasons the UID should always be randomly generated.
-//!     let todo = ToDo::new(
+//!     let todo = ToDo::build(
 //!         UID::new("d4092ed9-1667-4518-a7c0-bcfaac4f1fc6"),
 //!         DtStamp::new("20181021T190000"),
 //!         |todo| {

@@ -187,7 +187,7 @@ impl TimeZone {
 pub struct Alarm;
 
 impl Alarm {
-    pub fn new<'a, W: Write>(
+    pub fn build<'a, W: Write>(
         action: Action<'a>,
         trigger: Trigger<'a>,
         body: impl FnOnce(&mut AlarmWriter<W>) -> Result<(), Error> + 'a
@@ -260,7 +260,7 @@ impl Standard {
 pub struct Daylight;
 
 impl Daylight {
-    pub fn new<'d, W: Write>(
+    pub fn build<'d, W: Write>(
         dt_start: DtStart<'d>,
         tz_offset_from: TzOffsetFrom<'d>,
         tz_offset_to: TzOffsetTo<'d>,
