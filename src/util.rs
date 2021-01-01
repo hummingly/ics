@@ -48,7 +48,7 @@ pub fn write_base64<W: Write>(writer: &mut W, bytes: &[u8]) -> Result<(), Error>
     }
 }
 
-/// Escapes the comma, semicolon and backlash character and normalizes newlines
+/// Escapes the comma, semicolon and backslash character and normalizes newlines
 /// by replacing them with linefeed character.
 pub fn write_escaped_text<W: Write>(writer: &mut W, text: &str) -> Result<(), Error> {
     if text.is_empty() {

@@ -98,7 +98,7 @@ impl<W: Write> ContentLineWriter<W> {
         write_base64(&mut self.0, binary)
     }
 
-    /// Escapes comma, semicolon and backlash, and normalizes newlines.
+    /// Escapes comma, semicolon and backslash, and normalizes newlines.
     pub fn write_text_value(&mut self, text: &str) -> Result<(), Error> {
         self.0.write_all(b":")?;
         write_escaped_text(&mut self.0, text)
