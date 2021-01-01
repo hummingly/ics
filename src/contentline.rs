@@ -106,7 +106,7 @@ impl<W: Write> ContentLineWriter<W> {
 }
 
 struct Writer<W: Write> {
-    buffer: Box<[u8; CAPACITY]>,
+    buffer: [u8; CAPACITY],
     len: usize,
     inner: W
 }
@@ -114,7 +114,7 @@ struct Writer<W: Write> {
 impl<W: Write> Writer<W> {
     fn new(inner: W) -> Writer<W> {
         Self {
-            buffer: Box::new([0; CAPACITY]),
+            buffer: [0; CAPACITY],
             len: 0,
             inner
         }
