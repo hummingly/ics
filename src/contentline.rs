@@ -24,10 +24,11 @@ pub fn fold<W: fmt::Write>(writer: &mut W, mut content: &str) -> fmt::Result {
 // TODO: unfold algorithm
 
 fn next_boundary(input: &str) -> usize {
+    let input = input.as_bytes();
     if LIMIT >= input.len() {
         return input.len();
     }
-    match input[..=LIMIT].bytes().rposition(|i| i < 128 || i >= 192) {
+    match input[..=LIMIT].iter().rposition(|&i| i < 128 || i >= 192) {
         Some(0) | None => input.len(),
         Some(index) => index
     }
@@ -72,6 +73,18 @@ mod tests {
         fold(&mut line, content).unwrap();
         let expected =
             "Content lines shouldn't be folded in the middle of a UTF-8 character! 老\r\n 虎.";
+
+        assert_eq!(line, expected);
+    }
+
+    #[test]
+    fn multibytes_with_space() {
+        let content =
+            "Content lines shouldn't be folded in the middle of a UTF-8 character! 老 虎.";
+        let mut line = String::with_capacity(size(content.len()));
+        fold(&mut line, content).unwrap();
+        let expected =
+            "Content lines shouldn't be folded in the middle of a UTF-8 character! 老 \r\n 虎.";
 
         assert_eq!(line, expected);
     }
