@@ -110,22 +110,53 @@ property!(LastModified, "LAST-MODIFIED");
 property!(Sequence, "SEQUENCE");
 property!(RequestStatus, "REQUEST-STATUS");
 
-impl<'a> Default for Class<'a> {
+impl Default for Class<'_> {
     fn default() -> Self {
         Self::public()
     }
 }
 
-impl<'a> Default for Transp<'a> {
+impl Default for Transp<'_> {
     fn default() -> Self {
         Self::opaque()
     }
 }
 
-impl_default_prop!(CalScale, "GREGORIAN");
-impl_default_prop!(Priority, "0");
-impl_default_prop!(Repeat, "0");
-impl_default_prop!(Sequence, "0");
+impl Default for CalScale<'_> {
+    fn default() -> Self {
+        Self {
+            value: Cow::Borrowed("GREGORIAN"),
+            parameters: BTreeMap::new()
+        }
+    }
+}
+
+impl Default for Priority<'_> {
+    fn default() -> Self {
+        Self {
+            value: Cow::Borrowed("0"),
+            parameters: BTreeMap::new()
+        }
+    }
+}
+
+impl Default for Repeat<'_> {
+    fn default() -> Self {
+        Self {
+            value: Cow::Borrowed("0"),
+            parameters: BTreeMap::new()
+        }
+    }
+}
+
+impl Default for Sequence<'_> {
+    fn default() -> Self {
+        Self {
+            value: Cow::Borrowed("0"),
+            parameters: BTreeMap::new()
+        }
+    }
+}
 
 #[cfg(feature = "rfc7986")]
 pub use self::rfc7986::*;

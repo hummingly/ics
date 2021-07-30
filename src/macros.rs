@@ -260,19 +260,6 @@ macro_rules! parameter_with_const {
     };
 }
 
-macro_rules! impl_default_prop {
-    ($type:ident, $default:expr) => {
-        impl<'a> Default for $type<'a> {
-            fn default() -> Self {
-                Self {
-                    value: $default.into(),
-                    parameters: BTreeMap::new()
-                }
-            }
-        }
-    };
-}
-
 macro_rules! impl_from_prop {
     ($type:ident, $name:expr) => {
         impl<'a> From<$type<'a>> for Property<'a> {

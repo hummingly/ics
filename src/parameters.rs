@@ -104,31 +104,31 @@ parameter_with_const!(
     const UTC_OFFSET = "UTC-OFFSET"
 );
 
-impl<'a> Default for CUType<'a> {
+impl Default for CUType<'_> {
     fn default() -> Self {
         Self::INDIVIDUAL
     }
 }
 
-impl<'a> Default for FBType<'a> {
+impl Default for FBType<'_> {
     fn default() -> Self {
         Self::BUSY
     }
 }
 
-impl<'a> Default for PartStat<'a> {
+impl Default for PartStat<'_> {
     fn default() -> Self {
         PartStat::NEEDS_ACTION
     }
 }
 
-impl<'a> Default for RelType<'a> {
+impl Default for RelType<'_> {
     fn default() -> Self {
         Self::PARENT
     }
 }
 
-impl<'a> Default for Role<'a> {
+impl Default for Role<'_> {
     fn default() -> Self {
         Self::REQ_PARTICIPANT
     }
@@ -143,7 +143,7 @@ pub enum Encoding {
     Base64
 }
 
-impl<'a> From<Encoding> for Parameter<'a> {
+impl From<Encoding> for Parameter<'_> {
     fn from(builder: Encoding) -> Self {
         Parameter {
             key: "ENCODING".into(),
@@ -168,7 +168,7 @@ pub enum Range {
     ThisAndFuture
 }
 
-impl<'a> From<Range> for Parameter<'a> {
+impl From<Range> for Parameter<'_> {
     fn from(builder: Range) -> Self {
         Parameter {
             key: "RANGE".into(),
@@ -194,7 +194,7 @@ pub enum Related {
     End
 }
 
-impl<'a> From<Related> for Parameter<'a> {
+impl From<Related> for Parameter<'_> {
     fn from(builder: Related) -> Self {
         Parameter {
             key: "RELATED".into(),
@@ -221,7 +221,7 @@ pub enum RSVP {
     False
 }
 
-impl<'a> From<RSVP> for Parameter<'a> {
+impl From<RSVP> for Parameter<'_> {
     fn from(builder: RSVP) -> Self {
         Parameter {
             key: "RSVP".into(),
@@ -269,7 +269,7 @@ mod rfc7986 {
     );
     parameter!(Label, "LABEL");
 
-    impl<'a> Default for Display<'a> {
+    impl Default for Display<'_> {
         fn default() -> Self {
             Self::BADGE
         }
