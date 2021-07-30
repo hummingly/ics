@@ -37,12 +37,12 @@ where
                 // \r was in old MacOS versions the newline character
                 "\r" => {
                     if input.get(start + 1..start + 2) != Some("\n") {
-                        output.push_str("\n")
+                        output.push('\n');
                     }
                 }
                 c => {
                     output.push('\\');
-                    output.push_str(c)
+                    output.push_str(c);
                 }
             }
             last_end = start + part.len();
