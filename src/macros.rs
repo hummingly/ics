@@ -2,7 +2,7 @@
 ///
 /// # Example
 /// ```
-/// # #[macro_use] extern crate ics;
+/// use ics::parameters;
 /// use ics::components::Property;
 /// use ics::properties::DtStart;
 ///
