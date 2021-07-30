@@ -18,7 +18,7 @@
 //! assert_eq!(Parameter::new("CUTYPE", "INDIVIDUAL"), individual.into());
 //! ```
 //! For more information on parameters, please refer to the specification [RFC5545 3.2. Property Parameters](https://tools.ietf.org/html/rfc5545#section-3.2) and [RFC7986 6. Property Parameters](https://tools.ietf.org/html/rfc7986#section-6).
-use components::Parameter;
+use crate::components::Parameter;
 use std::borrow::Cow;
 
 parameter!(AltRep, "ALTREP");
@@ -143,20 +143,14 @@ pub enum Encoding {
     Base64
 }
 
-impl Encoding {
-    fn into_value<'a>(self) -> Cow<'a, str> {
-        match self {
-            Encoding::Byte => Cow::Borrowed("8BIT"),
-            Encoding::Base64 => Cow::Borrowed("BASE64")
-        }
-    }
-}
-
 impl<'a> From<Encoding> for Parameter<'a> {
     fn from(builder: Encoding) -> Self {
         Parameter {
             key: "ENCODING".into(),
-            value: builder.into_value()
+            value: Cow::Borrowed(match builder {
+                Encoding::Byte => "8BIT",
+                Encoding::Base64 => "BASE64"
+            })
         }
     }
 }
@@ -174,17 +168,13 @@ pub enum Range {
     ThisAndFuture
 }
 
-impl Range {
-    fn into_value<'a>(self) -> Cow<'a, str> {
-        Cow::Borrowed("THISANDFUTURE")
-    }
-}
-
 impl<'a> From<Range> for Parameter<'a> {
     fn from(builder: Range) -> Self {
         Parameter {
             key: "RANGE".into(),
-            value: builder.into_value()
+            value: Cow::Borrowed(match builder {
+                Range::ThisAndFuture => "THISANDFUTURE"
+            })
         }
     }
 }
@@ -204,20 +194,14 @@ pub enum Related {
     End
 }
 
-impl Related {
-    fn into_value<'a>(self) -> Cow<'a, str> {
-        match self {
-            Related::Start => Cow::Borrowed("START"),
-            Related::End => Cow::Borrowed("END")
-        }
-    }
-}
-
 impl<'a> From<Related> for Parameter<'a> {
     fn from(builder: Related) -> Self {
         Parameter {
             key: "RELATED".into(),
-            value: builder.into_value()
+            value: Cow::Borrowed(match builder {
+                Related::Start => "START",
+                Related::End => "END"
+            })
         }
     }
 }
@@ -237,20 +221,14 @@ pub enum RSVP {
     False
 }
 
-impl RSVP {
-    fn into_value<'a>(self) -> Cow<'a, str> {
-        match self {
-            RSVP::True => Cow::Borrowed("TRUE"),
-            RSVP::False => Cow::Borrowed("FALSE")
-        }
-    }
-}
-
 impl<'a> From<RSVP> for Parameter<'a> {
     fn from(builder: RSVP) -> Self {
         Parameter {
             key: "RSVP".into(),
-            value: builder.into_value()
+            value: Cow::Borrowed(match builder {
+                RSVP::True => "TRUE",
+                RSVP::False => "FALSE"
+            })
         }
     }
 }
@@ -266,7 +244,7 @@ pub use self::rfc7986::*;
 
 #[cfg(feature = "rfc7986")]
 mod rfc7986 {
-    use components::Parameter;
+    use crate::components::Parameter;
     use std::borrow::Cow;
     parameter_with_const!(
         /// [Format definitions of displaying images](https://tools.ietf.org/html/rfc7986#section-6.1)

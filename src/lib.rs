@@ -57,14 +57,14 @@ pub mod parameters;
 pub mod properties;
 mod util;
 
-pub use ical::Alarm;
-pub use ical::Daylight;
-pub use ical::Event;
-pub use ical::FreeBusy;
-pub use ical::ICalendar;
-pub use ical::Journal;
-pub use ical::Standard;
-pub use ical::TimeZone;
-pub use ical::ToDo;
+pub use crate::ical::Alarm;
+pub use crate::ical::Daylight;
+pub use crate::ical::Event;
+pub use crate::ical::FreeBusy;
+pub use crate::ical::ICalendar;
+pub use crate::ical::Journal;
+pub use crate::ical::Standard;
+pub use crate::ical::TimeZone;
+pub use crate::ical::ToDo;
 
-pub use util::escape_text;
+pub use crate::util::escape_text;

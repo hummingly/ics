@@ -37,12 +37,12 @@ where
                 // \r was in old MacOS versions the newline character
                 "\r" => {
                     if input.get(start + 1..start + 2) != Some("\n") {
-                        output.push_str("\n")
+                        output.push('\n');
                     }
                 }
                 c => {
                     output.push('\\');
-                    output.push_str(c)
+                    output.push_str(c);
                 }
             }
             last_end = start + part.len();
@@ -75,7 +75,7 @@ mod escape_text_tests {
     // test run with default features enabled but should be correct regardless
     #[test]
     fn escape_property() {
-        use components::Property;
+        use crate::components::Property;
 
         let expected_value = "Hello\\, World! Today is a beautiful day to test: Escape Methods.\n Characters like \\; or \\\\ must be escaped.\n";
         let property = Property::new(

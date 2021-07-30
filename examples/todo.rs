@@ -1,5 +1,3 @@
-extern crate ics;
-
 use ics::parameters::{FmtType, PartStat};
 use ics::properties::{
     Attach, Attendee, Due, Duration, Organizer, Repeat, Sequence, Status, Summary, Trigger

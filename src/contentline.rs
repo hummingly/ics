@@ -8,13 +8,13 @@ pub const LIMIT: usize = 75;
 const LINE_BREAK: &str = "\r\n ";
 
 pub fn fold<W: fmt::Write>(writer: &mut W, mut content: &str) -> fmt::Result {
-    let mut boundary = next_boundary(&content);
+    let mut boundary = next_boundary(content);
     writer.write_str(&content[..boundary])?;
 
     while boundary < content.len() {
         content = &content[boundary..];
         writer.write_str(LINE_BREAK)?;
-        let next_boundary = next_boundary(&content);
+        let next_boundary = next_boundary(content);
         writer.write_str(&content[..next_boundary])?;
         boundary = next_boundary;
     }
