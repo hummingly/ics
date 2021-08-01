@@ -9,7 +9,7 @@
 //! values. Those are associated functions or constructors.
 //!
 //! For more information on properties, please refer to the specification [RFC5545 3.7. Calendar Properties](https://tools.ietf.org/html/rfc5545#section-3.7) and [RFC7986 5. Properties](https://tools.ietf.org/html/rfc7986#section-5).
-use crate::contentline::{ContentLineWriter, PropertyWrite};
+use crate::contentline::{LineWriter, PropertyWrite};
 use crate::parameters::{Parameter, Parameters};
 use crate::value::{Float, Integer, StatusValue, TranspValue};
 use std::borrow::Cow;
@@ -71,7 +71,7 @@ impl<'a> Geo<'a> {
 }
 
 impl PropertyWrite for Geo<'_> {
-    fn write(&self, w: &mut ContentLineWriter<'_>) -> Result<(), Error> {
+    fn write(&self, w: &mut LineWriter<'_>) -> Result<(), Error> {
         w.write_name_unchecked(Self::NAME);
         for parameter in &self.parameters {
             w.write_parameter(&parameter.name, &parameter.value)?;
@@ -144,7 +144,7 @@ impl<'a> Status<'a> {
 }
 
 impl PropertyWrite for Status<'_> {
-    fn write(&self, w: &mut ContentLineWriter<'_>) -> Result<(), Error> {
+    fn write(&self, w: &mut LineWriter<'_>) -> Result<(), Error> {
         w.write_name_unchecked(Self::NAME);
         for parameter in &self.parameters {
             w.write_parameter(&parameter.name, &parameter.value)?;
@@ -201,7 +201,7 @@ impl<'a> Transp<'a> {
 }
 
 impl PropertyWrite for Transp<'_> {
-    fn write(&self, w: &mut ContentLineWriter<'_>) -> Result<(), Error> {
+    fn write(&self, w: &mut LineWriter<'_>) -> Result<(), Error> {
         w.write_name_unchecked(Self::NAME);
         for parameter in &self.parameters {
             w.write_parameter(&parameter.name, &parameter.value)?;
@@ -287,7 +287,7 @@ pub use self::rfc7986::*;
 
 #[cfg(feature = "rfc7986")]
 mod rfc7986 {
-    use crate::contentline::{ContentLineWriter, PropertyWrite};
+    use crate::contentline::{LineWriter, PropertyWrite};
     use crate::parameters::{Parameter, Parameters};
     use std::borrow::Cow;
     use std::io::Error;
@@ -354,7 +354,7 @@ mod rfc7986 {
     }
 
     impl PropertyWrite for Image<'_> {
-        fn write(&self, w: &mut ContentLineWriter<'_>) -> Result<(), Error> {
+        fn write(&self, w: &mut LineWriter<'_>) -> Result<(), Error> {
             w.write_name_unchecked(Self::NAME);
             for parameter in &self.parameters {
                 w.write_parameter(&parameter.name, &parameter.value)?;

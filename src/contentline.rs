@@ -6,19 +6,19 @@ const LINE_MAX_LEN: usize = 75;
 const CAPACITY: usize = LINE_MAX_LEN * 2;
 
 pub trait PropertyWrite {
-    fn write(&self, line: &mut ContentLineWriter<'_>) -> Result<(), Error>;
+    fn write(&self, line: &mut LineWriter<'_>) -> Result<(), Error>;
 }
 
 #[derive(Debug)]
-pub struct ContentLineWriter<'w>(Writer<'w>);
+pub struct LineWriter<'w>(Writer<'w>);
 
-impl<'w> ContentLineWriter<'w> {
+impl<'w> LineWriter<'w> {
     pub(crate) fn new(inner: &'w mut dyn Write) -> Self {
         Self(Writer::new(inner))
     }
 }
 
-impl ContentLineWriter<'_> {
+impl LineWriter<'_> {
     pub(crate) fn write_name_unchecked(&mut self, name: &str) {
         let end = name.len();
         self.0.buffer[..end].copy_from_slice(name.as_bytes());
@@ -63,7 +63,7 @@ impl ContentLineWriter<'_> {
     }
 }
 
-impl ContentLineWriter<'_> {
+impl LineWriter<'_> {
     pub fn write_name(&mut self, name: &str) -> Result<(), Error> {
         self.0.write_all(name.as_bytes())
     }

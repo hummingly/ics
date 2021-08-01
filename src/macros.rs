@@ -122,7 +122,7 @@ macro_rules! property_text {
         }
 
         impl PropertyWrite for $type<'_> {
-            fn write(&self, w: &mut ContentLineWriter<'_>) -> Result<(), Error> {
+            fn write(&self, w: &mut LineWriter<'_>) -> Result<(), Error> {
                 w.write_name_unchecked(Self::NAME);
                 for parameter in &self.parameters {
                     w.write_parameter(&parameter.name, &parameter.value)?;
@@ -271,7 +271,7 @@ macro_rules! parameter {
 macro_rules! impl_property_write {
     ($type:ident, $name:expr) => {
         impl PropertyWrite for $type<'_> {
-            fn write(&self, w: &mut ContentLineWriter<'_>) -> Result<(), Error> {
+            fn write(&self, w: &mut LineWriter<'_>) -> Result<(), Error> {
                 w.write_name_unchecked($name);
                 for parameter in &self.parameters {
                     w.write_parameter(&parameter.name, &parameter.value)?;
