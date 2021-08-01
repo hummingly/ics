@@ -23,14 +23,16 @@ impl<'w> ICalendar<'w> {
         inner: &'w mut dyn Write,
         version: Version,
         product_id: ProdID
-    ) -> Result<ICalendar<'w>, Error> {
+    ) -> Result<Self, Error> {
         let mut writer = ContentLineWriter::new(inner);
         writer.write_begin_unchecked(VCALENDAR)?;
         writer.write_property(&version)?;
         writer.write_property(&product_id)?;
         Ok(Self(writer))
     }
+}
 
+impl ICalendar<'_> {
     pub fn write(&mut self, property: &dyn PropertyWrite) -> Result<(), Error> {
         self.0.write_property(property)
     }

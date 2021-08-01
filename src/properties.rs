@@ -42,7 +42,7 @@ pub struct Geo<'a> {
     parameters: Vec<Parameter<'a>>
 }
 
-impl<'a> Geo<'a> {
+impl Geo<'_> {
     /// The associated specification name of the property in upper case.
     pub const NAME: &'static str = "GEO";
 
@@ -54,7 +54,9 @@ impl<'a> Geo<'a> {
             parameters: Vec::new()
         }
     }
+}
 
+impl<'a> Geo<'a> {
     /// Adds a parameter to the property.
     pub fn add(&mut self, parameter: impl Into<Parameter<'a>>) {
         self.parameters.push(parameter.into())
@@ -91,12 +93,11 @@ pub struct Status<'a> {
     parameters: Parameters<'a>
 }
 
-impl<'a> Status<'a> {
+impl Status<'_> {
     /// The associated specification name of the property in upper case.
     pub const NAME: &'static str = "STATUS";
 
-    /// Creates a new `STATUS` Property with the given value.
-    pub const fn new(value: StatusValue) -> Self {
+    const fn new(value: StatusValue) -> Self {
         Self {
             value,
             parameters: Vec::new()
@@ -126,7 +127,9 @@ impl<'a> Status<'a> {
 
     /// Status for a final Journal
     pub const FINAL: Self = Self::new(StatusValue::Final);
+}
 
+impl<'a> Status<'a> {
     /// Adds a parameter to the property.
     pub fn add(&mut self, parameter: impl Into<Parameter<'a>>) {
         self.parameters.push(parameter.into())
@@ -165,12 +168,11 @@ pub struct Transp<'a> {
     parameters: Parameters<'a>
 }
 
-impl<'a> Transp<'a> {
+impl Transp<'_> {
     /// The associated specification name of the property in upper case.
     pub const NAME: &'static str = "TRANSP";
 
-    /// Creates a new `STATUS` Property with the given value.
-    pub const fn new(value: TranspValue) -> Self {
+    const fn new(value: TranspValue) -> Self {
         Self {
             value,
             parameters: Vec::new()
@@ -182,7 +184,9 @@ impl<'a> Transp<'a> {
 
     /// Transparent on busy time searches.
     pub const TRANSPARENT: Self = Self::new(TranspValue::Transparent);
+}
 
+impl<'a> Transp<'a> {
     /// Adds a parameter to the property.
     pub fn add(&mut self, parameter: impl Into<Parameter<'a>>) {
         self.parameters.push(parameter.into())
@@ -311,10 +315,12 @@ mod rfc7986 {
         parameters: Vec<Parameter<'a>>
     }
 
-    impl<'a> Image<'a> {
+    impl Image<'_> {
         /// The associated specification name of the property in upper case.
         pub const NAME: &'static str = "IMAGE";
+    }
 
+    impl<'a> Image<'a> {
         /// Creates a new `IMAGE` Property with the given value. The value type
         /// is `URI`.
         pub fn uri<S>(uri: impl Into<Cow<'a, str>>) -> Self {

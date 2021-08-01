@@ -13,10 +13,12 @@ pub trait PropertyWrite {
 pub struct ContentLineWriter<'w>(Writer<'w>);
 
 impl<'w> ContentLineWriter<'w> {
-    pub(crate) fn new(inner: &'w mut dyn Write) -> ContentLineWriter<'w> {
+    pub(crate) fn new(inner: &'w mut dyn Write) -> Self {
         Self(Writer::new(inner))
     }
+}
 
+impl ContentLineWriter<'_> {
     pub(crate) fn write_name_unchecked(&mut self, name: &str) {
         let end = name.len();
         self.0.buffer[..end].copy_from_slice(name.as_bytes());
@@ -102,14 +104,16 @@ struct Writer<'w> {
 }
 
 impl<'w> Writer<'w> {
-    fn new(inner: &'w mut dyn Write) -> Writer<'w> {
+    fn new(inner: &'w mut dyn Write) -> Self {
         Self {
             buffer: [0; CAPACITY],
             len: 0,
             inner
         }
     }
+}
 
+impl Writer<'_> {
     fn write_buffer(&mut self) -> Result<(), Error> {
         match self.fold_buffer() {
             Ok(0) => Ok(()),

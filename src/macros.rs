@@ -39,10 +39,12 @@ macro_rules! property {
             parameters: Parameters<'a>
         }
 
-        impl<'a> $type<'a> {
+        impl $type<'_> {
             /// The associated specification name of the property in upper case.
             pub const NAME: &'static str = $name;
+        }
 
+        impl<'a> $type<'a> {
             #[doc = "Creates a new `"]#[doc=$name]#[doc = "` Property with the given value."]
             pub fn new(value: impl Into<Cow<'a, str>>) -> Self {
                 Self {
@@ -82,17 +84,9 @@ macro_rules! property_text {
             parameters: Parameters<'a>
         }
 
-        impl<'a> $type<'a> {
+        impl $type<'_> {
             /// The associated specification name of the property in upper case.
             pub const NAME: &'static str = $name;
-
-            #[doc = "Creates a new `"]#[doc=$name]#[doc = "` Property with the given value."]
-            pub fn new(value: impl Into<Cow<'a, str>>) -> Self {
-                Self {
-                    value: value.into(),
-                    parameters: Vec::new()
-                }
-            }
 
             $(
                 $(#[$inner])*
@@ -103,6 +97,16 @@ macro_rules! property_text {
                     parameters: Vec::new()
                 };
             )*
+        }
+
+        impl<'a> $type<'a> {
+            #[doc = "Creates a new `"]#[doc=$name]#[doc = "` Property with the given value."]
+            pub fn new(value: impl Into<Cow<'a, str>>) -> Self {
+                Self {
+                    value: value.into(),
+                    parameters: Vec::new()
+                }
+            }
 
             /// Adds a parameter to the property.
             pub fn add(&mut self, parameter: impl Into<Parameter<'a>>) {
@@ -145,10 +149,12 @@ macro_rules! property_with_parameter {
             parameters: Parameters<'a>
         }
 
-        impl<'a> $type<'a> {
+        impl $type<'_> {
             /// The associated specification name of the property in upper case.
             pub const NAME: &'static str = $name;
+        }
 
+        impl<'a> $type<'a> {
             #[doc = "Creates a new `"]#[doc=$name]#[doc = "` Property with the given value."]
             pub fn new(value: impl Into<Cow<'a, str>>) -> Self {
                 Self {
@@ -187,7 +193,7 @@ macro_rules! property_integer {
             parameters: Parameters<'a>
         }
 
-        impl<'a> $type<'a> {
+        impl $type<'_> {
             /// The associated specification name of the property in upper case.
             pub const NAME: &'static str = $name;
 
@@ -198,7 +204,9 @@ macro_rules! property_integer {
                     parameters: Vec::new()
                 }
             }
+        }
 
+        impl<'a> $type<'a> {
             /// Adds a parameter to the property.
             pub fn add(&mut self, parameter: impl Into<Parameter<'a>>) {
                 self.parameters.push(parameter.into())
@@ -228,14 +236,10 @@ macro_rules! parameter {
         #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
         pub struct $type<'a>(Cow<'a, str>);
 
-        impl<'a> $type<'a> {
+        impl $type<'_> {
             /// The associated specification name of the parameter in upper case.
             pub const NAME: &'static str = $name;
 
-            #[doc = "Creates a new `"]#[doc=$name]#[doc = "` Parameter with the given value."]
-            pub fn new(value: impl Into<Cow<'a, str>>) -> Self {
-                Self(value.into())
-            }
 
             $(
                 $(#[$inner])*
@@ -243,6 +247,13 @@ macro_rules! parameter {
                 #[doc = "Parameter Value: "]#[doc = $value]
                 pub const $const_ident: Self = Self(Cow::Borrowed($value));
             )*
+        }
+
+        impl<'a> $type<'a> {
+            #[doc = "Creates a new `"]#[doc=$name]#[doc = "` Parameter with the given value."]
+            pub fn new(value: impl Into<Cow<'a, str>>) -> Self {
+                Self(value.into())
+            }
         }
 
         impl<'a> From<$type<'a>> for Parameter<'a> {
