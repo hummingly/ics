@@ -37,6 +37,12 @@
 
 - Migrated to edition 2018.
 
+## Version 0.5.6
+
+### Bug Fix
+
+- Fix panic on folding multibytes character (see #15).
+
 ## Version 0.5.5
 
 ### Misc
