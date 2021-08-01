@@ -34,7 +34,7 @@ fn event() -> Result<(), io::Error> {
             event.write(&Organizer::new("mailto:jsmith@example.com"))?;
             event.write(&DtStart::new("19960918T143000Z"))?;
             event.write(&DtEnd::new("19960920T220000Z"))?;
-            event.write(&Status::confirmed())?;
+            event.write(&Status::CONFIRMED)?;
             event.write(&Categories::new("CONFERENCE"))?;
             event.write(&Summary::new("Networld+Interop Conference"))?;
             event.write(&Description::new(
@@ -94,7 +94,7 @@ fn todo() -> Result<(), io::Error> {
             attendee.add(PartStat::ACCEPTED);
             todo.write(&attendee)?;
             todo.write(&Due::new("19980415T000000"))?;
-            todo.write(&Status::needs_action())?;
+            todo.write(&Status::NEEDS_ACTION)?;
             todo.write(&Summary::new("Submit Income Taxes"))?;
             todo.write(&Sequence::new(2))?;
 
@@ -154,8 +154,8 @@ fn journal() -> Result<(), io::Error> {
         DtStamp::new("19970324T120000Z"),
         |journal| {
             journal.write(&Organizer::new("mailto:jsmith@example.com"))?;
-            journal.write(&Status::draft())?;
-            journal.write(&Class::public())?;
+            journal.write(&Status::DRAFT)?;
+            journal.write(&Class::PUBLIC)?;
             journal.write(&Categories::new("Project Report,XYZ,Weekly Meeting"))?;
             journal.write(&Description::new(
                 "Project xyz Review Meeting Minutes\n\
@@ -305,7 +305,7 @@ fn timezone() -> Result<(), io::Error> {
 
             event.write(&Description::new("Project XYZ Review Meeting"))?;
             event.write(&Categories::new("MEETING"))?;
-            event.write(&Class::public())?;
+            event.write(&Class::PUBLIC)?;
             event.write(&Created::new("19980309T130000Z"))?;
             event.write(&Summary::new("XYZ Project Review"))?;
 

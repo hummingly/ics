@@ -71,7 +71,7 @@ macro_rules! property {
 macro_rules! property_text {
     (
         $(#[$outer:meta])* $type:ident, $name:expr
-        $(;$(#[$inner:meta])* fn $const_ident:ident() { $value:expr })*
+        $(;$(#[$inner:meta])* const $const_ident:ident = $value:expr)*
     ) => {
         #[doc = "`"]#[doc=$name]#[doc = "` Property"]
         ///
@@ -98,12 +98,10 @@ macro_rules! property_text {
                 $(#[$inner])*
                 ///
                 #[doc = "Property Value: "]#[doc = $value]
-                pub const fn $const_ident() -> Self {
-                    Self {
-                        value: Cow::Borrowed($value),
-                        parameters: Vec::new()
-                    }
-                }
+                pub const $const_ident: Self = Self {
+                    value: Cow::Borrowed($value),
+                    parameters: Vec::new()
+                };
             )*
 
             /// Adds a parameter to the property.

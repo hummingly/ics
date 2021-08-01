@@ -27,9 +27,9 @@ property_text!(
     /// [Format definitions of classifications](https://tools.ietf.org/html/rfc5545#section-3.8.1.3)
     Class, "CLASS";
     // Default Value
-    fn public() { "PUBLIC" };
-    fn private() { "PRIVATE" };
-    fn confidential() { "CONFIDENTIAL" }
+    const PUBLIC = "PUBLIC";
+    const PRIVATE = "PRIVATE";
+    const CONFIDENTIAL = "CONFIDENTIAL"
 );
 property_text!(Comment, "COMMENT");
 property_text!(Description, "DESCRIPTION");
@@ -104,44 +104,28 @@ impl<'a> Status<'a> {
     }
 
     /// Status for a tentative event
-    pub const fn tentative() -> Self {
-        Self::new(StatusValue::Tentative)
-    }
+    pub const TENTATIVE: Self = Self::new(StatusValue::Tentative);
 
     /// Status for a definite event
-    pub const fn confirmed() -> Self {
-        Self::new(StatusValue::Confirmed)
-    }
+    pub const CONFIRMED: Self = Self::new(StatusValue::Confirmed);
 
     /// Status for a cancelled Event, To-Do or Journal
-    pub const fn cancelled() -> Self {
-        Self::new(StatusValue::Cancelled)
-    }
+    pub const CANCELLED: Self = Self::new(StatusValue::Cancelled);
 
     /// Status for a To-Do that needs action
-    pub const fn needs_action() -> Self {
-        Self::new(StatusValue::NeedsAction)
-    }
+    pub const NEEDS_ACTION: Self = Self::new(StatusValue::NeedsAction);
 
     /// Status for a completed To-Do
-    pub const fn completed() -> Self {
-        Self::new(StatusValue::Completed)
-    }
+    pub const COMPLETED: Self = Self::new(StatusValue::Completed);
 
     /// Status for an in-process To-Do
-    pub const fn in_process() -> Self {
-        Self::new(StatusValue::InProcess)
-    }
+    pub const IN_PROCESS: Self = Self::new(StatusValue::InProcess);
 
     /// Status for a draft Journal
-    pub const fn draft() -> Self {
-        Self::new(StatusValue::Draft)
-    }
+    pub const DRAFT: Self = Self::new(StatusValue::Draft);
 
     /// Status for a final Journal
-    pub const fn final_() -> Self {
-        Self::new(StatusValue::Final)
-    }
+    pub const FINAL: Self = Self::new(StatusValue::Final);
 
     /// Adds a parameter to the property.
     pub fn add(&mut self, parameter: impl Into<Parameter<'a>>) {
@@ -194,14 +178,10 @@ impl<'a> Transp<'a> {
     }
 
     /// Blocks or opaque on busy time searches.
-    pub const fn opaque() -> Self {
-        Self::new(TranspValue::Opaque)
-    }
+    pub const OPAQUE: Self = Self::new(TranspValue::Opaque);
 
     /// Transparent on busy time searches.
-    pub const fn transparent() -> Self {
-        Self::new(TranspValue::Transparent)
-    }
+    pub const TRANSPARENT: Self = Self::new(TranspValue::Transparent);
 
     /// Adds a parameter to the property.
     pub fn add(&mut self, parameter: impl Into<Parameter<'a>>) {
@@ -244,9 +224,9 @@ property!(RRule, "RRULE");
 property_text!(
     /// [Format definitions of alarm actions](https://tools.ietf.org/html/rfc5545#section-3.8.6.1)
     Action, "ACTION";
-    fn audio() { "AUDIO" };
-    fn display() { "DISPLAY" };
-    fn email() { "EMAIL" }
+    const AUDIO = "AUDIO";
+    const DISPLAY = "DISPLAY";
+    const EMAIL = "EMAIL"
 );
 property_integer!(Repeat, "REPEAT");
 property!(Trigger, "TRIGGER");
@@ -259,7 +239,7 @@ property!(RequestStatus, "REQUEST-STATUS");
 
 impl Default for Class<'_> {
     fn default() -> Self {
-        Self::public()
+        Self::PUBLIC
     }
 }
 

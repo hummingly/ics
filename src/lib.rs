@@ -41,7 +41,7 @@
 //!         |todo| {
 //!             todo.write(&Summary::new("Katarina's Birthday Present"))?;
 //!             todo.write(&Comment::new("Buy her Imagine Dragons tickets!"))?;
-//!             todo.write(&Status::needs_action())
+//!             todo.write(&Status::NEEDS_ACTION)
 //!         }
 //!     );
 //!     calendar.write_todo(todo)?;

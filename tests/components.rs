@@ -36,13 +36,13 @@ fn event() -> Result<(), io::Error> {
         DtStamp::new("19970901T130000Z"),
         |event| {
             event.write(&Categories::new("ANNIVERSARY,PERSONAL,SPECIAL OCCASION"))?;
-            event.write(&Class::confidential())?;
+            event.write(&Class::CONFIDENTIAL)?;
             let mut date = DtStart::new("19971102");
             date.add(Value::DATE);
             event.write(&date)?;
             event.write(&RRule::new("FREQ=YEARLY"))?;
             event.write(&Summary::new("Our Blissful Anniversary"))?;
-            event.write(&Transp::transparent())
+            event.write(&Transp::TRANSPARENT)
         }
     );
     calendar.write_event(event)?;
@@ -83,7 +83,7 @@ fn todo() -> Result<(), io::Error> {
             todo.write(&Due::new("20070709T130000Z"))?;
             todo.write(&Priority::new(1))?;
             todo.write(&Summary::new("Submit Revised Internet-Draft"))?;
-            todo.write(&Status::needs_action())
+            todo.write(&Status::NEEDS_ACTION)
         }
     );
     calendar.write_todo(todo)?;
