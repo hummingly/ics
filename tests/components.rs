@@ -7,12 +7,8 @@ use ics::properties::{
 use ics::writer::{Alarm, Daylight, Event, FreeBusy, ICalendar, Journal, Standard, TimeZone, ToDo};
 use std::io;
 
-fn calendar(capacity: usize) -> Result<ICalendar<Vec<u8>>, io::Error> {
-    ICalendar::new(
-        Vec::with_capacity(capacity),
-        Version::new("2.0"),
-        ProdID::new("Mock Calendar")
-    )
+fn calendar<'o>(output: &'o mut Vec<u8>) -> Result<ICalendar<'o>, io::Error> {
+    ICalendar::new(output, Version::new("2.0"), ProdID::new("Mock Calendar"))
 }
 
 #[test]
@@ -32,7 +28,8 @@ fn event() -> Result<(), io::Error> {
                     END:VEVENT\r\n\
                     END:VCALENDAR\r\n";
 
-    let mut calendar = calendar(expected.len())?;
+    let mut output = Vec::with_capacity(expected.len());
+    let mut calendar = calendar(&mut output)?;
 
     let event = Event::build(
         UID::new("b68378cf-872d-44f1-9703-5e3725c56e71"),
@@ -49,8 +46,8 @@ fn event() -> Result<(), io::Error> {
         }
     );
     calendar.write_event(event)?;
+    calendar.close()?;
 
-    let output = calendar.close()?;
     let output = String::from_utf8_lossy(&output);
 
     assert_eq!(output, expected);
@@ -74,7 +71,8 @@ fn todo() -> Result<(), io::Error> {
                     END:VTODO\r\n\
                     END:VCALENDAR\r\n";
 
-    let mut calendar = calendar(expected.len())?;
+    let mut output = Vec::with_capacity(expected.len());
+    let mut calendar = calendar(&mut output)?;
 
     let todo = ToDo::build(
         UID::new("b68378cf-872d-44f1-9703-5e3725c56e71"),
@@ -89,8 +87,8 @@ fn todo() -> Result<(), io::Error> {
         }
     );
     calendar.write_todo(todo)?;
+    calendar.close()?;
 
-    let output = calendar.close()?;
     let output = String::from_utf8_lossy(&output);
 
     assert_eq!(output, expected);
@@ -113,7 +111,8 @@ fn journal() -> Result<(), io::Error> {
                     END:VJOURNAL\r\n\
                     END:VCALENDAR\r\n";
 
-    let mut calendar = calendar(expected.len())?;
+    let mut output = Vec::with_capacity(expected.len());
+    let mut calendar = calendar(&mut output)?;
 
     let journal = Journal::build(
         UID::new("b68378cf-872d-44f1-9703-5e3725c56e71"),
@@ -131,8 +130,8 @@ fn journal() -> Result<(), io::Error> {
         }
     );
     calendar.write_journal(journal)?;
+    calendar.close()?;
 
-    let output = calendar.close()?;
     let output = String::from_utf8_lossy(&output);
 
     assert_eq!(output, expected);
@@ -157,7 +156,8 @@ fn freebusy() -> Result<(), io::Error> {
                     END:VFREEBUSY\r\n\
                     END:VCALENDAR\r\n";
 
-    let mut calendar = calendar(expected.len())?;
+    let mut output = Vec::with_capacity(expected.len());
+    let mut calendar = calendar(&mut output)?;
 
     let freebusy = FreeBusy::build(
         UID::new("b68378cf-872d-44f1-9703-5e3725c56e71"),
@@ -176,8 +176,8 @@ fn freebusy() -> Result<(), io::Error> {
     );
 
     calendar.write_freebusy(freebusy)?;
+    calendar.close()?;
 
-    let output = calendar.close()?;
     let output = String::from_utf8_lossy(&output);
 
     assert_eq!(output, expected);
@@ -207,7 +207,8 @@ fn timezone() -> Result<(), io::Error> {
                     END:VTIMEZONE\r\n\
                     END:VCALENDAR\r\n";
 
-    let mut calendar = calendar(expected.len())?;
+    let mut output = Vec::with_capacity(expected.len());
+    let mut calendar = calendar(&mut output)?;
 
     let standard = Standard::build(
         DtStart::new("20071104T020000"),
@@ -226,8 +227,8 @@ fn timezone() -> Result<(), io::Error> {
         timezone.write_daylight(daylight)
     });
     calendar.write_timezone(timezone)?;
+    calendar.close()?;
 
-    let output = calendar.close()?;
     let output = String::from_utf8_lossy(&output);
 
     assert_eq!(output, expected);
@@ -255,7 +256,8 @@ fn alarm() -> Result<(), io::Error> {
                     END:VEVENT\r\n\
                     END:VCALENDAR\r\n";
 
-    let mut calendar = calendar(expected.len())?;
+    let mut output = Vec::with_capacity(expected.len());
+    let mut calendar = calendar(&mut output)?;
 
     let event = Event::build(
         UID::new("b68378cf-872d-44f1-9703-5e3725c56e71"),
@@ -282,8 +284,8 @@ fn alarm() -> Result<(), io::Error> {
         }
     );
     calendar.write_event(event)?;
+    calendar.close()?;
 
-    let output = calendar.close()?;
     let output = String::from_utf8_lossy(&output);
 
     assert_eq!(output, expected);

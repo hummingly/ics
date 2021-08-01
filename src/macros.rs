@@ -40,6 +40,9 @@ macro_rules! property {
         }
 
         impl<'a> $type<'a> {
+            /// The associated specification name of the property in upper case.
+            pub const NAME: &'static str = $name;
+
             #[doc = "Creates a new `"]#[doc=$name]#[doc = "` Property with the given value."]
             pub fn new(value: impl Into<Cow<'a, str>>) -> Self {
                 Self {
@@ -80,6 +83,9 @@ macro_rules! property_text {
         }
 
         impl<'a> $type<'a> {
+            /// The associated specification name of the property in upper case.
+            pub const NAME: &'static str = $name;
+
             #[doc = "Creates a new `"]#[doc=$name]#[doc = "` Property with the given value."]
             pub fn new(value: impl Into<Cow<'a, str>>) -> Self {
                 Self {
@@ -114,8 +120,8 @@ macro_rules! property_text {
         }
 
         impl PropertyWrite for $type<'_> {
-            fn write<W: Write>(&self, w: &mut ContentLineWriter<W>) -> Result<(), Error> {
-                w.write_name_unchecked($name);
+            fn write(&self, w: &mut ContentLineWriter<'_>) -> Result<(), Error> {
+                w.write_name_unchecked(Self::NAME);
                 for parameter in &self.parameters {
                     w.write_parameter(&parameter.name, &parameter.value)?;
                 }
@@ -142,6 +148,9 @@ macro_rules! property_with_parameter {
         }
 
         impl<'a> $type<'a> {
+            /// The associated specification name of the property in upper case.
+            pub const NAME: &'static str = $name;
+
             #[doc = "Creates a new `"]#[doc=$name]#[doc = "` Property with the given value."]
             pub fn new(value: impl Into<Cow<'a, str>>) -> Self {
                 Self {
@@ -181,6 +190,9 @@ macro_rules! property_integer {
         }
 
         impl<'a> $type<'a> {
+            /// The associated specification name of the property in upper case.
+            pub const NAME: &'static str = $name;
+
             #[doc = "Creates a new `"]#[doc=$name]#[doc = "` Property with the given value."]
             pub const fn new(value: Integer) -> Self {
                 Self {
@@ -219,6 +231,9 @@ macro_rules! parameter {
         pub struct $type<'a>(Cow<'a, str>);
 
         impl<'a> $type<'a> {
+            /// The associated specification name of the parameter in upper case.
+            pub const NAME: &'static str = $name;
+
             #[doc = "Creates a new `"]#[doc=$name]#[doc = "` Parameter with the given value."]
             pub fn new(value: impl Into<Cow<'a, str>>) -> Self {
                 Self(value.into())
@@ -235,7 +250,7 @@ macro_rules! parameter {
         impl<'a> From<$type<'a>> for Parameter<'a> {
             fn from(builder: $type<'a>) -> Self {
                 Parameter {
-                    name: Cow::Borrowed($name),
+                    name: Cow::Borrowed($type::NAME),
                     value: builder.0
                 }
             }
@@ -247,7 +262,7 @@ macro_rules! parameter {
 macro_rules! impl_property_write {
     ($type:ident, $name:expr) => {
         impl PropertyWrite for $type<'_> {
-            fn write<W: Write>(&self, w: &mut ContentLineWriter<W>) -> Result<(), Error> {
+            fn write(&self, w: &mut ContentLineWriter<'_>) -> Result<(), Error> {
                 w.write_name_unchecked($name);
                 for parameter in &self.parameters {
                     w.write_parameter(&parameter.name, &parameter.value)?;

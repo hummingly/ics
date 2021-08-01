@@ -13,7 +13,7 @@ use crate::contentline::{ContentLineWriter, PropertyWrite};
 use crate::parameters::{Parameter, Parameters};
 use crate::value::{Float, Integer, StatusValue, TranspValue};
 use std::borrow::Cow;
-use std::io::{Error, Write};
+use std::io::Error;
 
 property_text!(CalScale, "CALSCALE");
 property_text!(Method, "METHOD");
@@ -43,6 +43,9 @@ pub struct Geo<'a> {
 }
 
 impl<'a> Geo<'a> {
+    /// The associated specification name of the property in upper case.
+    pub const NAME: &'static str = "GEO";
+
     /// Creates a new `GEO` Property with the given value.
     pub const fn new(latitude: Float, longitude: Float) -> Self {
         Self {
@@ -66,8 +69,8 @@ impl<'a> Geo<'a> {
 }
 
 impl PropertyWrite for Geo<'_> {
-    fn write<W: Write>(&self, w: &mut ContentLineWriter<W>) -> Result<(), Error> {
-        w.write_name_unchecked("GEO");
+    fn write(&self, w: &mut ContentLineWriter<'_>) -> Result<(), Error> {
+        w.write_name_unchecked(Self::NAME);
         for parameter in &self.parameters {
             w.write_parameter(&parameter.name, &parameter.value)?;
         }
@@ -89,6 +92,9 @@ pub struct Status<'a> {
 }
 
 impl<'a> Status<'a> {
+    /// The associated specification name of the property in upper case.
+    pub const NAME: &'static str = "STATUS";
+
     /// Creates a new `STATUS` Property with the given value.
     pub const fn new(value: StatusValue) -> Self {
         Self {
@@ -151,8 +157,8 @@ impl<'a> Status<'a> {
 }
 
 impl PropertyWrite for Status<'_> {
-    fn write<W: Write>(&self, w: &mut ContentLineWriter<W>) -> Result<(), Error> {
-        w.write_name_unchecked("STATUS");
+    fn write(&self, w: &mut ContentLineWriter<'_>) -> Result<(), Error> {
+        w.write_name_unchecked(Self::NAME);
         for parameter in &self.parameters {
             w.write_parameter(&parameter.name, &parameter.value)?;
         }
@@ -176,6 +182,9 @@ pub struct Transp<'a> {
 }
 
 impl<'a> Transp<'a> {
+    /// The associated specification name of the property in upper case.
+    pub const NAME: &'static str = "TRANSP";
+
     /// Creates a new `STATUS` Property with the given value.
     pub const fn new(value: TranspValue) -> Self {
         Self {
@@ -208,8 +217,8 @@ impl<'a> Transp<'a> {
 }
 
 impl PropertyWrite for Transp<'_> {
-    fn write<W: Write>(&self, w: &mut ContentLineWriter<W>) -> Result<(), Error> {
-        w.write_name_unchecked("TRANSP");
+    fn write(&self, w: &mut ContentLineWriter<'_>) -> Result<(), Error> {
+        w.write_name_unchecked(Self::NAME);
         for parameter in &self.parameters {
             w.write_parameter(&parameter.name, &parameter.value)?;
         }
@@ -297,7 +306,7 @@ mod rfc7986 {
     use crate::contentline::{ContentLineWriter, PropertyWrite};
     use crate::parameters::{Parameter, Parameters};
     use std::borrow::Cow;
-    use std::io::{Error, Write};
+    use std::io::Error;
     property_text!(Name, "NAME");
     property_with_parameter!(RefreshInterval, "REFRESH-INTERVAL", "DURATION");
     property_with_parameter!(Source, "SOURCE", "URI");
@@ -323,6 +332,9 @@ mod rfc7986 {
     }
 
     impl<'a> Image<'a> {
+        /// The associated specification name of the property in upper case.
+        pub const NAME: &'static str = "IMAGE";
+
         /// Creates a new `IMAGE` Property with the given value. The value type
         /// is `URI`.
         pub fn uri<S>(uri: impl Into<Cow<'a, str>>) -> Self {
@@ -356,8 +368,8 @@ mod rfc7986 {
     }
 
     impl PropertyWrite for Image<'_> {
-        fn write<W: Write>(&self, w: &mut ContentLineWriter<W>) -> Result<(), Error> {
-            w.write_name_unchecked("IMAGE");
+        fn write(&self, w: &mut ContentLineWriter<'_>) -> Result<(), Error> {
+            w.write_name_unchecked(Self::NAME);
             for parameter in &self.parameters {
                 w.write_parameter(&parameter.name, &parameter.value)?;
             }

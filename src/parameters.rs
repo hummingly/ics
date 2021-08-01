@@ -173,10 +173,15 @@ pub enum Encoding {
     Base64
 }
 
+impl Encoding {
+    /// The associated specification name of the parameter in upper case.
+    pub const NAME: &'static str = "ENCODING";
+}
+
 impl From<Encoding> for Parameter<'_> {
     fn from(builder: Encoding) -> Self {
         Parameter {
-            name: Cow::Borrowed("ENCODING"),
+            name: Cow::Borrowed(Encoding::NAME),
             value: Cow::Borrowed(match builder {
                 Encoding::Byte => "8BIT",
                 Encoding::Base64 => "BASE64"
@@ -198,11 +203,18 @@ pub enum Range {
     ThisAndFuture
 }
 
+impl Range {
+    /// The associated specification name of the parameter in upper case.
+    pub const NAME: &'static str = "RANGE";
+}
+
 impl From<Range> for Parameter<'_> {
-    fn from(_builder: Range) -> Self {
+    fn from(builder: Range) -> Self {
         Parameter {
-            name: Cow::Borrowed("RANGE"),
-            value: Cow::Borrowed("THISANDFUTURE")
+            name: Cow::Borrowed(Range::NAME),
+            value: Cow::Borrowed(match builder {
+                Range::ThisAndFuture => "THISANDFUTURE"
+            })
         }
     }
 }
@@ -222,10 +234,15 @@ pub enum Related {
     End
 }
 
+impl Related {
+    /// The associated specification name of the parameter in upper case.
+    pub const NAME: &'static str = "RELATED";
+}
+
 impl From<Related> for Parameter<'_> {
     fn from(builder: Related) -> Self {
         Parameter {
-            name: Cow::Borrowed("RELATED"),
+            name: Cow::Borrowed(Related::NAME),
             value: Cow::Borrowed(match builder {
                 Related::Start => "START",
                 Related::End => "END"
@@ -249,10 +266,15 @@ pub enum RSVP {
     False
 }
 
+impl RSVP {
+    /// The associated specification name of the parameter in upper case.
+    pub const NAME: &'static str = "RSVP";
+}
+
 impl From<RSVP> for Parameter<'_> {
     fn from(builder: RSVP) -> Self {
         Parameter {
-            name: Cow::Borrowed("RSVP"),
+            name: Cow::Borrowed(RSVP::NAME),
             value: Cow::Borrowed(match builder {
                 RSVP::True => "TRUE",
                 RSVP::False => "FALSE"

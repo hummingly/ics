@@ -9,12 +9,12 @@ use std::io;
 
 fn main() -> Result<(), io::Error> {
     // Crate a writer object to which the iCalendar object is written to.
-    let file = File::create("todo.ics")?;
+    let mut file = File::create("todo.ics")?;
 
     // Create a new iCalendar object.
     // An iCalendar object must at least consist of the VERSION and PRODID property.
     let mut calendar = ICalendar::new(
-        file,
+        &mut file,
         Version::new("2.0"),
         ProdID::new("-//ABC Corporation//NONSGML My Product//EN")
     )?;

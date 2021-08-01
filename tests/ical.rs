@@ -45,15 +45,16 @@ fn event() -> Result<(), io::Error> {
         }
     );
 
+    let mut output = Vec::with_capacity(expected.len());
     let mut calendar = ICalendar::new(
-        Vec::with_capacity(expected.len()),
+        &mut output,
         Version::new("2.0"),
         ProdID::new("-//xyz Corp//NONSGML PDA Calendar Version 1.0//EN")
     )?;
 
     calendar.write_event(event)?;
+    calendar.close()?;
 
-    let output = calendar.close()?;
     let output = String::from_utf8_lossy(&output);
 
     assert_eq!(output, expected);
@@ -107,14 +108,15 @@ fn todo() -> Result<(), io::Error> {
         }
     );
 
+    let mut output = Vec::with_capacity(expected.len());
     let mut calendar = ICalendar::new(
-        Vec::with_capacity(expected.len()),
+        &mut output,
         Version::new("2.0"),
         ProdID::new("-//ABC Corporation//NONSGML My Product//EN")
     )?;
     calendar.write_todo(todo)?;
+    calendar.close()?;
 
-    let output = calendar.close()?;
     let output = String::from_utf8_lossy(&output);
 
     assert_eq!(output, expected);
@@ -171,14 +173,15 @@ fn journal() -> Result<(), io::Error> {
         }
     );
 
+    let mut output = Vec::with_capacity(expected.len());
     let mut calendar = ICalendar::new(
-        Vec::with_capacity(expected.len()),
+        &mut output,
         Version::new("2.0"),
         ProdID::new("-//ABC Corporation//NONSGML My Product//EN")
     )?;
     calendar.write_journal(journal)?;
+    calendar.close()?;
 
-    let output = calendar.close()?;
     let output = String::from_utf8_lossy(&output);
 
     assert_eq!(output, expected);
@@ -219,14 +222,15 @@ fn freebusy() -> Result<(), io::Error> {
         }
     );
 
+    let mut output = Vec::with_capacity(expected.len());
     let mut calendar = ICalendar::new(
-        Vec::with_capacity(expected.len()),
+        &mut output,
         Version::new("2.0"),
         ProdID::new("-//RDU Software//NONSGML HandCal//EN")
     )?;
     calendar.write_freebusy(freebusy)?;
+    calendar.close()?;
 
-    let output = calendar.close()?;
     let output = String::from_utf8_lossy(&output);
 
     assert_eq!(output, expected);
@@ -316,15 +320,16 @@ fn timezone() -> Result<(), io::Error> {
         }
     );
 
+    let mut output = Vec::with_capacity(expected.len());
     let mut calendar = ICalendar::new(
-        Vec::with_capacity(expected.len()),
+        &mut output,
         Version::new("2.0"),
         ProdID::new("-//RDU Software//NONSGML HandCal//EN")
     )?;
     calendar.write_timezone(timezone)?;
     calendar.write_event(event)?;
+    calendar.close()?;
 
-    let output = calendar.close()?;
     let output = String::from_utf8_lossy(&output);
 
     assert_eq!(output, expected);

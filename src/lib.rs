@@ -29,9 +29,9 @@
 //! use std::io;
 //!
 //! fn main() -> Result<(), io::Error> {
-//!     let file = File::create("birthday.ics")?;
+//!     let mut file = File::create("birthday.ics")?;
 //!     // The ICalendar object is what is later written to the file.
-//!     let mut calendar = ICalendar::new(file, Version::new("2.0"), ProdID::new("ics-rs"))?;
+//!     let mut calendar = ICalendar::new(&mut file, Version::new("2.0"), ProdID::new("ics-rs"))?;
 //!
 //!     // For the sake of demonstrating the UID was taken from somewhere. Out of security
 //!     // reasons the UID should always be randomly generated.

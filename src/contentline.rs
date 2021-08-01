@@ -6,14 +6,14 @@ const LINE_MAX_LEN: usize = 75;
 const CAPACITY: usize = LINE_MAX_LEN * 2;
 
 pub trait PropertyWrite {
-    fn write<W: Write>(&self, line: &mut ContentLineWriter<W>) -> Result<(), Error>;
+    fn write(&self, line: &mut ContentLineWriter<'_>) -> Result<(), Error>;
 }
 
 #[derive(Debug)]
-pub struct ContentLineWriter<W: Write>(Writer<W>);
+pub struct ContentLineWriter<'w>(Writer<'w>);
 
-impl<W: Write> ContentLineWriter<W> {
-    pub(crate) fn new(inner: W) -> ContentLineWriter<W> {
+impl<'w> ContentLineWriter<'w> {
+    pub(crate) fn new(inner: &'w mut dyn Write) -> ContentLineWriter<'w> {
         Self(Writer::new(inner))
     }
 
@@ -24,7 +24,7 @@ impl<W: Write> ContentLineWriter<W> {
     }
 
     #[inline]
-    pub(crate) fn write_property(&mut self, property: &impl PropertyWrite) -> Result<(), Error> {
+    pub(crate) fn write_property(&mut self, property: &dyn PropertyWrite) -> Result<(), Error> {
         property.write(self)?;
         self.write_line_break()
     }
@@ -55,18 +55,13 @@ impl<W: Write> ContentLineWriter<W> {
         writeln!(self.0.inner, "END:{}\r", component)
     }
 
-    pub(crate) fn into_inner(mut self) -> Result<W, Error> {
-        self.0.flush()?;
-        Ok(self.0.inner)
-    }
-
     fn write_line_break(&mut self) -> Result<(), Error> {
         self.0.write_buffer()?;
         self.0.inner.write_all(b"\r\n")
     }
 }
 
-impl<W: Write> ContentLineWriter<W> {
+impl ContentLineWriter<'_> {
     pub fn write_name(&mut self, name: &str) -> Result<(), Error> {
         self.0.write_all(name.as_bytes())
     }
@@ -100,14 +95,14 @@ impl<W: Write> ContentLineWriter<W> {
     }
 }
 
-struct Writer<W: Write> {
+struct Writer<'w> {
     buffer: [u8; CAPACITY],
     len: usize,
-    inner: W
+    inner: &'w mut dyn Write
 }
 
-impl<W: Write> Writer<W> {
-    fn new(inner: W) -> Writer<W> {
+impl<'w> Writer<'w> {
+    fn new(inner: &'w mut dyn Write) -> Writer<'w> {
         Self {
             buffer: [0; CAPACITY],
             len: 0,
@@ -136,22 +131,25 @@ impl<W: Write> Writer<W> {
             // In str::is_char_boundary bit magic is used in the form of (b as i8) >= -0x40
             // but this is more understandable for me.
             fn is_char_boundary(b: u8) -> bool {
-                b < 128 || b >= 192
+                !(128..192).contains(&b)
             }
 
-            (1..=LINE_MAX_LEN)
-                .rev()
-                .find(|&boundary| is_char_boundary(input[boundary]))
+            for boundary in (1..=LINE_MAX_LEN).rev() {
+                if is_char_boundary(input[boundary]) {
+                    return Some(boundary);
+                }
+            }
+            None
         }
 
         let mut content = &self.buffer[..self.len];
-        let mut boundary = next_boundary(&content).unwrap_or(content.len());
+        let mut boundary = next_boundary(content).unwrap_or(content.len());
         self.inner.write_all(&content[..boundary])?;
 
         while boundary < content.len() {
             content = &content[boundary..];
             self.inner.write_all(b"\r\n ")?;
-            match next_boundary(&content) {
+            match next_boundary(content) {
                 Some(next_boundary) => {
                     self.inner.write_all(&content[..next_boundary])?;
                     boundary = next_boundary;
@@ -169,7 +167,7 @@ impl<W: Write> Writer<W> {
     }
 }
 
-impl<W: Write> Write for Writer<W> {
+impl Write for Writer<'_> {
     fn write(&mut self, buf: &[u8]) -> Result<usize, Error> {
         self.write_all(buf)?;
         Ok(buf.len())
@@ -211,12 +209,11 @@ impl<W: Write> Write for Writer<W> {
     }
 }
 
-impl<W: Write + fmt::Debug> fmt::Debug for Writer<W> {
+impl fmt::Debug for Writer<'_> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         f.debug_struct("Writer")
             .field("buffer", &&self.buffer[..])
             .field("len", &self.len)
-            .field("inner", &self.inner)
             .finish()
     }
 }
@@ -227,10 +224,11 @@ mod tests {
     use std::io::{Error, Write};
 
     fn write(content: &[u8]) -> Result<String, Error> {
-        let mut writer = Writer::new(Vec::with_capacity(content.len()));
+        let mut output = Vec::with_capacity(content.len());
+        let mut writer = Writer::new(&mut output);
         writer.write_all(content)?;
         writer.flush()?;
-        Ok(String::from_utf8_lossy(&writer.inner).to_string())
+        Ok(String::from_utf8_lossy(&output).to_string())
     }
 
     #[test]
@@ -257,6 +255,18 @@ mod tests {
         let content = "Content lines shouldn't be folded in the middle of a UTF-8 character! 老虎.";
         let expected =
             "Content lines shouldn't be folded in the middle of a UTF-8 character! 老\r\n 虎.";
+        let output = write(content.as_bytes())?;
+
+        assert_eq!(output, expected);
+        Ok(())
+    }
+
+    #[test]
+    fn multibytes_with_space() -> Result<(), Error> {
+        let content =
+            "Content lines shouldn't be folded in the middle of a UTF-8 character! 老 虎.";
+        let expected =
+            "Content lines shouldn't be folded in the middle of a UTF-8 character! 老 \r\n 虎.";
         let output = write(content.as_bytes())?;
 
         assert_eq!(output, expected);
