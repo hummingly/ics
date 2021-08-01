@@ -70,7 +70,7 @@ impl ContentLineWriter<'_> {
         write!(self.0, ";{}={}", key, value)
     }
 
-    pub fn write_value(&mut self, value: &impl fmt::Display) -> Result<(), Error> {
+    pub fn write_value(&mut self, value: &dyn fmt::Display) -> Result<(), Error> {
         write!(self.0, ":{}", value)
     }
 
