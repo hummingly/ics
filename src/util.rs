@@ -20,7 +20,7 @@ where
     let mut has_carriage_return_char = false;
 
     for b in input.bytes() {
-        if b == b',' || b == b';' || b == b'\\' || b == b'\n'{
+        if b == b',' || b == b';' || b == b'\\' || b == b'\n' {
             escaped_chars_count += 1;
         } else if b == b'\r' {
             has_carriage_return_char = true;
@@ -39,11 +39,11 @@ where
                     if input.get(start + 1..start + 2) != Some("\n") {
                         output.push_str("\\n");
                     }
-                },
+                }
                 // Newlines needs to be escaped to the literal `\n`
                 "\n" => {
                     output.push_str("\\n");
-                },
+                }
                 c => {
                     output.push('\\');
                     output.push_str(c);
