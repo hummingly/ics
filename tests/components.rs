@@ -106,9 +106,9 @@ fn journal() -> Result<(), io::Error> {
                     DTSTAMP:19970901T130000Z\r\n\
                     DTSTART;VALUE=DATE:19970317\r\n\
                     SUMMARY:Staff meeting minutes\r\n\
-                    DESCRIPTION:1. Staff meeting: Participants include Joe\\, Lisa\\, and Bob. Au\r\n rora project plans were reviewed. There is currently no budget reserves for\r\n  this project. Lisa will escalate to management. Next meeting on Tuesday.\n\
-                    2\r\n . Telephone Conference: ABC Corp. sales representative called to discuss ne\r\n w printer. Promised to get us a demo by Friday.\n\
-                    3. Henry Miller (Handsoff I\r\n nsurance): Car was totaled by tree. Is looking into a loaner car. 555-2323 \r\n (tel).\r\n\
+                    DESCRIPTION:1. Staff meeting: Participants include Joe\\, Lisa\\, and Bob. Au\r\n rora project plans were reviewed. There is currently no budget reserves for\r\n  this project. Lisa will escalate to management. Next meeting on Tuesday.\\n\
+                    \r\n 2. Telephone Conference: ABC Corp. sales representative called to discuss n\r\n ew printer. Promised to get us a demo by Friday.\\n\
+                    3. Henry Miller (Handsoff\r\n  Insurance): Car was totaled by tree. Is looking into a loaner car. 555-232\r\n 3 (tel).\r\n\
                     END:VJOURNAL\r\n\
                     END:VCALENDAR\r\n";
 

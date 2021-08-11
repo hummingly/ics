@@ -53,8 +53,8 @@ fn main() -> std::io::Result<()> {
     event.push(Status::confirmed());
     event.push(Categories::new("CONFERENCE"));
     event.push(Summary::new("Networld+Interop Conference"));
-    // values that are "TEXT" must be escaped (only if the text contains a comma,
-    // semicolon or backslash)
+    // Values that are "TEXT" must be escaped (only if the text contains a comma,
+    // semicolon, backslash or newline).
     event.push(Description::new(escape_text(
         "Networld+Interop Conference and Exhibit\n\
          Atlanta World Congress Center\n\

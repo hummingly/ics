@@ -35,8 +35,8 @@ fn main() -> Result<(), io::Error> {
             event.write(&Categories::new("CONFERENCE"))?;
             event.write(&Summary::new("Networld+Interop Conference"))?;
             // Values that are "TEXT" are escaped by default. To be escaped characters are
-            // comma, semicolon and backslash. Additionally, new lines are normalized to a
-            // line feed character.
+            // comma, semicolon, backslash and newline. Additionally, new lines are
+            // normalized to a line feed character.
             event.write(&Description::new(
                 "Networld+Interop Conference and Exhibit\n\
                 Atlanta World Congress Center\n\
@@ -65,10 +65,8 @@ fn main() -> Result<(), io::Error> {
     STATUS:CONFIRMED
     CATEGORIES:CONFERENCE
     SUMMARY:Networld+Interop Conference
-    DESCRIPTION:Networld+Interop Conference and Exhibit
-    Atlanta World Congress
-     Center
-    Atlanta\, Georgia
+    DESCRIPTION:Networld+Interop Conference and Exhibit\nAtlanta World Congress
+      Center\nAtlanta\, Georgia
     END:VEVENT
     END:VCALENDAR
     */

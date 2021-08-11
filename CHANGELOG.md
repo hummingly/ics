@@ -37,6 +37,16 @@
 
 - Migrated to edition 2018.
 
+## Version 0.5.7
+
+### Bug Fix
+
+- Escape newline character in util::escape_text properly (see PR #16 by @greenfierydragon).
+
+### Documentation
+
+- Fix typos and update documentation regarding escaping newlines.
+
 ## Version 0.5.6
 
 ### Bug Fix
@@ -85,7 +95,7 @@
 
 ### Bug Fix
 
-- A single carriage return character (the old macOS new line character) was not properly converted to a new line character (line feed).
+- A single carriage return character (the old macOS newline character) was not properly converted to a newline character (line feed).
 
 ### Misc
 

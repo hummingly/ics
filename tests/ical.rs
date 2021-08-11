@@ -22,8 +22,8 @@ fn event() -> Result<(), io::Error> {
                     STATUS:CONFIRMED\r\n\
                     CATEGORIES:CONFERENCE\r\n\
                     SUMMARY:Networld+Interop Conference\r\n\
-                    DESCRIPTION:Networld+Interop Conference and Exhibit\n\
-                    Atlanta World Congress \r\n Center\n\
+                    DESCRIPTION:Networld+Interop Conference and Exhibit\\n\
+                    Atlanta World Congress\r\n  Center\\n\
                     Atlanta\\, Georgia\r\n\
                     END:VEVENT\r\n\
                     END:VCALENDAR\r\n";
@@ -136,17 +136,17 @@ fn journal() -> Result<(), io::Error> {
                     STATUS:DRAFT\r\n\
                     CLASS:PUBLIC\r\n\
                     CATEGORIES:Project Report,XYZ,Weekly Meeting\r\n\
-                    DESCRIPTION:Project xyz Review Meeting Minutes\n\
-                    Agenda\n\
-                    1. Review of project \r\n version 1.0 requirements.\n\
-                    2. Definition of project processes.\n\
-                    3. Review of \r\n project schedule.\n\
-                    Participants: John Smith\\, Jane Doe\\, Jim Dandy\n\
-                    -It was d\r\n ecided that the requirements need to be signed off by product marketing.\n\
-                    -P\r\n roject processes were accepted.\n\
-                    -Project schedule needs to account for sche\r\n duled holidays and employee vacation time. Check with HR for specific dates\r\n .\n\
-                    -New schedule will be distributed by Friday.\n\
-                    -Next weeks meeting is cance\r\n lled. No meeting until 3/23.\r\n\
+                    DESCRIPTION:Project xyz Review Meeting Minutes\\n\
+                    Agenda\\n\
+                    1. Review of projec\r\n t version 1.0 requirements.\\n\
+                    2. Definition of project processes.\\n\
+                    3. Review\r\n  of project schedule.\\n\
+                    Participants: John Smith\\, Jane Doe\\, Jim Dandy\\n\
+                    -It\r\n  was decided that the requirements need to be signed off by product marketi\r\n ng.\\n\
+                    -Project processes were accepted.\\n\
+                    -Project schedule needs to account \r\n for scheduled holidays and employee vacation time. Check with HR for specif\r\n ic dates.\\n\
+                    -New schedule will be distributed by Friday.\\n\
+                    -Next weeks meetin\r\n g is cancelled. No meeting until 3/23.\r\n\
                     END:VJOURNAL\r\n\
                     END:VCALENDAR\r\n";
 

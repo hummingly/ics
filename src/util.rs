@@ -65,8 +65,12 @@ pub fn write_escaped_text<W: Write>(writer: &mut W, text: &str) -> Result<(), Er
                 // Replace old macOS newline character with a line feed character otherwise
                 // discard the carriage return character for Windows OS newlines.
                 if text.get(start + 1) != Some(&b'\n') {
-                    writer.write_all(b"\n")?;
+                    writer.write_all(b"\\n")?;
                 }
+            }
+            // Newlines needs to be escaped to the literal `\n`
+            b'\n' => {
+                writer.write_all(b"\\n")?;
             }
             b => writer.write_all(&[b'\\', b])?
         }
@@ -91,7 +95,7 @@ impl Iterator for EscapeByteIndices<'_> {
 
     fn next(&mut self) -> Option<Self::Item> {
         fn is_escaped_byte(b: u8) -> bool {
-            b == b',' || b == b';' || b == b'\\' || b == b'\r'
+            b == b',' || b == b';' || b == b'\\' || b == b'\r' || b == b'\n'
         }
 
         for &b in &self.bytes[self.offset..] {
@@ -150,9 +154,18 @@ mod text {
     }
 
     #[test]
+    fn escaped_chars() -> Result<(), Error> {
+        let s = ",\r\n;:\\ \r\n\rö\r";
+        let expected = "\\,\\n\\;:\\\\ \\n\\nö\\n";
+
+        assert_eq!(expected, write_text(s)?);
+        Ok(())
+    }
+
+    #[test]
     fn escaped_chars_only() -> Result<(), Error> {
         let s = ",\r\n;\r:\\";
-        let expected = "\\,\n\\;\n:\\\\";
+        let expected = "\\,\\n\\;\\n:\\\\";
 
         assert_eq!(expected, write_text(s)?);
         Ok(())
@@ -163,7 +176,7 @@ mod text {
         // To handle newlines, implementations have to check the next byte. However,
         // indexing must not panic.
         let s = "\r\n\rö\r";
-        let expected = "\n\nö\n";
+        let expected = "\\n\\nö\\n";
 
         assert_eq!(expected, write_text(s)?);
         Ok(())
@@ -181,7 +194,7 @@ mod text {
     #[test]
     fn long_sentence() -> Result<(), Error> {
         let s = "Hello, World! Today is a beautiful day to test: Escape Methods.\n Characters like ; or \\ must be escaped.\r\n";
-        let expected = "Hello\\, World! Today is a beautiful day to test: Escape Methods.\n Characters like \\; or \\\\ must be escaped.\n";
+        let expected = "Hello\\, World! Today is a beautiful day to test: Escape Methods.\\n Characters like \\; or \\\\ must be escaped.\\n";
 
         assert_eq!(expected, write_text(s)?);
         Ok(())
