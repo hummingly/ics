@@ -1,5 +1,15 @@
 # Changelog
 
+## Version 0.5.7
+
+### Bug Fix
+
+- Escape newline character in util::escape_text properly (see PR #16 by @greenfierydragon).
+
+### Documentation
+
+- Fix typos and update documentation regarding escaping newlines.
+
 ## Version 0.5.6
 
 ### Bug Fix
