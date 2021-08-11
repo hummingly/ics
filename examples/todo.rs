@@ -1,9 +1,10 @@
+use ics::components::{Alarm, ToDo};
 use ics::parameters::{FmtType, PartStat};
 use ics::properties::{
     Attach, Attendee, DtStamp, Due, Duration, Organizer, ProdID, Repeat, Sequence, Status, Summary,
     Trigger, Version, UID
 };
-use ics::writer::{Alarm, ICalendar, ToDo};
+use ics::writer::ICalendar;
 use std::fs::File;
 use std::io;
 

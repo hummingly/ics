@@ -1,10 +1,11 @@
+use ics::components::{Alarm, Daylight, Event, FreeBusy, Journal, Standard, TimeZone, ToDo};
 use ics::parameters::{CUType, FmtType, PartStat, Role, TzIDParam, RSVP};
 use ics::properties::{
     Attach, Attendee, Categories, Class, Created, Description, DtEnd, DtStamp, DtStart, Due,
     Duration, FreeBusyTime, Location, Organizer, ProdID, Repeat, Sequence, Status, Summary,
     Trigger, TzID, TzName, TzOffsetFrom, TzOffsetTo, Version, UID, URL
 };
-use ics::writer::{Alarm, Daylight, Event, FreeBusy, ICalendar, Journal, Standard, TimeZone, ToDo};
+use ics::writer::ICalendar;
 use std::io;
 
 #[test]

@@ -1,8 +1,9 @@
+use ics::components::Event;
 use ics::properties::{
     Categories, Description, DtEnd, DtStamp, DtStart, Organizer, ProdID, Status, Summary, Version,
     UID
 };
-use ics::writer::{Event, ICalendar};
+use ics::writer::ICalendar;
 use std::fs::File;
 use std::io;
 

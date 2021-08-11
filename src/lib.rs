@@ -23,8 +23,9 @@
 //!
 //! # Example
 //! ```
+//! use ics::components::ToDo;
 //! use ics::properties::{Comment, DtStamp, ProdID, Status, Summary, UID, Version};
-//! use ics::writer::{ICalendar, ToDo};
+//! use ics::writer::ICalendar;
 //! use std::fs::File;
 //! use std::io;
 //!
@@ -57,6 +58,7 @@
 
 #[macro_use]
 mod macros;
+pub mod components;
 mod contentline;
 pub mod parameters;
 pub mod properties;

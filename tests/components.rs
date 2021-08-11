@@ -1,10 +1,11 @@
+use ics::components::{Alarm, Daylight, Event, FreeBusy, Journal, Standard, TimeZone, ToDo};
 use ics::parameters::{FmtType, Related, Value};
 use ics::properties::{
     Attach, Attendee, Categories, Class, Completed, Description, DtEnd, DtStamp, DtStart, Due,
     FreeBusyTime, LastModified, Organizer, Priority, ProdID, RRule, Status, Summary, Transp,
     Trigger, TzID, TzName, TzOffsetFrom, TzOffsetTo, Version, UID, URL
 };
-use ics::writer::{Alarm, Daylight, Event, FreeBusy, ICalendar, Journal, Standard, TimeZone, ToDo};
+use ics::writer::ICalendar;
 use std::io;
 
 fn calendar<'o>(output: &'o mut Vec<u8>) -> Result<ICalendar<'o>, io::Error> {
