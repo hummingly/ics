@@ -51,6 +51,8 @@ pub fn write_base64<W: Write>(writer: &mut W, bytes: &[u8]) -> Result<(), Error>
 /// Escapes the comma, semicolon and backslash character and normalizes newlines
 /// by replacing them with linefeed character.
 pub fn write_escaped_text<W: Write>(writer: &mut W, text: &str) -> Result<(), Error> {
+    const ESCAPED_NEWLINE: &[u8] = b"\\n";
+
     if text.is_empty() {
         return Ok(());
     }
@@ -65,12 +67,12 @@ pub fn write_escaped_text<W: Write>(writer: &mut W, text: &str) -> Result<(), Er
                 // Replace old macOS newline character with a line feed character otherwise
                 // discard the carriage return character for Windows OS newlines.
                 if text.get(start + 1) != Some(&b'\n') {
-                    writer.write_all(b"\\n")?;
+                    writer.write_all(ESCAPED_NEWLINE)?;
                 }
             }
             // Newlines needs to be escaped to the literal `\n`
             b'\n' => {
-                writer.write_all(b"\\n")?;
+                writer.write_all(ESCAPED_NEWLINE)?;
             }
             b => writer.write_all(&[b'\\', b])?
         }

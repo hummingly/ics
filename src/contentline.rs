@@ -127,6 +127,9 @@ impl Writer<'_> {
     /// Folds and writes exactly LIMIT * N bytes and returns number of not
     /// written bytes.
     fn fold_buffer(&mut self) -> Result<usize, Error> {
+        /// Delimeter for content lines (CR LF SPACE)
+        const LINE_BREAK: &[u8] = b"\r\n ";
+
         fn next_boundary(input: &[u8]) -> Option<usize> {
             if input.len() <= LINE_MAX_LEN {
                 return None;
@@ -152,7 +155,7 @@ impl Writer<'_> {
 
         while boundary < content.len() {
             content = &content[boundary..];
-            self.inner.write_all(b"\r\n ")?;
+            self.inner.write_all(LINE_BREAK)?;
             match next_boundary(content) {
                 Some(next_boundary) => {
                     self.inner.write_all(&content[..next_boundary])?;
