@@ -9,7 +9,7 @@ use std::borrow::Cow;
 /// use ics::escape_text;
 ///
 /// let line = "Hello, World! Today is a beautiful day to test: Escape Methods.\n Characters like ; or \\ must be escaped.";
-/// let expected = "Hello\\, World! Today is a beautiful day to test: Escape Methods.\n Characters like \\; or \\\\ must be escaped.";
+/// let expected = "Hello\\, World! Today is a beautiful day to test: Escape Methods.\\n Characters like \\; or \\\\ must be escaped.";
 /// assert_eq!(expected, escape_text(line));
 pub fn escape_text<'a, S>(input: S) -> Cow<'a, str>
 where
@@ -20,7 +20,7 @@ where
     let mut has_carriage_return_char = false;
 
     for b in input.bytes() {
-        if b == b',' || b == b';' || b == b'\\' {
+        if b == b',' || b == b';' || b == b'\\' || b == b'\n' {
             escaped_chars_count += 1;
         } else if b == b'\r' {
             has_carriage_return_char = true;
@@ -28,7 +28,7 @@ where
     }
 
     if has_carriage_return_char || escaped_chars_count > 0 {
-        let escaped_chars = |c| c == ',' || c == ';' || c == '\\' || c == '\r';
+        let escaped_chars = |c| c == ',' || c == ';' || c == '\\' || c == '\r' || c == '\n';
         let mut output = String::with_capacity(input.len() + escaped_chars_count);
         let mut last_end = 0;
         for (start, part) in input.match_indices(escaped_chars) {
@@ -37,8 +37,12 @@ where
                 // \r was in old MacOS versions the newline character
                 "\r" => {
                     if input.get(start + 1..start + 2) != Some("\n") {
-                        output.push('\n');
+                        output.push_str("\\n");
                     }
+                }
+                // Newlines needs to be escaped to the literal `\n`
+                "\n" => {
+                    output.push_str("\\n");
                 }
                 c => {
                     output.push('\\');
@@ -61,7 +65,7 @@ mod escape_text_tests {
     #[test]
     fn escaped_chars() {
         let s = ",\r\n;:\\ \r\n\rö\r";
-        let expected = "\\,\n\\;:\\\\ \n\nö\n";
+        let expected = "\\,\\n\\;:\\\\ \\n\\nö\\n";
         assert_eq!(expected, escape_text(s));
     }
 
@@ -77,7 +81,7 @@ mod escape_text_tests {
     fn escape_property() {
         use components::Property;
 
-        let expected_value = "Hello\\, World! Today is a beautiful day to test: Escape Methods.\n Characters like \\; or \\\\ must be escaped.\n";
+        let expected_value = "Hello\\, World! Today is a beautiful day to test: Escape Methods.\\n Characters like \\; or \\\\ must be escaped.\\n";
         let property = Property::new(
             "COMMENT",
             escape_text("Hello, World! Today is a beautiful day to test: Escape Methods.\n Characters like ; or \\ must be escaped.\r\n")

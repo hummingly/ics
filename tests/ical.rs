@@ -21,8 +21,8 @@ fn icalendar_event() {
                     STATUS:CONFIRMED\r\n\
                     CATEGORIES:CONFERENCE\r\n\
                     SUMMARY:Networld+Interop Conference\r\n\
-                    DESCRIPTION:Networld+Interop Conference and Exhibit\n\
-                    Atlanta World Congress \r\n Center\n\
+                    DESCRIPTION:Networld+Interop Conference and Exhibit\\n\
+                    Atlanta World Congress\r\n  Center\\n\
                     Atlanta\\, Georgia\r\n\
                     END:VEVENT\r\n\
                     END:VCALENDAR\r\n";
