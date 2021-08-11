@@ -48,7 +48,7 @@
 
 ### Bug Fix
 
-- A single carriage return character (the old macOS new line character) was not properly converted to a new line character (line feed).
+- A single carriage return character (the old macOS newline character) was not properly converted to a newline character (line feed).
 
 ### Misc
 

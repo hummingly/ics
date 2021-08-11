@@ -1,6 +1,7 @@
 use std::borrow::Cow;
 
-/// Escapes comma, semicolon and backlash character with a backlash.
+/// Escapes comma, semicolon, backslash and newline character by prepending a
+/// backslash. Newlines are normalized to a line feed character.
 ///
 /// This method is only necessary for properties with the value type "TEXT".
 ///
