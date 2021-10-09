@@ -2,7 +2,7 @@
 ///
 /// # Example
 /// ```
-/// # #[macro_use] extern crate ics;
+/// use ics::parameters;
 /// use ics::components::Property;
 /// use ics::properties::DtStart;
 ///
@@ -32,7 +32,7 @@ macro_rules! parameters {
 
 #[cfg(test)]
 mod test {
-    use components::Parameters;
+    use crate::components::Parameters;
     use std::collections::BTreeMap;
 
     #[test]

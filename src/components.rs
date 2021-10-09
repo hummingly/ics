@@ -18,7 +18,7 @@
 //!     }
 //! }
 //! ```
-use contentline;
+use crate::contentline;
 use std::borrow::Cow;
 use std::collections::BTreeMap;
 use std::fmt;
