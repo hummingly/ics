@@ -30,7 +30,7 @@ fn next_boundary(input: &str) -> usize {
     }
     match input[..=LIMIT]
         .iter()
-        .rposition(|&i| !(128..192).contains(&i))
+        .rposition(|&i| i < 128 || i >= 192)
     {
         Some(0) | None => input.len(),
         Some(index) => index
