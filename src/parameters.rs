@@ -18,7 +18,7 @@
 //! assert_eq!(Parameter::new("CUTYPE", "INDIVIDUAL"), individual.into());
 //! ```
 //! For more information on parameters, please refer to the specification [RFC5545 3.2. Property Parameters](https://tools.ietf.org/html/rfc5545#section-3.2) and [RFC7986 6. Property Parameters](https://tools.ietf.org/html/rfc7986#section-6).
-use components::Parameter;
+use crate::components::Parameter;
 use std::borrow::Cow;
 
 parameter!(AltRep, "ALTREP");
@@ -266,7 +266,7 @@ pub use self::rfc7986::*;
 
 #[cfg(feature = "rfc7986")]
 mod rfc7986 {
-    use components::Parameter;
+    use crate::components::Parameter;
     use std::borrow::Cow;
     parameter_with_const!(
         /// [Format definitions of displaying images](https://tools.ietf.org/html/rfc7986#section-6.1)

@@ -21,7 +21,7 @@
 //! assert_eq!(Property::new("CLASS", "CONFIDENTIAL"), confidential.into());
 //! ```
 //! For more information on properties, please refer to the specification [RFC5545 3.7. Calendar Properties](https://tools.ietf.org/html/rfc5545#section-3.7) and [RFC7986 5. Properties](https://tools.ietf.org/html/rfc7986#section-5).
-use components::{Parameter, Parameters, Property};
+use crate::components::{Parameter, Parameters, Property};
 use std::borrow::Cow;
 use std::collections::BTreeMap;
 
@@ -132,7 +132,7 @@ pub use self::rfc7986::*;
 
 #[cfg(feature = "rfc7986")]
 mod rfc7986 {
-    use components::{Parameter, Parameters, Property};
+    use crate::components::{Parameter, Parameters, Property};
     use std::borrow::Cow;
     use std::collections::BTreeMap;
     property!(Name, "NAME");

@@ -48,8 +48,6 @@ impl ICalendarWriter {
 #### Rewriting TODO Example
 
 ```rust
-extern crate ics;
-
 use ics::properties::*;
 use ics::parameters::*;
 use ics::*;

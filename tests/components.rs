@@ -1,5 +1,3 @@
-extern crate ics;
-
 use ics::parameters::{FmtType, Related, Value};
 use ics::properties::{
     Attach, Attendee, Categories, Class, Completed, Description, DtEnd, DtStart, Due, FreeBusyTime,
