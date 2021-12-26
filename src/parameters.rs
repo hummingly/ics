@@ -140,14 +140,14 @@ pub enum Encoding {
     /// `8BIT` encoding defined in RFC2045 (Text)
     Byte,
     /// `BASE64` encoding Format defined in RFC4648 (Binary)
-    Base64
+    Base64,
 }
 
 impl Encoding {
     fn into_value<'a>(self) -> Cow<'a, str> {
         match self {
             Encoding::Byte => Cow::Borrowed("8BIT"),
-            Encoding::Base64 => Cow::Borrowed("BASE64")
+            Encoding::Base64 => Cow::Borrowed("BASE64"),
         }
     }
 }
@@ -156,7 +156,7 @@ impl<'a> From<Encoding> for Parameter<'a> {
     fn from(builder: Encoding) -> Self {
         Parameter {
             key: "ENCODING".into(),
-            value: builder.into_value()
+            value: builder.into_value(),
         }
     }
 }
@@ -171,7 +171,7 @@ impl Default for Encoding {
 #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub enum Range {
     /// `THISANDFUTURE` (Default Value)
-    ThisAndFuture
+    ThisAndFuture,
 }
 
 impl Range {
@@ -184,7 +184,7 @@ impl<'a> From<Range> for Parameter<'a> {
     fn from(builder: Range) -> Self {
         Parameter {
             key: "RANGE".into(),
-            value: builder.into_value()
+            value: builder.into_value(),
         }
     }
 }
@@ -201,14 +201,14 @@ pub enum Related {
     /// Trigger off of `START`
     Start,
     /// Trigger off of `END`
-    End
+    End,
 }
 
 impl Related {
     fn into_value<'a>(self) -> Cow<'a, str> {
         match self {
             Related::Start => Cow::Borrowed("START"),
-            Related::End => Cow::Borrowed("END")
+            Related::End => Cow::Borrowed("END"),
         }
     }
 }
@@ -217,7 +217,7 @@ impl<'a> From<Related> for Parameter<'a> {
     fn from(builder: Related) -> Self {
         Parameter {
             key: "RELATED".into(),
-            value: builder.into_value()
+            value: builder.into_value(),
         }
     }
 }
@@ -234,14 +234,14 @@ pub enum RSVP {
     /// `TRUE`
     True,
     /// `FALSE` (Default Value)
-    False
+    False,
 }
 
 impl RSVP {
     fn into_value<'a>(self) -> Cow<'a, str> {
         match self {
             RSVP::True => Cow::Borrowed("TRUE"),
-            RSVP::False => Cow::Borrowed("FALSE")
+            RSVP::False => Cow::Borrowed("FALSE"),
         }
     }
 }
@@ -250,7 +250,7 @@ impl<'a> From<RSVP> for Parameter<'a> {
     fn from(builder: RSVP) -> Self {
         Parameter {
             key: "RSVP".into(),
-            value: builder.into_value()
+            value: builder.into_value(),
         }
     }
 }

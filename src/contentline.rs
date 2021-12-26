@@ -28,12 +28,9 @@ fn next_boundary(input: &str) -> usize {
     if LIMIT >= input.len() {
         return input.len();
     }
-    match input[..=LIMIT]
-        .iter()
-        .rposition(|&i| i < 128 || i >= 192)
-    {
+    match input[..=LIMIT].iter().rposition(|&i| i < 128 || i >= 192) {
         Some(0) | None => input.len(),
-        Some(index) => index
+        Some(index) => index,
     }
 }
 

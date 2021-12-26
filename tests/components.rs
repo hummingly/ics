@@ -1,7 +1,7 @@
 use ics::parameters::{FmtType, Related, Value};
 use ics::properties::{
     Attach, Attendee, Categories, Class, Completed, Description, DtEnd, DtStart, Due, FreeBusyTime,
-    LastModified, Organizer, Priority, RRule, Status, Summary, Transp, Trigger, TzName, URL
+    LastModified, Organizer, Priority, RRule, Status, Summary, Transp, Trigger, TzName, URL,
 };
 use ics::{escape_text, Alarm, Daylight, Event, FreeBusy, Journal, Standard, TimeZone, ToDo};
 
@@ -101,7 +101,7 @@ fn freebusy() {
     freebusy.push(FreeBusyTime::new("19980318T030000Z/19980318T040000Z"));
     freebusy.push(Organizer::new("jsmith@example.com"));
     freebusy.push(URL::new(
-        "http://www.example.com/calendar/busytime/jsmith.ifb"
+        "http://www.example.com/calendar/busytime/jsmith.ifb",
     ));
 
     assert_eq!(freebusy.to_string(), expected);

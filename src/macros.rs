@@ -266,7 +266,7 @@ macro_rules! impl_default_prop {
             fn default() -> Self {
                 Self {
                     value: $default.into(),
-                    parameters: BTreeMap::new()
+                    parameters: BTreeMap::new(),
                 }
             }
         }
@@ -280,7 +280,7 @@ macro_rules! impl_from_prop {
                 Property {
                     key: $name.into(),
                     value: builder.value,
-                    parameters: builder.parameters
+                    parameters: builder.parameters,
                 }
             }
         }
@@ -293,7 +293,7 @@ macro_rules! impl_from_param {
             fn from(builder: $type<'a>) -> Self {
                 Parameter {
                     key: $name.into(),
-                    value: builder.value
+                    value: builder.value,
                 }
             }
         }

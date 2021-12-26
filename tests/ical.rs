@@ -1,7 +1,7 @@
 use ics::parameters::{FmtType, PartStat};
 use ics::properties::{
     Attach, Attendee, Categories, Description, DtEnd, DtStart, Due, Duration, Organizer, Repeat,
-    Sequence, Status, Summary, Trigger
+    Sequence, Status, Summary, Trigger,
 };
 use ics::{escape_text, Alarm, Event, ICalendar, ToDo};
 
@@ -35,7 +35,7 @@ fn icalendar_event() {
     event.push(Description::new(escape_text(
         "Networld+Interop Conference and Exhibit\n\
          Atlanta World Congress Center\n\
-         Atlanta, Georgia"
+         Atlanta, Georgia",
     )));
 
     let mut calendar = ICalendar::new("2.0", "-//xyz Corp//NONSGML PDA Calendar Version 1.0//EN");

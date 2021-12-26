@@ -18,7 +18,7 @@ fn main() -> std::io::Result<()> {
     event.push(Description::new(escape_text(
         "Networld+Interop Conference and Exhibit\n\
          Atlanta World Congress Center\n\
-         Atlanta, Georgia"
+         Atlanta, Georgia",
     )));
 
     // Create new iCalendar object

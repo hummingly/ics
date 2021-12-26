@@ -150,7 +150,7 @@ mod rfc7986 {
     #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
     pub struct Image<'a> {
         value: Cow<'a, str>,
-        parameters: Parameters<'a>
+        parameters: Parameters<'a>,
     }
 
     impl<'a> Image<'a> {
@@ -158,11 +158,11 @@ mod rfc7986 {
         /// is `URI`.
         pub fn uri<S>(value: S) -> Self
         where
-            S: Into<Cow<'a, str>>
+            S: Into<Cow<'a, str>>,
         {
             Image {
                 value: value.into(),
-                parameters: parameters!("VALUE" => "URI")
+                parameters: parameters!("VALUE" => "URI"),
             }
         }
 
@@ -171,18 +171,18 @@ mod rfc7986 {
         /// with the value `BASE64` is also added.
         pub fn binary<S>(value: S) -> Self
         where
-            S: Into<Cow<'a, str>>
+            S: Into<Cow<'a, str>>,
         {
             Image {
                 value: value.into(),
-                parameters: parameters!("ENCODING" => "BASE64"; "VALUE" => "BINARY")
+                parameters: parameters!("ENCODING" => "BASE64"; "VALUE" => "BINARY"),
             }
         }
 
         /// Adds a parameter to the property.
         pub fn add<P>(&mut self, parameter: P)
         where
-            P: Into<Parameter<'a>>
+            P: Into<Parameter<'a>>,
         {
             let param = parameter.into();
             self.parameters.insert(param.key, param.value);
@@ -201,7 +201,7 @@ mod rfc7986 {
             Property {
                 key: "IMAGE".into(),
                 value: builder.value,
-                parameters: builder.parameters
+                parameters: builder.parameters,
             }
         }
     }

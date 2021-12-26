@@ -1,7 +1,7 @@
 use crate::components::{Component, Property};
 use crate::properties::{
     Action, Description, DtStamp, DtStart, ProdID, Summary, Trigger, TzID, TzOffsetFrom,
-    TzOffsetTo, Version, UID
+    TzOffsetTo, Version, UID,
 };
 use std::borrow::Cow;
 use std::fmt;
@@ -26,12 +26,12 @@ impl<'a> ICalendar<'a> {
     pub fn new<V, P>(version: V, prodid: P) -> Self
     where
         V: Into<Cow<'a, str>>,
-        P: Into<Cow<'a, str>>
+        P: Into<Cow<'a, str>>,
     {
         ICalendar(Component {
             name: "VCALENDAR".into(),
             properties: vec![Version::new(version).into(), ProdID::new(prodid).into()],
-            subcomponents: Vec::new()
+            subcomponents: Vec::new(),
         })
     }
 
@@ -39,7 +39,7 @@ impl<'a> ICalendar<'a> {
     /// calendar attributes.
     pub fn push<P>(&mut self, property: P)
     where
-        P: Into<Property<'a>>
+        P: Into<Property<'a>>,
     {
         self.0.add_property(property);
     }
@@ -48,7 +48,7 @@ impl<'a> ICalendar<'a> {
     /// for IANA/non-standard components.
     pub fn add_component<C>(&mut self, component: C)
     where
-        C: Into<Component<'a>>
+        C: Into<Component<'a>>,
     {
         self.0.add_component(component);
     }
@@ -82,7 +82,7 @@ impl<'a> ICalendar<'a> {
     /// to a writer in the iCalendar format.
     pub fn write<W>(&self, mut writer: W) -> io::Result<()>
     where
-        W: Write
+        W: Write,
     {
         write!(writer, "{}", self)
     }
@@ -91,7 +91,7 @@ impl<'a> ICalendar<'a> {
     /// object in the iCalendar format.
     pub fn save_file<P>(&self, filename: P) -> io::Result<()>
     where
-        P: AsRef<Path>
+        P: AsRef<Path>,
     {
         self.write(File::create(filename)?)
     }
@@ -117,7 +117,7 @@ impl<'a> From<ICalendar<'a>> for Component<'a> {
 #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Event<'a> {
     properties: Vec<Property<'a>>,
-    alarms: Vec<Alarm<'a>>
+    alarms: Vec<Alarm<'a>>,
 }
 
 impl<'a> Event<'a> {
@@ -127,11 +127,11 @@ impl<'a> Event<'a> {
     pub fn new<U, D>(uid: U, dtstamp: D) -> Self
     where
         U: Into<Cow<'a, str>>,
-        D: Into<Cow<'a, str>>
+        D: Into<Cow<'a, str>>,
     {
         Self {
             properties: vec![UID::new(uid).into(), DtStamp::new(dtstamp).into()],
-            alarms: Vec::new()
+            alarms: Vec::new(),
         }
     }
 
@@ -165,7 +165,7 @@ impl<'a> From<Event<'a>> for Component<'a> {
         Component {
             name: "VEVENT".into(),
             properties: component.properties,
-            subcomponents: component.alarms.into_iter().map(Component::from).collect()
+            subcomponents: component.alarms.into_iter().map(Component::from).collect(),
         }
     }
 }
@@ -177,7 +177,7 @@ impl<'a> From<Event<'a>> for Component<'a> {
 #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct ToDo<'a> {
     properties: Vec<Property<'a>>,
-    alarms: Vec<Alarm<'a>>
+    alarms: Vec<Alarm<'a>>,
 }
 
 impl<'a> ToDo<'a> {
@@ -187,11 +187,11 @@ impl<'a> ToDo<'a> {
     pub fn new<U, D>(uid: U, dtstamp: D) -> Self
     where
         U: Into<Cow<'a, str>>,
-        D: Into<Cow<'a, str>>
+        D: Into<Cow<'a, str>>,
     {
         Self {
             properties: vec![UID::new(uid).into(), DtStamp::new(dtstamp).into()],
-            alarms: Vec::new()
+            alarms: Vec::new(),
         }
     }
 
@@ -199,7 +199,7 @@ impl<'a> ToDo<'a> {
     /// properties can be added to a to-do.
     pub fn push<P>(&mut self, property: P)
     where
-        P: Into<Property<'a>>
+        P: Into<Property<'a>>,
     {
         self.properties.push(property.into());
     }
@@ -228,7 +228,7 @@ impl<'a> From<ToDo<'a>> for Component<'a> {
         Component {
             name: "VTODO".into(),
             properties: component.properties,
-            subcomponents: component.alarms.into_iter().map(Component::from).collect()
+            subcomponents: component.alarms.into_iter().map(Component::from).collect(),
         }
     }
 }
@@ -248,7 +248,7 @@ impl<'a> Journal<'a> {
     pub fn new<U, D>(uid: U, dtstamp: D) -> Self
     where
         U: Into<Cow<'a, str>>,
-        D: Into<Cow<'a, str>>
+        D: Into<Cow<'a, str>>,
     {
         Journal(vec![UID::new(uid).into(), DtStamp::new(dtstamp).into()])
     }
@@ -257,7 +257,7 @@ impl<'a> Journal<'a> {
     /// properties can be added to a journal.
     pub fn push<P>(&mut self, property: P)
     where
-        P: Into<Property<'a>>
+        P: Into<Property<'a>>,
     {
         self.0.push(property.into());
     }
@@ -278,7 +278,7 @@ impl<'a> From<Journal<'a>> for Component<'a> {
         Component {
             name: "VJOURNAL".into(),
             properties: component.0,
-            subcomponents: Vec::new()
+            subcomponents: Vec::new(),
         }
     }
 }
@@ -299,7 +299,7 @@ impl<'a> FreeBusy<'a> {
     pub fn new<U, D>(uid: U, dtstamp: D) -> Self
     where
         U: Into<Cow<'a, str>>,
-        D: Into<Cow<'a, str>>
+        D: Into<Cow<'a, str>>,
     {
         FreeBusy(vec![UID::new(uid).into(), DtStamp::new(dtstamp).into()])
     }
@@ -308,7 +308,7 @@ impl<'a> FreeBusy<'a> {
     /// properties can be added to a free busy schedule.
     pub fn push<P>(&mut self, property: P)
     where
-        P: Into<Property<'a>>
+        P: Into<Property<'a>>,
     {
         self.0.push(property.into());
     }
@@ -329,7 +329,7 @@ impl<'a> From<FreeBusy<'a>> for Component<'a> {
         Component {
             name: "VFREEBUSY".into(),
             properties: component.0,
-            subcomponents: Vec::new()
+            subcomponents: Vec::new(),
         }
     }
 }
@@ -342,7 +342,7 @@ impl<'a> From<FreeBusy<'a>> for Component<'a> {
 #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct TimeZone<'a> {
     properties: Vec<Property<'a>>,
-    zone_times: Vec<ZoneTime<'a>>
+    zone_times: Vec<ZoneTime<'a>>,
 }
 
 impl<'a> TimeZone<'a> {
@@ -351,11 +351,11 @@ impl<'a> TimeZone<'a> {
     /// [`TimeZone::add_standard()`] or [`TimeZone::add_daylight()`].
     pub fn standard<S>(tzid: S, definition: Standard<'a>) -> Self
     where
-        S: Into<Cow<'a, str>>
+        S: Into<Cow<'a, str>>,
     {
         Self {
             properties: vec![TzID::new(tzid).into()],
-            zone_times: vec![ZoneTime::Standard(definition)]
+            zone_times: vec![ZoneTime::Standard(definition)],
         }
     }
 
@@ -364,11 +364,11 @@ impl<'a> TimeZone<'a> {
     /// [`TimeZone::add_standard()`] or [`TimeZone::add_daylight()`].
     pub fn daylight<S>(tzid: S, definition: Daylight<'a>) -> Self
     where
-        S: Into<Cow<'a, str>>
+        S: Into<Cow<'a, str>>,
     {
         Self {
             properties: vec![TzID::new(tzid).into()],
-            zone_times: vec![ZoneTime::Daylight(definition)]
+            zone_times: vec![ZoneTime::Daylight(definition)],
         }
     }
 
@@ -376,7 +376,7 @@ impl<'a> TimeZone<'a> {
     /// properties can be added to a time zone.
     pub fn push<P>(&mut self, property: P)
     where
-        P: Into<Property<'a>>
+        P: Into<Property<'a>>,
     {
         self.properties.push(property.into());
     }
@@ -416,7 +416,7 @@ impl<'a> From<TimeZone<'a>> for Component<'a> {
                 .zone_times
                 .into_iter()
                 .map(Component::from)
-                .collect()
+                .collect(),
         }
     }
 }
@@ -426,14 +426,14 @@ enum ZoneTime<'a> {
     /// Standard Time
     Standard(Standard<'a>),
     /// Daylight Saving Time
-    Daylight(Daylight<'a>)
+    Daylight(Daylight<'a>),
 }
 
 impl<'a> fmt::Display for ZoneTime<'a> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             ZoneTime::Daylight(p) => write!(f, "{}", p),
-            ZoneTime::Standard(p) => write!(f, "{}", p)
+            ZoneTime::Standard(p) => write!(f, "{}", p),
         }
     }
 }
@@ -442,7 +442,7 @@ impl<'a> From<ZoneTime<'a>> for Component<'a> {
     fn from(component: ZoneTime<'a>) -> Self {
         match component {
             ZoneTime::Daylight(p) => Self::from(p),
-            ZoneTime::Standard(p) => Self::from(p)
+            ZoneTime::Standard(p) => Self::from(p),
         }
     }
 }
@@ -461,7 +461,7 @@ impl<'a> Standard<'a> {
     where
         S: Into<Cow<'a, str>>,
         F: Into<Cow<'a, str>>,
-        T: Into<Cow<'a, str>>
+        T: Into<Cow<'a, str>>,
     {
         Standard(vec![
             DtStart::new(dtstart).into(),
@@ -474,7 +474,7 @@ impl<'a> Standard<'a> {
     /// properties can be added to a zone time.
     pub fn push<P>(&mut self, property: P)
     where
-        P: Into<Property<'a>>
+        P: Into<Property<'a>>,
     {
         self.0.push(property.into());
     }
@@ -495,7 +495,7 @@ impl<'a> From<Standard<'a>> for Component<'a> {
         Component {
             name: "STANDARD".into(),
             properties: component.0,
-            subcomponents: Vec::new()
+            subcomponents: Vec::new(),
         }
     }
 }
@@ -515,7 +515,7 @@ impl<'a> Daylight<'a> {
     where
         S: Into<Cow<'a, str>>,
         F: Into<Cow<'a, str>>,
-        T: Into<Cow<'a, str>>
+        T: Into<Cow<'a, str>>,
     {
         Daylight(vec![
             DtStart::new(dtstart).into(),
@@ -528,7 +528,7 @@ impl<'a> Daylight<'a> {
     /// properties can be added to a zone time.
     pub fn push<P>(&mut self, property: P)
     where
-        P: Into<Property<'a>>
+        P: Into<Property<'a>>,
     {
         self.0.push(property.into());
     }
@@ -549,7 +549,7 @@ impl<'a> From<Daylight<'a>> for Component<'a> {
         Component {
             name: "DAYLIGHT".into(),
             properties: component.0,
-            subcomponents: Vec::new()
+            subcomponents: Vec::new(),
         }
     }
 }
@@ -601,7 +601,7 @@ impl<'a> Alarm<'a> {
     /// be added depending on the kind of alarm.
     pub fn push<P>(&mut self, property: P)
     where
-        P: Into<Property<'a>>
+        P: Into<Property<'a>>,
     {
         self.0.push(property.into());
     }
@@ -622,7 +622,7 @@ impl<'a> From<Alarm<'a>> for Component<'a> {
         Component {
             name: "VALARM".into(),
             properties: component.0,
-            subcomponents: Vec::new()
+            subcomponents: Vec::new(),
         }
     }
 }

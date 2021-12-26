@@ -1,6 +1,6 @@
 use ics::parameters::{FmtType, PartStat};
 use ics::properties::{
-    Attach, Attendee, Due, Duration, Organizer, Repeat, Sequence, Status, Summary, Trigger
+    Attach, Attendee, Due, Duration, Organizer, Repeat, Sequence, Status, Summary, Trigger,
 };
 use ics::{Alarm, ICalendar, ToDo};
 

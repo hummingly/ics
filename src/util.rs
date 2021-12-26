@@ -14,7 +14,7 @@ use std::borrow::Cow;
 /// assert_eq!(expected, escape_text(line));
 pub fn escape_text<'a, S>(input: S) -> Cow<'a, str>
 where
-    S: Into<Cow<'a, str>>
+    S: Into<Cow<'a, str>>,
 {
     let input = input.into();
     let mut escaped_chars_count = 0;
