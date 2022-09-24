@@ -5,12 +5,12 @@ use std::io::Error;
 use crate::{
     properties::{
         Action, Description, DtStamp, DtStart, Summary, Trigger, TzID, TzOffsetFrom, TzOffsetTo,
-        UID
+        UID,
     },
     writer::{
         AlarmWriter, DaylightWriter, EventWriter, FreeBusyWriter, JournalWriter, StandardWriter,
-        TimeZoneWriter, ToDoWriter
-    }
+        TimeZoneWriter, ToDoWriter,
+    },
 };
 
 pub struct Event;
@@ -19,7 +19,7 @@ impl Event {
     pub fn build<'e>(
         uid: UID<'e>,
         dt_stamp: DtStamp<'e>,
-        body: impl FnOnce(&mut EventWriter) -> Result<(), Error> + 'e
+        body: impl FnOnce(&mut EventWriter) -> Result<(), Error> + 'e,
     ) -> impl FnOnce(&mut EventWriter) -> Result<(), Error> + 'e {
         move |event| {
             event.write(&uid)?;
@@ -35,7 +35,7 @@ impl ToDo {
     pub fn build<'t>(
         uid: UID<'t>,
         dt_stamp: DtStamp<'t>,
-        body: impl FnOnce(&mut ToDoWriter) -> Result<(), Error> + 't
+        body: impl FnOnce(&mut ToDoWriter) -> Result<(), Error> + 't,
     ) -> impl FnOnce(&mut ToDoWriter) -> Result<(), Error> + 't {
         move |todo| {
             todo.write(&uid)?;
@@ -51,7 +51,7 @@ impl Journal {
     pub fn build<'j>(
         uid: UID<'j>,
         dt_stamp: DtStamp<'j>,
-        body: impl FnOnce(&mut JournalWriter) -> Result<(), Error> + 'j
+        body: impl FnOnce(&mut JournalWriter) -> Result<(), Error> + 'j,
     ) -> impl FnOnce(&mut JournalWriter) -> Result<(), Error> + 'j {
         move |journal| {
             journal.write(&uid)?;
@@ -67,7 +67,7 @@ impl FreeBusy {
     pub fn build<'f>(
         uid: UID<'f>,
         dt_stamp: DtStamp<'f>,
-        body: impl FnOnce(&mut FreeBusyWriter) -> Result<(), Error> + 'f
+        body: impl FnOnce(&mut FreeBusyWriter) -> Result<(), Error> + 'f,
     ) -> impl FnOnce(&mut FreeBusyWriter) -> Result<(), Error> + 'f {
         move |freebusy| {
             freebusy.write(&uid)?;
@@ -83,7 +83,7 @@ impl TimeZone {
     pub fn standard<'t>(
         tzid: TzID<'t>,
         definition: impl FnOnce(&mut StandardWriter) -> Result<(), Error> + 't,
-        body: impl FnOnce(&mut TimeZoneWriter) -> Result<(), Error> + 't
+        body: impl FnOnce(&mut TimeZoneWriter) -> Result<(), Error> + 't,
     ) -> impl FnOnce(&mut TimeZoneWriter) -> Result<(), Error> + 't {
         move |timezone| {
             timezone.write(&tzid)?;
@@ -95,7 +95,7 @@ impl TimeZone {
     pub fn daylight<'t>(
         tzid: TzID<'t>,
         definition: impl FnOnce(&mut DaylightWriter) -> Result<(), Error> + 't,
-        body: impl FnOnce(&mut TimeZoneWriter) -> Result<(), Error> + 't
+        body: impl FnOnce(&mut TimeZoneWriter) -> Result<(), Error> + 't,
     ) -> impl FnOnce(&mut TimeZoneWriter) -> Result<(), Error> + 't {
         move |timezone| {
             timezone.write(&tzid)?;
@@ -111,7 +111,7 @@ impl Alarm {
     pub fn build<'a>(
         action: Action<'a>,
         trigger: Trigger<'a>,
-        body: impl FnOnce(&mut AlarmWriter) -> Result<(), Error> + 'a
+        body: impl FnOnce(&mut AlarmWriter) -> Result<(), Error> + 'a,
     ) -> impl FnOnce(&mut AlarmWriter) -> Result<(), Error> + 'a {
         move |alarm| {
             alarm.write(&action)?;
@@ -122,7 +122,7 @@ impl Alarm {
 
     pub fn audio<'a>(
         trigger: Trigger<'a>,
-        body: impl FnOnce(&mut AlarmWriter) -> Result<(), Error> + 'a
+        body: impl FnOnce(&mut AlarmWriter) -> Result<(), Error> + 'a,
     ) -> impl FnOnce(&mut AlarmWriter) -> Result<(), Error> + 'a {
         move |alarm| {
             alarm.write(&Action::AUDIO)?;
@@ -134,7 +134,7 @@ impl Alarm {
     pub fn display<'a>(
         trigger: Trigger<'a>,
         description: Description<'a>,
-        body: impl FnOnce(&mut AlarmWriter) -> Result<(), Error> + 'a
+        body: impl FnOnce(&mut AlarmWriter) -> Result<(), Error> + 'a,
     ) -> impl FnOnce(&mut AlarmWriter) -> Result<(), Error> + 'a {
         move |alarm| {
             alarm.write(&Action::DISPLAY)?;
@@ -148,7 +148,7 @@ impl Alarm {
         trigger: Trigger<'a>,
         description: Description<'a>,
         summary: Summary<'a>,
-        body: impl FnOnce(&mut AlarmWriter) -> Result<(), Error> + 'a
+        body: impl FnOnce(&mut AlarmWriter) -> Result<(), Error> + 'a,
     ) -> impl FnOnce(&mut AlarmWriter) -> Result<(), Error> + 'a {
         move |alarm| {
             alarm.write(&Action::EMAIL)?;
@@ -167,7 +167,7 @@ impl Standard {
         dt_start: DtStart<'s>,
         tz_offset_from: TzOffsetFrom<'s>,
         tz_offset_to: TzOffsetTo<'s>,
-        body: impl FnOnce(&mut StandardWriter) -> Result<(), Error> + 's
+        body: impl FnOnce(&mut StandardWriter) -> Result<(), Error> + 's,
     ) -> impl FnOnce(&mut StandardWriter) -> Result<(), Error> + 's {
         move |standard| {
             standard.write(&dt_start)?;
@@ -185,7 +185,7 @@ impl Daylight {
         dt_start: DtStart<'d>,
         tz_offset_from: TzOffsetFrom<'d>,
         tz_offset_to: TzOffsetTo<'d>,
-        body: impl FnOnce(&mut DaylightWriter) -> Result<(), Error> + 'd
+        body: impl FnOnce(&mut DaylightWriter) -> Result<(), Error> + 'd,
     ) -> impl FnOnce(&mut DaylightWriter) -> Result<(), Error> + 'd {
         move |daylight| {
             daylight.write(&dt_start)?;

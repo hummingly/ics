@@ -1,7 +1,7 @@
 use ics::components::Event;
 use ics::properties::{
     Categories, Description, DtEnd, DtStamp, DtStart, Organizer, ProdID, Status, Summary, Version,
-    UID
+    UID,
 };
 use ics::writer::ICalendar;
 use std::fs::File;
@@ -16,7 +16,7 @@ fn main() -> Result<(), io::Error> {
     let mut calendar = ICalendar::new(
         &mut file,
         Version::new("2.0"),
-        ProdID::new("-//xyz Corp//NONSGML PDA Calendar Version 1.0//EN")
+        ProdID::new("-//xyz Corp//NONSGML PDA Calendar Version 1.0//EN"),
     )?;
 
     // Create a new event.
@@ -40,9 +40,9 @@ fn main() -> Result<(), io::Error> {
             event.write(&Description::new(
                 "Networld+Interop Conference and Exhibit\n\
                 Atlanta World Congress Center\n\
-                Atlanta, Georgia"
+                Atlanta, Georgia",
             ))
-        }
+        },
     );
 
     // Write the event into the writer.

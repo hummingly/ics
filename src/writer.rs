@@ -19,7 +19,7 @@ impl<'w> ICalendar<'w> {
     pub fn new(
         inner: &'w mut dyn Write,
         version: Version,
-        product_id: ProdID
+        product_id: ProdID,
     ) -> Result<Self, Error> {
         let mut writer = LineWriter::new(inner);
         writer.write_begin_unchecked(VCALENDAR)?;
@@ -37,7 +37,7 @@ impl ICalendar<'_> {
     pub fn write_component(
         &mut self,
         name: &str,
-        body: impl FnOnce(&mut Self) -> Result<(), Error>
+        body: impl FnOnce(&mut Self) -> Result<(), Error>,
     ) -> Result<(), Error> {
         self.0.write_begin(name)?;
         body(self)?;
@@ -46,7 +46,7 @@ impl ICalendar<'_> {
 
     pub fn write_event(
         &mut self,
-        event: impl FnOnce(&mut EventWriter) -> Result<(), Error>
+        event: impl FnOnce(&mut EventWriter) -> Result<(), Error>,
     ) -> Result<(), Error> {
         self.0.write_begin_unchecked(VEVENT)?;
         (event)(&mut EventWriter(&mut self.0))?;
@@ -55,7 +55,7 @@ impl ICalendar<'_> {
 
     pub fn write_todo(
         &mut self,
-        todo: impl FnOnce(&mut ToDoWriter) -> Result<(), Error>
+        todo: impl FnOnce(&mut ToDoWriter) -> Result<(), Error>,
     ) -> Result<(), Error> {
         self.0.write_begin_unchecked(VTODO)?;
         (todo)(&mut ToDoWriter(&mut self.0))?;
@@ -64,7 +64,7 @@ impl ICalendar<'_> {
 
     pub fn write_journal(
         &mut self,
-        journal: impl FnOnce(&mut JournalWriter) -> Result<(), Error>
+        journal: impl FnOnce(&mut JournalWriter) -> Result<(), Error>,
     ) -> Result<(), Error> {
         self.0.write_begin_unchecked(VJOURNAL)?;
         (journal)(&mut JournalWriter(&mut self.0))?;
@@ -73,7 +73,7 @@ impl ICalendar<'_> {
 
     pub fn write_freebusy(
         &mut self,
-        freebusy: impl FnOnce(&mut FreeBusyWriter) -> Result<(), Error>
+        freebusy: impl FnOnce(&mut FreeBusyWriter) -> Result<(), Error>,
     ) -> Result<(), Error> {
         self.0.write_begin_unchecked(VFREEBUSY)?;
         (freebusy)(&mut FreeBusyWriter(&mut self.0))?;
@@ -82,7 +82,7 @@ impl ICalendar<'_> {
 
     pub fn write_timezone(
         &mut self,
-        timezone: impl FnOnce(&mut TimeZoneWriter) -> Result<(), Error>
+        timezone: impl FnOnce(&mut TimeZoneWriter) -> Result<(), Error>,
     ) -> Result<(), Error> {
         self.0.write_begin_unchecked(VTIMEZONE)?;
         (timezone)(&mut TimeZoneWriter(&mut self.0))?;
@@ -104,7 +104,7 @@ impl EventWriter<'_, '_> {
 
     pub fn write_alarm(
         &mut self,
-        alarm: impl FnOnce(&mut AlarmWriter) -> Result<(), Error>
+        alarm: impl FnOnce(&mut AlarmWriter) -> Result<(), Error>,
     ) -> Result<(), Error> {
         self.0.write_begin_unchecked(VALARM)?;
         (alarm)(&mut AlarmWriter(self.0))?;
@@ -122,7 +122,7 @@ impl ToDoWriter<'_, '_> {
 
     pub fn write_alarm(
         &mut self,
-        alarm: impl FnOnce(&mut AlarmWriter) -> Result<(), Error>
+        alarm: impl FnOnce(&mut AlarmWriter) -> Result<(), Error>,
     ) -> Result<(), Error> {
         self.0.write_begin_unchecked(VALARM)?;
         (alarm)(&mut AlarmWriter(self.0))?;
@@ -158,7 +158,7 @@ impl TimeZoneWriter<'_, '_> {
 
     pub fn write_standard(
         &mut self,
-        definition: impl FnOnce(&mut StandardWriter) -> Result<(), Error>
+        definition: impl FnOnce(&mut StandardWriter) -> Result<(), Error>,
     ) -> Result<(), Error> {
         self.0.write_begin_unchecked(STANDARD)?;
         (definition)(&mut StandardWriter(self.0))?;
@@ -167,7 +167,7 @@ impl TimeZoneWriter<'_, '_> {
 
     pub fn write_daylight(
         &mut self,
-        definition: impl FnOnce(&mut DaylightWriter) -> Result<(), Error>
+        definition: impl FnOnce(&mut DaylightWriter) -> Result<(), Error>,
     ) -> Result<(), Error> {
         self.0.write_begin_unchecked(DAYLIGHT)?;
         (definition)(&mut DaylightWriter(self.0))?;

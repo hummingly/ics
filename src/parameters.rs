@@ -28,7 +28,7 @@ use std::fmt;
 #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Parameter<'a> {
     pub(crate) name: Cow<'a, str>,
-    pub(crate) value: Cow<'a, str>
+    pub(crate) value: Cow<'a, str>,
 }
 
 impl<'a> Parameter<'a> {
@@ -36,7 +36,7 @@ impl<'a> Parameter<'a> {
     pub fn new(name: impl Into<Cow<'a, str>>, value: impl Into<Cow<'a, str>>) -> Self {
         Parameter {
             name: name.into(),
-            value: value.into()
+            value: value.into(),
         }
     }
 }
@@ -170,7 +170,7 @@ pub enum Encoding {
     /// `8BIT` encoding defined in RFC2045 (Text)
     Byte,
     /// `BASE64` encoding Format defined in RFC4648 (Binary)
-    Base64
+    Base64,
 }
 
 impl Encoding {
@@ -184,8 +184,8 @@ impl From<Encoding> for Parameter<'_> {
             name: Cow::Borrowed(Encoding::NAME),
             value: Cow::Borrowed(match builder {
                 Encoding::Byte => "8BIT",
-                Encoding::Base64 => "BASE64"
-            })
+                Encoding::Base64 => "BASE64",
+            }),
         }
     }
 }
@@ -200,7 +200,7 @@ impl Default for Encoding {
 #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub enum Range {
     /// `THISANDFUTURE` (Default Value)
-    ThisAndFuture
+    ThisAndFuture,
 }
 
 impl Range {
@@ -213,8 +213,8 @@ impl From<Range> for Parameter<'_> {
         Parameter {
             name: Cow::Borrowed(Range::NAME),
             value: Cow::Borrowed(match builder {
-                Range::ThisAndFuture => "THISANDFUTURE"
-            })
+                Range::ThisAndFuture => "THISANDFUTURE",
+            }),
         }
     }
 }
@@ -231,7 +231,7 @@ pub enum Related {
     /// Trigger off of `START`
     Start,
     /// Trigger off of `END`
-    End
+    End,
 }
 
 impl Related {
@@ -245,8 +245,8 @@ impl From<Related> for Parameter<'_> {
             name: Cow::Borrowed(Related::NAME),
             value: Cow::Borrowed(match builder {
                 Related::Start => "START",
-                Related::End => "END"
-            })
+                Related::End => "END",
+            }),
         }
     }
 }
@@ -263,7 +263,7 @@ pub enum RSVP {
     /// `TRUE`
     True,
     /// `FALSE` (Default Value)
-    False
+    False,
 }
 
 impl RSVP {
@@ -277,8 +277,8 @@ impl From<RSVP> for Parameter<'_> {
             name: Cow::Borrowed(RSVP::NAME),
             value: Cow::Borrowed(match builder {
                 RSVP::True => "TRUE",
-                RSVP::False => "FALSE"
-            })
+                RSVP::False => "FALSE",
+            }),
         }
     }
 }

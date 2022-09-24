@@ -3,7 +3,7 @@ use ics::parameters::{FmtType, Related, Value};
 use ics::properties::{
     Attach, Attendee, Categories, Class, Completed, Description, DtEnd, DtStamp, DtStart, Due,
     FreeBusyTime, LastModified, Organizer, Priority, ProdID, RRule, Status, Summary, Transp,
-    Trigger, TzID, TzName, TzOffsetFrom, TzOffsetTo, Version, UID, URL
+    Trigger, TzID, TzName, TzOffsetFrom, TzOffsetTo, Version, UID, URL,
 };
 use ics::writer::ICalendar;
 use std::io;
@@ -44,7 +44,7 @@ fn event() -> Result<(), io::Error> {
             event.write(&RRule::new("FREQ=YEARLY"))?;
             event.write(&Summary::new("Our Blissful Anniversary"))?;
             event.write(&Transp::TRANSPARENT)
-        }
+        },
     );
     calendar.write_event(event)?;
     calendar.close()?;
@@ -85,7 +85,7 @@ fn todo() -> Result<(), io::Error> {
             todo.write(&Priority::new(1))?;
             todo.write(&Summary::new("Submit Revised Internet-Draft"))?;
             todo.write(&Status::NEEDS_ACTION)
-        }
+        },
     );
     calendar.write_todo(todo)?;
     calendar.close()?;
@@ -128,7 +128,7 @@ fn journal() -> Result<(), io::Error> {
                 2. Telephone Conference: ABC Corp. sales representative called to discuss new printer. Promised to get us a demo by Friday.\n\
                 3. Henry Miller (Handsoff Insurance): Car was totaled by tree. Is looking into a loaner car. 555-2323 (tel)."
             ))
-        }
+        },
     );
     calendar.write_journal(journal)?;
     calendar.close()?;
@@ -171,9 +171,9 @@ fn freebusy() -> Result<(), io::Error> {
             freebusy.write(&FreeBusyTime::new("19980318T030000Z/19980318T040000Z"))?;
             freebusy.write(&Organizer::new("jsmith@example.com"))?;
             freebusy.write(&URL::new(
-                "http://www.example.com/calendar/busytime/jsmith.ifb"
+                "http://www.example.com/calendar/busytime/jsmith.ifb",
             ))
-        }
+        },
     );
 
     calendar.write_freebusy(freebusy)?;
@@ -215,13 +215,13 @@ fn timezone() -> Result<(), io::Error> {
         DtStart::new("20071104T020000"),
         TzOffsetFrom::new("-0400"),
         TzOffsetTo::new("-0500"),
-        |standard| standard.write(&TzName::new("EST"))
+        |standard| standard.write(&TzName::new("EST")),
     );
     let daylight = Daylight::build(
         DtStart::new("20070311T020000"),
         TzOffsetFrom::new("-0500"),
         TzOffsetTo::new("-0400"),
-        |daylight| daylight.write(&TzName::new("EDT"))
+        |daylight| daylight.write(&TzName::new("EDT")),
     );
     let timezone = TimeZone::standard(TzID::new("America/New_York"), standard, |timezone| {
         timezone.write(&LastModified::new("20050809T050000Z"))?;
@@ -282,7 +282,7 @@ fn alarm() -> Result<(), io::Error> {
                     alarm.write(&attach)
                 }
             ))
-        }
+        },
     );
     calendar.write_event(event)?;
     calendar.close()?;

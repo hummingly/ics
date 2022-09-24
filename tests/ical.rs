@@ -3,7 +3,7 @@ use ics::parameters::{CUType, FmtType, PartStat, Role, TzIDParam, RSVP};
 use ics::properties::{
     Attach, Attendee, Categories, Class, Created, Description, DtEnd, DtStamp, DtStart, Due,
     Duration, FreeBusyTime, Location, Organizer, ProdID, Repeat, Sequence, Status, Summary,
-    Trigger, TzID, TzName, TzOffsetFrom, TzOffsetTo, Version, UID, URL
+    Trigger, TzID, TzName, TzOffsetFrom, TzOffsetTo, Version, UID, URL,
 };
 use ics::writer::ICalendar;
 use std::io;
@@ -41,16 +41,16 @@ fn event() -> Result<(), io::Error> {
             event.write(&Description::new(
                 "Networld+Interop Conference and Exhibit\n\
                 Atlanta World Congress Center\n\
-                Atlanta, Georgia"
+                Atlanta, Georgia",
             ))
-        }
+        },
     );
 
     let mut output = Vec::with_capacity(expected.len());
     let mut calendar = ICalendar::new(
         &mut output,
         Version::new("2.0"),
-        ProdID::new("-//xyz Corp//NONSGML PDA Calendar Version 1.0//EN")
+        ProdID::new("-//xyz Corp//NONSGML PDA Calendar Version 1.0//EN"),
     )?;
 
     calendar.write_event(event)?;
@@ -106,14 +106,14 @@ fn todo() -> Result<(), io::Error> {
                 alarm.write(&Repeat::new(4))?;
                 alarm.write(&Duration::new("PT1H"))
             }))
-        }
+        },
     );
 
     let mut output = Vec::with_capacity(expected.len());
     let mut calendar = ICalendar::new(
         &mut output,
         Version::new("2.0"),
-        ProdID::new("-//ABC Corporation//NONSGML My Product//EN")
+        ProdID::new("-//ABC Corporation//NONSGML My Product//EN"),
     )?;
     calendar.write_todo(todo)?;
     calendar.close()?;
@@ -171,14 +171,14 @@ fn journal() -> Result<(), io::Error> {
                 -New schedule will be distributed by Friday.\n\
                 -Next weeks meeting is cancelled. No meeting until 3/23."
             ))
-        }
+        },
     );
 
     let mut output = Vec::with_capacity(expected.len());
     let mut calendar = ICalendar::new(
         &mut output,
         Version::new("2.0"),
-        ProdID::new("-//ABC Corporation//NONSGML My Product//EN")
+        ProdID::new("-//ABC Corporation//NONSGML My Product//EN"),
     )?;
     calendar.write_journal(journal)?;
     calendar.close()?;
@@ -218,16 +218,16 @@ fn freebusy() -> Result<(), io::Error> {
             freebusy.write(&FreeBusyTime::new("19980316T153000Z/19980316T163000Z"))?;
             freebusy.write(&FreeBusyTime::new("19980318T030000Z/19980318T040000Z"))?;
             freebusy.write(&URL::new(
-                "http://www.example.com/calendar/busytime/jsmith.ifb"
+                "http://www.example.com/calendar/busytime/jsmith.ifb",
             ))
-        }
+        },
     );
 
     let mut output = Vec::with_capacity(expected.len());
     let mut calendar = ICalendar::new(
         &mut output,
         Version::new("2.0"),
-        ProdID::new("-//RDU Software//NONSGML HandCal//EN")
+        ProdID::new("-//RDU Software//NONSGML HandCal//EN"),
     )?;
     calendar.write_freebusy(freebusy)?;
     calendar.close()?;
@@ -280,16 +280,16 @@ fn timezone() -> Result<(), io::Error> {
             DtStart::new("19981025T020000"),
             TzOffsetFrom::new("-0400"),
             TzOffsetTo::new("-0500"),
-            |standard| standard.write(&TzName::new("EST"))
+            |standard| standard.write(&TzName::new("EST")),
         ),
         |timezone| {
             timezone.write_daylight(Daylight::build(
                 DtStart::new("19990404T020000"),
                 TzOffsetFrom::new("-0500"),
                 TzOffsetTo::new("-0400"),
-                |daylight| daylight.write(&TzName::new("EDT"))
+                |daylight| daylight.write(&TzName::new("EDT")),
             ))
-        }
+        },
     );
 
     let event = Event::build(
@@ -318,14 +318,14 @@ fn timezone() -> Result<(), io::Error> {
             event.write(&end)?;
 
             event.write(&Location::new("1CP Conference Room 4350"))
-        }
+        },
     );
 
     let mut output = Vec::with_capacity(expected.len());
     let mut calendar = ICalendar::new(
         &mut output,
         Version::new("2.0"),
-        ProdID::new("-//RDU Software//NONSGML HandCal//EN")
+        ProdID::new("-//RDU Software//NONSGML HandCal//EN"),
     )?;
     calendar.write_timezone(timezone)?;
     calendar.write_event(event)?;

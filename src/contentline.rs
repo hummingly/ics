@@ -100,7 +100,7 @@ impl LineWriter<'_> {
 struct Writer<'w> {
     buffer: [u8; CAPACITY],
     len: usize,
-    inner: &'w mut dyn Write
+    inner: &'w mut dyn Write,
 }
 
 impl<'w> Writer<'w> {
@@ -108,7 +108,7 @@ impl<'w> Writer<'w> {
         Self {
             buffer: [0; CAPACITY],
             len: 0,
-            inner
+            inner,
         }
     }
 }
@@ -118,7 +118,7 @@ impl Writer<'_> {
         match self.fold_buffer() {
             Ok(0) => Ok(()),
             Ok(n) => self.inner.write_all(&self.buffer[self.len - n..self.len]),
-            Err(error) => Err(error)
+            Err(error) => Err(error),
         }?;
         self.len = 0;
         Ok(())
@@ -161,7 +161,7 @@ impl Writer<'_> {
                     self.inner.write_all(&content[..next_boundary])?;
                     boundary = next_boundary;
                 }
-                None => return Ok(content.len())
+                None => return Ok(content.len()),
             }
         }
         Ok(0)
@@ -209,7 +209,7 @@ impl Write for Writer<'_> {
                         break;
                     }
                 }
-                Err(err) => return Err(err)
+                Err(err) => return Err(err),
             }
         }
         Ok(())

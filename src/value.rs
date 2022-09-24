@@ -14,7 +14,7 @@ pub type CalAdress<'a> = Cow<'a, str>;
 pub struct Date {
     year: u16,
     month: u8,
-    day: u8
+    day: u8,
 }
 
 /// Local/Floating Time Marker
@@ -27,18 +27,18 @@ pub struct Time<T = Local> {
     hour: u8,
     minute: u8,
     second: u8,
-    _phantom: PhantomData<T>
+    _phantom: PhantomData<T>,
 }
 
 pub struct DateTime<T = Local> {
     date: Date,
-    time: Time<T>
+    time: Time<T>,
 }
 
 pub struct UtcOffset {
     hour: i8,
     minute: u8,
-    second: u8
+    second: u8,
 }
 
 enum DurationInner {
@@ -47,14 +47,14 @@ enum DurationInner {
     Time {
         hour: u8,
         minute: u8,
-        second: u8
+        second: u8,
     },
     DayTime {
         day: u32,
         hour: u8,
         minute: u8,
-        second: u8
-    }
+        second: u8,
+    },
 }
 
 pub enum Positive {}
@@ -62,14 +62,14 @@ pub enum Negative {}
 
 pub struct Duration<T = Positive> {
     inner: DurationInner,
-    _phantom: PhantomData<T>
+    _phantom: PhantomData<T>,
 }
 
 impl<T> Duration<T> {
     fn new(duration: DurationInner) -> Self {
         Duration {
             inner: duration,
-            _phantom: PhantomData
+            _phantom: PhantomData,
         }
     }
 
@@ -86,7 +86,7 @@ impl<T> Duration<T> {
             day,
             hour,
             minute,
-            second
+            second,
         })
     }
 
@@ -94,7 +94,7 @@ impl<T> Duration<T> {
         Duration::new(DurationInner::Time {
             hour,
             minute,
-            second
+            second,
         })
     }
 }
@@ -151,12 +151,12 @@ enum Period<T = Local> {
     /// use a Period in UTC time.
     Explicit {
         start: DateTime<T>,
-        end: DateTime<T>
+        end: DateTime<T>,
     },
     Start {
         start: DateTime<T>,
-        duration: Duration<Positive>
-    }
+        duration: Duration<Positive>,
+    },
 }
 
 // Recur
@@ -198,7 +198,7 @@ pub enum StatusValue {
     /// `FINAL`
     ///
     /// Status for a final Journal
-    Final
+    Final,
 }
 
 impl StatusValue {
@@ -211,7 +211,7 @@ impl StatusValue {
             StatusValue::Completed => "COMPLETED",
             StatusValue::InProcess => "IN-PROCESS",
             StatusValue::Draft => "DRAFT",
-            StatusValue::Final => "FINAL"
+            StatusValue::Final => "FINAL",
         }
     }
 }
@@ -228,14 +228,14 @@ pub enum TranspValue {
     /// `TRANSPARENT`
     ///
     /// Transparent on busy time searches.
-    Transparent
+    Transparent,
 }
 
 impl TranspValue {
     pub(crate) fn as_str(self) -> &'static str {
         match self {
             TranspValue::Opaque => "OPAQUE",
-            TranspValue::Transparent => "TRANSPARENT"
+            TranspValue::Transparent => "TRANSPARENT",
         }
     }
 }

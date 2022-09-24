@@ -39,7 +39,7 @@ property_text!(Description, "DESCRIPTION");
 pub struct Geo<'a> {
     latitude: Float,
     longitude: Float,
-    parameters: Vec<Parameter<'a>>
+    parameters: Vec<Parameter<'a>>,
 }
 
 impl Geo<'_> {
@@ -51,7 +51,7 @@ impl Geo<'_> {
         Self {
             latitude,
             longitude,
-            parameters: Vec::new()
+            parameters: Vec::new(),
         }
     }
 }
@@ -90,7 +90,7 @@ property!(Resources, "RESOURCES");
 #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Status<'a> {
     value: StatusValue,
-    parameters: Parameters<'a>
+    parameters: Parameters<'a>,
 }
 
 impl Status<'_> {
@@ -100,7 +100,7 @@ impl Status<'_> {
     const fn new(value: StatusValue) -> Self {
         Self {
             value,
-            parameters: Vec::new()
+            parameters: Vec::new(),
         }
     }
 
@@ -165,7 +165,7 @@ property!(FreeBusyTime, "FREEBUSY");
 #[derive(Debug, Default, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Transp<'a> {
     value: TranspValue,
-    parameters: Parameters<'a>
+    parameters: Parameters<'a>,
 }
 
 impl Transp<'_> {
@@ -175,7 +175,7 @@ impl Transp<'_> {
     const fn new(value: TranspValue) -> Self {
         Self {
             value,
-            parameters: Vec::new()
+            parameters: Vec::new(),
         }
     }
 
@@ -251,7 +251,7 @@ impl Default for CalScale<'_> {
     fn default() -> Self {
         Self {
             value: Cow::Borrowed("GREGORIAN"),
-            parameters: Vec::new()
+            parameters: Vec::new(),
         }
     }
 }
@@ -259,7 +259,7 @@ impl Default for Priority<'_> {
     fn default() -> Self {
         Self {
             value: 0,
-            parameters: Vec::new()
+            parameters: Vec::new(),
         }
     }
 }
@@ -268,7 +268,7 @@ impl Default for Repeat<'_> {
     fn default() -> Self {
         Self {
             value: 0,
-            parameters: Vec::new()
+            parameters: Vec::new(),
         }
     }
 }
@@ -277,7 +277,7 @@ impl Default for Sequence<'_> {
     fn default() -> Self {
         Self {
             value: 0,
-            parameters: Vec::new()
+            parameters: Vec::new(),
         }
     }
 }
@@ -300,7 +300,7 @@ mod rfc7986 {
     #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
     enum Data<'a> {
         Link(Cow<'a, str>),
-        Binary(Cow<'a, [u8]>)
+        Binary(Cow<'a, [u8]>),
     }
 
     /// `IMAGE` Property
@@ -312,7 +312,7 @@ mod rfc7986 {
     #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
     pub struct Image<'a> {
         value: Data<'a>,
-        parameters: Vec<Parameter<'a>>
+        parameters: Vec<Parameter<'a>>,
     }
 
     impl Image<'_> {
@@ -326,7 +326,7 @@ mod rfc7986 {
         pub fn uri<S>(uri: impl Into<Cow<'a, str>>) -> Self {
             Image {
                 value: Data::Link(uri.into()),
-                parameters: parameters!("VALUE" => "URI")
+                parameters: parameters!("VALUE" => "URI"),
             }
         }
 
@@ -336,7 +336,7 @@ mod rfc7986 {
         pub fn binary(binary: impl Into<Cow<'a, [u8]>>) -> Self {
             Image {
                 value: Data::Binary(binary.into()),
-                parameters: parameters!("ENCODING" => "BASE64"; "VALUE" => "BINARY")
+                parameters: parameters!("ENCODING" => "BASE64"; "VALUE" => "BINARY"),
             }
         }
 
@@ -361,7 +361,7 @@ mod rfc7986 {
             }
             match &self.value {
                 Data::Link(uri) => w.write_value(uri),
-                Data::Binary(binary) => w.write_binary_value(binary)
+                Data::Binary(binary) => w.write_binary_value(binary),
             }
         }
     }

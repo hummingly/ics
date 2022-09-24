@@ -14,7 +14,7 @@ pub fn write_base64<W: Write>(writer: &mut W, bytes: &[u8]) -> Result<(), Error>
         b'P', b'Q', b'R', b'S', b'T', b'U', b'V', b'W', b'X', b'Y', b'Z', b'a', b'b', b'c', b'd',
         b'e', b'f', b'g', b'h', b'i', b'j', b'k', b'l', b'm', b'n', b'o', b'p', b'q', b'r', b's',
         b't', b'u', b'v', b'w', b'x', b'y', b'z', b'0', b'1', b'2', b'3', b'4', b'5', b'6', b'7',
-        b'8', b'9', b'+', b'/'
+        b'8', b'9', b'+', b'/',
     ];
 
     let chunks = bytes.chunks_exact(3);
@@ -44,7 +44,7 @@ pub fn write_base64<W: Write>(writer: &mut W, bytes: &[u8]) -> Result<(), Error>
             output[3] = b'=';
             writer.write_all(&output)
         }
-        _ => Ok(())
+        _ => Ok(()),
     }
 }
 
@@ -74,7 +74,7 @@ pub fn write_escaped_text<W: Write>(writer: &mut W, text: &str) -> Result<(), Er
             b'\n' => {
                 writer.write_all(ESCAPED_NEWLINE)?;
             }
-            b => writer.write_all(&[b'\\', b])?
+            b => writer.write_all(&[b'\\', b])?,
         }
         last_end = start + 1;
     }
@@ -83,7 +83,7 @@ pub fn write_escaped_text<W: Write>(writer: &mut W, text: &str) -> Result<(), Er
 
 struct EscapeByteIndices<'m> {
     offset: usize,
-    bytes: &'m [u8]
+    bytes: &'m [u8],
 }
 
 impl<'m> EscapeByteIndices<'m> {

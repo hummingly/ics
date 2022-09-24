@@ -35,8 +35,6 @@ default-features = false
 ## Usage
 
 ```rust
-extern crate ics;
-
 use ics::properties::{Categories, Description, DtEnd, DtStart, Organizer, Status, Summary};
 use ics::{escape_text, Event, ICalendar};
 
