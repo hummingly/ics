@@ -31,14 +31,7 @@ property!(ProdID, "PRODID");
 property!(Version, "VERSION");
 property!(Attach, "ATTACH");
 property!(Categories, "CATEGORIES");
-property_with_constructor!(
-    /// [Format definitions of classifications](https://tools.ietf.org/html/rfc5545#section-3.8.1.3)
-    Class, "CLASS",
-    // Default Value
-    fn public() { "PUBLIC" };
-    fn private() { "PRIVATE" };
-    fn confidential() { "CONFIDENTIAL" }
-);
+property!(Class, "CLASS");
 property!(Comment, "COMMENT");
 property!(Description, "DESCRIPTION");
 property!(Geo, "GEO");
@@ -46,26 +39,7 @@ property!(Location, "LOCATION");
 property!(PercentComplete, "PERCENT-COMPLETE");
 property!(Priority, "PRIORITY");
 property!(Resources, "RESOURCES");
-property_with_constructor!(
-    /// [Format definitions of statuses](https://tools.ietf.org/html/rfc5545#section-3.8.1.11)
-    Status, "STATUS",
-    /// `Status` for a tentative event
-    fn tentative() { "TENTATIVE" };
-    /// `Status` for a definite event
-    fn confirmed() { "CONFIRMED" };
-    /// `Status` for a cancelled Event, To-Do or Journal
-    fn cancelled() { "CANCELLED" };
-    /// `Status` for a To-Do that needs action
-    fn needs_action() { "NEEDS-ACTION" };
-    /// `Status` for a completed To-Do
-    fn completed() { "COMPLETED" };
-    /// `Status` for an in-process To-Do
-    fn in_process() { "IN-PROCESS" };
-    /// `Status` for a draft Journal
-    fn draft() { "DRAFT" };
-    /// `Status` for a final Journal
-    fn final_() { "FINAL" }
-);
+property!(Status, "STATUS");
 property!(Summary, "SUMMARY");
 property!(Completed, "COMPLETED");
 property!(DtEnd, "DTEND");
@@ -73,13 +47,7 @@ property!(Due, "DUE");
 property!(DtStart, "DTSTART");
 property!(Duration, "DURATION");
 property!(FreeBusyTime, "FREEBUSY");
-property_with_constructor!(
-    /// [Format definitions of time transparency](https://tools.ietf.org/html/rfc5545#section-3.8.2.7)
-    Transp, "TRANSP",
-    // Default Value
-    fn opaque() { "OPAQUE" };
-    fn transparent() { "TRANSPARENT" }
-);
+property!(Transp, "TRANSP");
 property!(TzID, "TZID");
 property!(TzName, "TZNAME");
 property!(TzOffsetFrom, "TZOFFSETFROM");
@@ -95,13 +63,7 @@ property!(UID, "UID");
 property!(ExDate, "EXDATE");
 property!(RDate, "RDATE");
 property!(RRule, "RRULE");
-property_with_constructor!(
-    /// [Format definitions of alarm actions](https://tools.ietf.org/html/rfc5545#section-3.8.6.1)
-    Action, "ACTION",
-    fn audio() { "AUDIO" };
-    fn display() { "DISPLAY" };
-    fn email() { "EMAIL" }
-);
+property!(Action, "ACTION");
 property!(Repeat, "REPEAT");
 property!(Trigger, "TRIGGER");
 property!(Created, "CREATED");
@@ -110,22 +72,139 @@ property!(LastModified, "LAST-MODIFIED");
 property!(Sequence, "SEQUENCE");
 property!(RequestStatus, "REQUEST-STATUS");
 
-impl<'a> Default for Class<'a> {
+impl Class<'_> {
+    /// Specifies the access classification as public for a component (default value).
+    pub fn public() -> Self {
+        Self::new("PUBLIC")
+    }
+
+    /// Specifies the access classification as private for a component.
+    pub fn private() -> Self {
+        Self::new("PRIVATE")
+    }
+
+    /// Specifies the access classification as confidential for a component.
+    pub fn confidential() -> Self {
+        Self::new("CONFIDENTIAL")
+    }
+}
+
+impl Status<'_> {
+    /// Status for a tentative event.
+    pub fn tentative() -> Self {
+        Self::new("TENTATIVE")
+    }
+
+    /// Status for a definite event.
+    pub fn confirmed() -> Self {
+        Self::new("CONFIRMED")
+    }
+
+    /// Status for a cancelled Event, To-Do or Journal.
+    pub fn cancelled() -> Self {
+        Self::new("CANCELLED")
+    }
+
+    /// Status for a To-Do that needs action.
+    pub fn needs_action() -> Self {
+        Self::new("NEEDS-ACTION")
+    }
+
+    /// Status for a completed To-Do.
+    pub fn completed() -> Self {
+        Self::new("COMPLETED")
+    }
+
+    /// Status for an in-process To-Do.
+    pub fn in_process() -> Self {
+        Self::new("IN-PROCESS")
+    }
+
+    /// Status for a draft Journal.
+    pub fn draft() -> Self {
+        Self::new("DRAFT")
+    }
+
+    /// Status for a final Journal.
+    pub fn final_() -> Self {
+        Self::new("FINAL")
+    }
+}
+
+impl Transp<'_> {
+    /// Blocks or opaque on busy time searches (default value).
+    pub fn opaque() -> Self {
+        Self::new("OPAQUE")
+    }
+
+    /// Transparent on busy time searches.
+    pub fn transparent() -> Self {
+        Self::new("TRANSPARENT")
+    }
+}
+
+impl Action<'_> {
+    /// Specifies an audio action to be invoked when an alarm is triggered.
+    pub fn audio() -> Self {
+        Self::new("AUDIO")
+    }
+    /// Specifies a display action to be invoked when an alarm is triggered.
+    pub fn display() -> Self {
+        Self::new("DISPLAY")
+    }
+    /// Specifies an email action to be invoked when an alarm is triggered.
+    pub fn email() -> Self {
+        Self::new("EMAIL")
+    }
+}
+
+impl Default for Class<'_> {
     fn default() -> Self {
         Self::public()
     }
 }
 
-impl<'a> Default for Transp<'a> {
+impl Default for Transp<'_> {
     fn default() -> Self {
         Self::opaque()
     }
 }
 
-impl_default_prop!(CalScale, "GREGORIAN");
-impl_default_prop!(Priority, "0");
-impl_default_prop!(Repeat, "0");
-impl_default_prop!(Sequence, "0");
+impl Default for CalScale<'_> {
+    fn default() -> Self {
+        Self {
+            value: Cow::Borrowed("GREGORIAN"),
+            parameters: BTreeMap::new(),
+        }
+    }
+}
+
+impl Default for Priority<'_> {
+    fn default() -> Self {
+        Self {
+            value: Cow::Borrowed("0"),
+            parameters: BTreeMap::new(),
+        }
+    }
+}
+
+impl Default for Repeat<'_> {
+    fn default() -> Self {
+        Self {
+            value: Cow::Borrowed("0"),
+            parameters: BTreeMap::new(),
+        }
+    }
+}
+
+impl Default for Sequence<'_> {
+    fn default() -> Self {
+        Self {
+            value: Cow::Borrowed("0"),
+            parameters: BTreeMap::new(),
+        }
+    }
+}
 
 #[cfg(feature = "rfc7986")]
 pub use self::rfc7986::*;
@@ -178,31 +257,9 @@ mod rfc7986 {
                 parameters: parameters!("ENCODING" => "BASE64"; "VALUE" => "BINARY"),
             }
         }
-
-        /// Adds a parameter to the property.
-        pub fn add<P>(&mut self, parameter: P)
-        where
-            P: Into<Parameter<'a>>,
-        {
-            let param = parameter.into();
-            self.parameters.insert(param.key, param.value);
-        }
-
-        /// Adds several parameters at once to the property. For creating
-        /// several parameters at once, consult the documentation of
-        /// the [`parameters!`] macro.
-        pub fn append(&mut self, mut parameters: Parameters<'a>) {
-            self.parameters.append(&mut parameters);
-        }
     }
 
-    impl<'a> From<Image<'a>> for Property<'a> {
-        fn from(builder: Image<'a>) -> Self {
-            Property {
-                key: "IMAGE".into(),
-                value: builder.value,
-                parameters: builder.parameters,
-            }
-        }
-    }
+    impl_add_parameters!(Image);
+
+    impl_from_prop!(Image, "IMAGE");
 }
