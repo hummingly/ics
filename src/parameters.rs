@@ -139,6 +139,10 @@ impl RelType<'_> {
     pub const SIBLING: Self = Self {
         value: Cow::Borrowed("SIBLING"),
     };
+
+    /// See [`RelType::SIBLING`].
+    #[deprecated(note = "use RelType::SIBLING instead")]
+    pub const SILBLING: Self = Self::SIBLING;
 }
 
 impl Role<'_> {
