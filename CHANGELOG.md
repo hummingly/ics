@@ -33,9 +33,19 @@
 - Changed `[PROPERTY]::append(&mut self, Parameters<'_>)` to `[PROPERTY]::append(&mut self, &mut Parameters<'_>)`. The value is drained empty instead of being moved.
 - Replaced `BTreeMap` with `Vec` for `Parameters`.
 
+## Version 0.5.8
+
+### Bug Fix
+
+- Fix spelling error for value of `RelType::SILBLING`.
+
+### Documentation
+
+- Improved documentation for constants.
+
 ### Misc
 
-- Migrated to edition 2018.
+- Internal refactoring of macros and inlining constants declaration. This makes reading the source code on `docs.rs` easier.
 
 ## Version 0.5.7
 
