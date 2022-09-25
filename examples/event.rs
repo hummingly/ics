@@ -31,7 +31,7 @@ fn main() -> Result<(), io::Error> {
             event.write(&Organizer::new("mailto:jsmith@example.com"))?;
             event.write(&DtStart::new("19960918T143000Z"))?;
             event.write(&DtEnd::new("19960920T220000Z"))?;
-            event.write(&Status::CONFIRMED)?;
+            event.write(&Status::confirmed())?;
             event.write(&Categories::new("CONFERENCE"))?;
             event.write(&Summary::new("Networld+Interop Conference"))?;
             // Values that are "TEXT" are escaped by default. To be escaped characters are

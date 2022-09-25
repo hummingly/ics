@@ -53,86 +53,147 @@ pub type Parameters<'p> = Vec<Parameter<'p>>;
 
 parameter!(AltRep, "ALTREP");
 parameter!(CN, "CN");
-parameter!(
-    /// [Format definitions of calender user types.](https://tools.ietf.org/html/rfc5545#section-3.2.3)
-    CUType, "CUTYPE";
-    /// Default Value
-    const INDIVIDUAL = "INDIVIDUAL";
-    const GROUP = "GROUP";
-    const RESOURCE = "RESOURCE";
-    const ROOM = "ROOM";
-    const UNKNOWN = "UNKNOWN"
-);
+parameter!(CUType, "CUTYPE");
 parameter!(DelegatedFrom, "DELEGATED-FROM");
 parameter!(DelegatedTo, "DELEGATED-TO");
 parameter!(Dir, "DIR");
 parameter!(FmtType, "FMTTYPE");
-parameter!(
-    /// [Format definitions of free/busy time types](https://tools.ietf.org/html/rfc5545#section-3.2.9)
-    FBType, "FBTYPE";
-    const FREE = "FREE";
-    /// Default Value
-    const BUSY = "BUSY";
-    const BUSY_UNAVAILABLE = "BUSY-UNAVAILABLE";
-    const BUSY_TENTATIVE = "BUSY-TENTATIVE"
-);
+parameter!(FBType, "FBTYPE");
 parameter!(Language, "LANGUAGE");
 parameter!(Member, "MEMBER");
-parameter!(
-    /// [Format definitions of participation statuses of calendar users](https://tools.ietf.org/html/rfc5545#section-3.2.12)
-    PartStat, "PARTSTAT";
-    /// `PartStat` for an Event, To-Do or Journal that needs action (Default Value)
-    const NEEDS_ACTION = "NEEDS-ACTION";
-    /// `PartStat` for an accepted Event, To-Do or Journal
-    const ACCEPTED = "ACCEPTED";
-    /// `PartStat` for a declined Event, To-Do or Journal
-    const DECLINED = "DECLINED";
-    /// `PartStat` for a tentatively accepted Event or To-Do
-    const TENTATIVE = "TENTATIVE";
-    /// `PartStat` for a delegated Event or To-Do
-    const DELEGATED = "DELEGATED";
-    /// `PartStat` for a completed To-Do
-    const COMPLETED = "COMPLETED";
-    /// `PartStat` for an in-process To-Do
-    const IN_PROCESS = "IN-PROCESS"
-);
-parameter!(
-    /// [Format definitions of hierarchical relationship types associated with the calendar component](https://tools.ietf.org/html/rfc5545#section-3.2.15)
-    RelType, "RELTYPE";
-    /// Default Value
-    const PARENT = "PARENT";
-    const CHILD = "CHILD";
-    const SILBLING = "SILBLING"
-);
-parameter!(
-    /// [Format definitions of participation roles for calendar users](https://tools.ietf.org/html/rfc5545#section-3.2.16)
-    Role, "ROLE";
-    const CHAIR = "CHAIR";
-    /// Default Value
-    const REQ_PARTICIPANT = "REQ-PARTICIPANT";
-    const OPT_PARTICIPANT = "OPT-PARTICIPANT";
-    const NON_PARTICIPANT = "NON-PARTICIPANT"
-);
+parameter!(PartStat, "PARTSTAT");
+parameter!(RelType, "RELTYPE");
+parameter!(Role, "ROLE");
 parameter!(SentBy, "SENT-BY");
 parameter!(TzIDParam, "TZID");
-parameter!(
-    /// [Format definitions of value type format for a property value](https://tools.ietf.org/html/rfc5545#section-3.2.20)
-    Value, "VALUE";
-    const BINARY = "BINARY";
-    const BOOLEAN = "BOOLEAN";
-    const CAL_ADDRESS = "CAL-ADDRESS";
-    const DATE = "DATE";
-    const DATE_TIME = "DATE-TIME";
-    const DURATION = "DURATION";
-    const FLOAT = "FLOAT";
-    const INTEGER = "INTEGER";
-    const PERIOD = "PERIOD";
-    const RECUR = "RECUR";
-    const TEXT = "TEXT";
-    const TIME = "TIME";
-    const URI = "URI";
-    const UTC_OFFSET = "UTC-OFFSET"
-);
+parameter!(Value, "VALUE");
+
+impl CUType<'_> {
+    /// Identifies an individual (default value).
+    pub const INDIVIDUAL: Self = Self(Cow::Borrowed("INDIVIDUAL"));
+
+    /// Identifies the calendar user as a group of individuals.
+    pub const GROUP: Self = Self(Cow::Borrowed("GROUP"));
+
+    /// Identifies the calendar user as a physical resource.
+    pub const RESOURCE: Self = Self(Cow::Borrowed("RESOURCE"));
+
+    /// Identifies the calendar user as a room resource
+    pub const ROOM: Self = Self(Cow::Borrowed("ROOM"));
+
+    /// Identifies the calendar user as an unknown calendar user type.
+    pub const UNKNOWN: Self = Self(Cow::Borrowed("UNKNOWN"));
+}
+
+impl FBType<'_> {
+    /// The time interval is free for scheduling.
+    pub const FREE: Self = Self(Cow::Borrowed("FREE"));
+
+    /// The time interval is busy because one or more events have been scheduled for that interval (default value).
+    pub const BUSY: Self = Self(Cow::Borrowed("BUSY"));
+
+    /// The time interval is busy and the interval cannot be scheduled.
+    pub const BUSY_UNAVAILABLE: Self = Self(Cow::Borrowed("BUSY-UNAVAILABLE"));
+
+    /// The time interval is busy because one or more events have been tentatively scheduled for that interval.
+    pub const BUSY_TENTATIVE: Self = Self(Cow::Borrowed("BUSY-TENTATIVE"));
+}
+
+impl PartStat<'_> {
+    /// Participation status for an Event, To-Do or Journal that needs action (default Value).
+    pub const NEEDS_ACTION: Self = Self(Cow::Borrowed("NEEDS-ACTION"));
+
+    /// Participation status for an accepted Event, To-Do or Journal.
+    pub const ACCEPTED: Self = Self(Cow::Borrowed("ACCEPTED"));
+
+    /// Participation status for a declined Event, To-Do or Journal.
+    pub const DECLINED: Self = Self(Cow::Borrowed("DECLINED"));
+
+    /// Participation status for a tentatively accepted Event or To-Do.
+    pub const TENTATIVE: Self = Self(Cow::Borrowed("TENTATIVE"));
+
+    /// Participation status for a delegated Event or To-Do.
+    pub const DELEGATED: Self = Self(Cow::Borrowed("DELEGATED"));
+
+    /// Participation status for a completed To-Do.
+    pub const COMPLETED: Self = Self(Cow::Borrowed("COMPLETED"));
+
+    /// Participation status for an in-process To-Do.
+    pub const IN_PROCESS: Self = Self(Cow::Borrowed("IN-PROCESS"));
+}
+
+impl RelType<'_> {
+    /// Specifies a parent relationship (default value).
+    pub const PARENT: Self = Self(Cow::Borrowed("PARENT"));
+
+    /// Specifies a child relationship.
+    pub const CHILD: Self = Self(Cow::Borrowed("CHILD"));
+
+    /// Specifies a sibling relationship.
+    const SIBLING: Self = Self(Cow::Borrowed("SIBLING"));
+
+    /// Specifies a sibling relationship.
+    // #[deprecated(note = "use RelType::SIBLING instead")]
+    pub const SILBLING: Self = Self::SIBLING;
+}
+
+impl Role<'_> {
+    /// Indicates chair of the calendar entity.
+    pub const CHAIR: Self = Self(Cow::Borrowed("CHAIR"));
+
+    /// Indicates a participant whose participation is required (default value).
+    pub const REQ_PARTICIPANT: Self = Self(Cow::Borrowed("REQ-PARTICIPANT"));
+
+    /// Indicates a participant whose participation is optional.
+    pub const OPT_PARTICIPANT: Self = Self(Cow::Borrowed("OPT-PARTICIPANT"));
+
+    /// Indicates a participant who is copied for information purposes only.
+    pub const NON_PARTICIPANT: Self = Self(Cow::Borrowed("NON-PARTICIPANT"));
+}
+
+impl Value<'_> {
+    /// Explicitly specifies the BINARY value type format for a property value.
+    pub const BINARY: Self = Self(Cow::Borrowed("BINARY"));
+
+    /// Explicitly specifies the BOOLEAN value type format for a property value.
+    pub const BOOLEAN: Self = Self(Cow::Borrowed("BOOLEAN"));
+
+    /// Explicitly specifies the CAL-ADDRESS value type format for a property value.
+    pub const CAL_ADDRESS: Self = Self(Cow::Borrowed("CAL-ADDRESS"));
+
+    /// Explicitly specifies the DATE value type format for a property value.
+    pub const DATE: Self = Self(Cow::Borrowed("DATE"));
+
+    /// Explicitly specifies the DATE-TIME value type format for a property value.
+    pub const DATE_TIME: Self = Self(Cow::Borrowed("DATE-TIME"));
+
+    /// Explicitly specifies the DURATION value type format for a property value.
+    pub const DURATION: Self = Self(Cow::Borrowed("DURATION"));
+
+    /// Explicitly specifies the FLOAT value type format for a property value.
+    pub const FLOAT: Self = Self(Cow::Borrowed("FLOAT"));
+
+    /// Explicitly specifies the INTEGER value type format for a property value.
+    pub const INTEGER: Self = Self(Cow::Borrowed("INTEGER"));
+
+    /// Explicitly specifies the PERIOD value type format for a property value.
+    pub const PERIOD: Self = Self(Cow::Borrowed("PERIOD"));
+
+    /// Explicitly specifies the RECUR value type format for a property value.
+    pub const RECUR: Self = Self(Cow::Borrowed("RECUR"));
+
+    /// Explicitly specifies the TEXT value type format for a property value.
+    pub const TEXT: Self = Self(Cow::Borrowed("TEXT"));
+
+    /// Explicitly specifies the TIME value type format for a property value.
+    pub const TIME: Self = Self(Cow::Borrowed("TIME"));
+
+    /// Explicitly specifies the URI value type format for a property value.
+    pub const URI: Self = Self(Cow::Borrowed("URI"));
+
+    /// Explicitly specifies the UTC-OFFSET value type format for a property value.
+    pub const UTC_OFFSET: Self = Self(Cow::Borrowed("UTC-OFFSET"));
+}
 
 impl Default for CUType<'_> {
     fn default() -> Self {
@@ -296,28 +357,48 @@ pub use self::rfc7986::*;
 mod rfc7986 {
     use super::Parameter;
     use std::borrow::Cow;
-    parameter!(
-        /// [Format definitions of displaying images](https://tools.ietf.org/html/rfc7986#section-6.1)
-        Display, "DISPLAY";
-        /// Default Value
-        const BADGE = "BADGE";
-        const GRAPHIC = "GRAPHIC";
-        const FULLSIZE = "FULLSIZE";
-        const THUMBNAIL = "THUMBNAIL"
-    );
+
+    parameter!(Display, "DISPLAY");
     parameter!(Email, "EMAIL");
-    parameter!(
-        /// [Format definitions of features of of a conference or broadcast system](https://tools.ietf.org/html/rfc7986#section-6.3)
-        Feature, "FEATURE";
-        const AUDIO = "AUDIO";
-        const CHAT = "CHAT";
-        const FEED = "FEED";
-        const MODERATOR = "MODERATOR";
-        const PHONE = "PHONE";
-        const SCREEN = "SCREEN";
-        const VIDEO = "VIDEO"
-    );
+    parameter!(Feature, "FEATURE");
     parameter!(Label, "LABEL");
+
+    impl Display<'_> {
+        /// Displays an image inline with the title of the event (default value).
+        pub const BADGE: Self = Self(Cow::Borrowed("BADGE"));
+
+        /// Displays a full image replacement for the event itself.
+        pub const GRAPHIC: Self = Self(Cow::Borrowed("GRAPHIC"));
+
+        /// Displays an image that is used to enhance the event.
+        pub const FULLSIZE: Self = Self(Cow::Borrowed("FULLSIZE"));
+
+        /// Displays a smaller variant of "FULLSIZE" to be used when space for the image is constrained.
+        pub const THUMBNAIL: Self = Self(Cow::Borrowed("THUMBNAIL"));
+    }
+
+    impl Feature<'_> {
+        /// Specifies a conference or broacast system with audio capability.
+        pub const AUDIO: Self = Self(Cow::Borrowed("AUDIO"));
+
+        /// Specifies a conference or broacast system with chat or instant messaging.
+        pub const CHAT: Self = Self(Cow::Borrowed("CHAT"));
+
+        /// Specifies a conference or broacast system with blog or atom feed.
+        pub const FEED: Self = Self(Cow::Borrowed("FEED"));
+
+        /// Specifies a conference or broacast system with moderator dial-in code.
+        pub const MODERATOR: Self = Self(Cow::Borrowed("MODERATOR"));
+
+        /// Specifies a conference or broacast system with phone conference.
+        pub const PHONE: Self = Self(Cow::Borrowed("PHONE"));
+
+        /// Specifies a conference or broacast system with screen sharing.
+        pub const SCREEN: Self = Self(Cow::Borrowed("SCREEN"));
+
+        /// Specifies a conference or broacast system with video capability.
+        pub const VIDEO: Self = Self(Cow::Borrowed("VIDEO"));
+    }
 
     impl Default for Display<'_> {
         fn default() -> Self {

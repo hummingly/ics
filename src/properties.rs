@@ -23,14 +23,7 @@ property!(Version, "VERSION");
 property!(Attach, "ATTACH");
 // TODO: property_text_list!
 property!(Categories, "CATEGORIES");
-property_text!(
-    /// [Format definitions of classifications](https://tools.ietf.org/html/rfc5545#section-3.8.1.3)
-    Class, "CLASS";
-    // Default Value
-    const PUBLIC = "PUBLIC";
-    const PRIVATE = "PRIVATE";
-    const CONFIDENTIAL = "CONFIDENTIAL"
-);
+property_text!(Class, "CLASS");
 property_text!(Comment, "COMMENT");
 property_text!(Description, "DESCRIPTION");
 
@@ -40,6 +33,59 @@ pub struct Geo<'a> {
     latitude: Float,
     longitude: Float,
     parameters: Vec<Parameter<'a>>,
+}
+
+property_text!(Location, "LOCATION");
+property_integer!(PercentComplete, "PERCENT-COMPLETE");
+property_integer!(Priority, "PRIORITY");
+// TODO: property_text_list!
+property!(Resources, "RESOURCES");
+
+/// `STATUS` Property
+#[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
+pub struct Status<'a> {
+    value: StatusValue,
+    parameters: Parameters<'a>,
+}
+
+property_text!(Summary, "SUMMARY");
+property!(Completed, "COMPLETED");
+property!(DtEnd, "DTEND");
+property!(Due, "DUE");
+property!(DtStart, "DTSTART");
+property!(Duration, "DURATION");
+property!(FreeBusyTime, "FREEBUSY");
+property_text!(TzID, "TZID");
+property_text!(TzName, "TZNAME");
+property!(TzOffsetFrom, "TZOFFSETFROM");
+property!(TzOffsetTo, "TZOFFSETTO");
+property!(TzURL, "TZURL");
+property!(Attendee, "ATTENDEE");
+property_text!(Contact, "CONTACT");
+property!(Organizer, "ORGANIZER");
+property!(RecurrenceID, "RECURRENCE-ID");
+property_text!(RelatedTo, "RELATED-TO");
+property!(URL, "URL");
+property_text!(UID, "UID");
+property!(ExDate, "EXDATE");
+property!(RDate, "RDATE");
+property!(RRule, "RRULE");
+property_text!(Action, "ACTION");
+property_integer!(Repeat, "REPEAT");
+property!(Trigger, "TRIGGER");
+property!(Created, "CREATED");
+property!(DtStamp, "DTSTAMP");
+property!(LastModified, "LAST-MODIFIED");
+property_integer!(Sequence, "SEQUENCE");
+// TODO: statcode ";" statdesc [";" extdata]
+property!(RequestStatus, "REQUEST-STATUS");
+
+
+/// `TRANSP` Property
+#[derive(Debug, Default, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
+pub struct Transp<'a> {
+    value: TranspValue,
+    parameters: Parameters<'a>,
 }
 
 impl Geo<'_> {
@@ -80,53 +126,9 @@ impl PropertyWrite for Geo<'_> {
     }
 }
 
-property_text!(Location, "LOCATION");
-property_integer!(PercentComplete, "PERCENT-COMPLETE");
-property_integer!(Priority, "PRIORITY");
-// TODO: property_text_list!
-property!(Resources, "RESOURCES");
-
-/// `STATUS` Property
-#[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
-pub struct Status<'a> {
-    value: StatusValue,
-    parameters: Parameters<'a>,
-}
-
 impl Status<'_> {
     /// The associated specification name of the property in upper case.
     pub const NAME: &'static str = "STATUS";
-
-    const fn new(value: StatusValue) -> Self {
-        Self {
-            value,
-            parameters: Vec::new(),
-        }
-    }
-
-    /// Status for a tentative event
-    pub const TENTATIVE: Self = Self::new(StatusValue::Tentative);
-
-    /// Status for a definite event
-    pub const CONFIRMED: Self = Self::new(StatusValue::Confirmed);
-
-    /// Status for a cancelled Event, To-Do or Journal
-    pub const CANCELLED: Self = Self::new(StatusValue::Cancelled);
-
-    /// Status for a To-Do that needs action
-    pub const NEEDS_ACTION: Self = Self::new(StatusValue::NeedsAction);
-
-    /// Status for a completed To-Do
-    pub const COMPLETED: Self = Self::new(StatusValue::Completed);
-
-    /// Status for an in-process To-Do
-    pub const IN_PROCESS: Self = Self::new(StatusValue::InProcess);
-
-    /// Status for a draft Journal
-    pub const DRAFT: Self = Self::new(StatusValue::Draft);
-
-    /// Status for a final Journal
-    pub const FINAL: Self = Self::new(StatusValue::Final);
 }
 
 impl<'a> Status<'a> {
@@ -153,37 +155,9 @@ impl PropertyWrite for Status<'_> {
     }
 }
 
-property_text!(Summary, "SUMMARY");
-property!(Completed, "COMPLETED");
-property!(DtEnd, "DTEND");
-property!(Due, "DUE");
-property!(DtStart, "DTSTART");
-property!(Duration, "DURATION");
-property!(FreeBusyTime, "FREEBUSY");
-
-/// `TRANSP` Property
-#[derive(Debug, Default, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
-pub struct Transp<'a> {
-    value: TranspValue,
-    parameters: Parameters<'a>,
-}
-
 impl Transp<'_> {
     /// The associated specification name of the property in upper case.
     pub const NAME: &'static str = "TRANSP";
-
-    const fn new(value: TranspValue) -> Self {
-        Self {
-            value,
-            parameters: Vec::new(),
-        }
-    }
-
-    /// Blocks or opaque on busy time searches.
-    pub const OPAQUE: Self = Self::new(TranspValue::Opaque);
-
-    /// Transparent on busy time searches.
-    pub const TRANSPARENT: Self = Self::new(TranspValue::Transparent);
 }
 
 impl<'a> Transp<'a> {
@@ -210,40 +184,111 @@ impl PropertyWrite for Transp<'_> {
     }
 }
 
-property_text!(TzID, "TZID");
-property_text!(TzName, "TZNAME");
-property!(TzOffsetFrom, "TZOFFSETFROM");
-property!(TzOffsetTo, "TZOFFSETTO");
-property!(TzURL, "TZURL");
-property!(Attendee, "ATTENDEE");
-property_text!(Contact, "CONTACT");
-property!(Organizer, "ORGANIZER");
-property!(RecurrenceID, "RECURRENCE-ID");
-property_text!(RelatedTo, "RELATED-TO");
-property!(URL, "URL");
-property_text!(UID, "UID");
-property!(ExDate, "EXDATE");
-property!(RDate, "RDATE");
-property!(RRule, "RRULE");
-property_text!(
-    /// [Format definitions of alarm actions](https://tools.ietf.org/html/rfc5545#section-3.8.6.1)
-    Action, "ACTION";
-    const AUDIO = "AUDIO";
-    const DISPLAY = "DISPLAY";
-    const EMAIL = "EMAIL"
-);
-property_integer!(Repeat, "REPEAT");
-property!(Trigger, "TRIGGER");
-property!(Created, "CREATED");
-property!(DtStamp, "DTSTAMP");
-property!(LastModified, "LAST-MODIFIED");
-property_integer!(Sequence, "SEQUENCE");
-// TODO: statcode ";" statdesc [";" extdata]
-property!(RequestStatus, "REQUEST-STATUS");
+impl Class<'_> {
+    /// Specifies the access classification as public for a component (default value).
+    pub fn public() -> Self {
+        Self::new("PUBLIC")
+    }
+
+    /// Specifies the access classification as private for a component.
+    pub fn private() -> Self {
+        Self::new("PRIVATE")
+    }
+
+    /// Specifies the access classification as confidential for a component.
+    pub fn confidential() -> Self {
+        Self::new("CONFIDENTIAL")
+    }
+}
+
+impl Status<'_> {
+    const fn new(value: StatusValue) -> Self {
+        Self {
+            value,
+            parameters: Vec::new(),
+        }
+    }
+
+    /// Status for a tentative event.
+    pub const fn tentative() -> Self {
+        Self::new(StatusValue::Tentative)
+    }
+
+    /// Status for a definite event.
+    pub const fn confirmed() -> Self {
+        Self::new(StatusValue::Confirmed)
+    }
+
+    /// Status for a cancelled Event, To-Do or Journal.
+    pub const fn cancelled() -> Self {
+        Self::new(StatusValue::Cancelled)
+    }
+
+    /// Status for a To-Do that needs action.
+    pub const fn needs_action() -> Self {
+        Self::new(StatusValue::NeedsAction)
+    }
+
+    /// Status for a completed To-Do.
+    pub const fn completed() -> Self {
+        Self::new(StatusValue::Completed)
+    }
+
+    /// Status for an in-process To-Do.
+    pub const fn in_process() -> Self {
+        Self::new(StatusValue::InProcess)
+    }
+
+    /// Status for a draft Journal.
+    pub const fn draft() -> Self {
+        Self::new(StatusValue::Draft)
+    }
+
+    /// Status for a final Journal.
+    pub const fn final_() -> Self {
+        Self::new(StatusValue::Final)
+    }
+}
+
+impl Transp<'_> {
+    const fn new(value: TranspValue) -> Self {
+        Self {
+            value,
+            parameters: Vec::new(),
+        }
+    }
+
+    /// Blocks or opaque on busy time searches (default value).
+    pub const fn opaque() -> Self {
+        Self::new(TranspValue::Opaque)
+    }
+
+    /// Transparent on busy time searches.
+    pub const fn transparent() -> Self {
+        Self::new(TranspValue::Transparent)
+    }
+}
+
+impl Action<'_> {
+    /// Specifies an audio action to be invoked when an alarm is triggered.
+    pub fn audio() -> Self {
+        Self::new("AUDIO")
+    }
+
+    /// Specifies a display action to be invoked when an alarm is triggered.
+    pub fn display() -> Self {
+        Self::new("DISPLAY")
+    }
+
+    /// Specifies an email action to be invoked when an alarm is triggered.
+    pub fn email() -> Self {
+        Self::new("EMAIL")
+    }
+}
 
 impl Default for Class<'_> {
     fn default() -> Self {
-        Self::PUBLIC
+        Self::public()
     }
 }
 
@@ -255,6 +300,7 @@ impl Default for CalScale<'_> {
         }
     }
 }
+
 impl Default for Priority<'_> {
     fn default() -> Self {
         Self {
@@ -339,19 +385,9 @@ mod rfc7986 {
                 parameters: parameters!("ENCODING" => "BASE64"; "VALUE" => "BINARY"),
             }
         }
-
-        /// Adds a parameter to the property.
-        pub fn add(&mut self, parameter: impl Into<Parameter<'a>>) {
-            self.parameters.push(parameter.into())
-        }
-
-        /// Adds several parameters at once to the property. For creating
-        /// several parameters at once, consult the documentation of
-        /// the [`parameters!`] macro.
-        pub fn append(&mut self, parameters: &mut Parameters<'a>) {
-            self.parameters.append(parameters)
-        }
     }
+
+    impl_add_parameters!(Image);
 
     impl PropertyWrite for Image<'_> {
         fn write(&self, w: &mut LineWriter<'_>) -> Result<(), Error> {

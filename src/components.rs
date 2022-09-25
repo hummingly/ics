@@ -125,7 +125,7 @@ impl Alarm {
         body: impl FnOnce(&mut AlarmWriter) -> Result<(), Error> + 'a,
     ) -> impl FnOnce(&mut AlarmWriter) -> Result<(), Error> + 'a {
         move |alarm| {
-            alarm.write(&Action::AUDIO)?;
+            alarm.write(&Action::audio())?;
             alarm.write(&trigger)?;
             body(alarm)
         }
@@ -137,7 +137,7 @@ impl Alarm {
         body: impl FnOnce(&mut AlarmWriter) -> Result<(), Error> + 'a,
     ) -> impl FnOnce(&mut AlarmWriter) -> Result<(), Error> + 'a {
         move |alarm| {
-            alarm.write(&Action::DISPLAY)?;
+            alarm.write(&Action::display())?;
             alarm.write(&trigger)?;
             alarm.write(&description)?;
             body(alarm)
@@ -151,7 +151,7 @@ impl Alarm {
         body: impl FnOnce(&mut AlarmWriter) -> Result<(), Error> + 'a,
     ) -> impl FnOnce(&mut AlarmWriter) -> Result<(), Error> + 'a {
         move |alarm| {
-            alarm.write(&Action::EMAIL)?;
+            alarm.write(&Action::email())?;
             alarm.write(&trigger)?;
             alarm.write(&description)?;
             alarm.write(&summary)?;

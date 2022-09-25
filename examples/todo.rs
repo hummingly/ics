@@ -32,7 +32,7 @@ fn main() -> Result<(), io::Error> {
             attendee.add(PartStat::ACCEPTED);
             todo.write(&attendee)?;
             todo.write(&Due::new("19980415T000000"))?;
-            todo.write(&Status::NEEDS_ACTION)?;
+            todo.write(&Status::needs_action())?;
             todo.write(&Summary::new("Submit Income Taxes"))?;
             todo.write(&Sequence::new(2))?;
 
