@@ -1,5 +1,19 @@
 # Changelog
 
+## Version 0.5.8
+
+### Bug Fix
+
+- Fix spelling error for value of `RelType::SILBLING`.
+
+### Documentation
+
+- Improved documentation for constants.
+
+### Misc
+
+- Internal refactoring of macros and inlining constants declaration. This makes reading the source code on `docs.rs` easier.
+
 ## Version 0.5.7
 
 ### Bug Fix

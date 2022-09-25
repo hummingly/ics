@@ -136,12 +136,12 @@ impl RelType<'_> {
     };
 
     /// Specifies a sibling relationship.
-    pub const SIBLING: Self = Self {
+    const SIBLING: Self = Self {
         value: Cow::Borrowed("SIBLING"),
     };
 
-    /// See [`RelType::SIBLING`].
-    #[deprecated(note = "use RelType::SIBLING instead")]
+    /// Specifies a sibling relationship.
+    // #[deprecated(note = "use RelType::SIBLING instead")]
     pub const SILBLING: Self = Self::SIBLING;
 }
 
