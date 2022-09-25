@@ -12,6 +12,8 @@
 
 ### Misc
 
+- Minimum supported rustc is now `1.34.0`.
+- Mirgated to 2018 edition.
 - Internal refactoring of macros and inlining constants declaration. This makes reading the source code on `docs.rs` easier.
 
 ## Version 0.5.7

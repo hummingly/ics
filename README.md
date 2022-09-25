@@ -7,9 +7,9 @@ A library for creating iCalendar files as specified in [RFC5545](https://tools.i
 
 ## Minimum supported rustc
 
-**1.26.0+**
+**1.34.0+**
 
-This version is officially supported and tested in CI. Changes to the minimum supported version will be noted in the Changelog.
+This version is officially supported and tested in CI. Changes to the minimum supported version will be noted in the Changelog. However, they are not considered as breaking changes.
 
 ## Installation
 
